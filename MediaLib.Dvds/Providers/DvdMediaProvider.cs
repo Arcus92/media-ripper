@@ -33,12 +33,26 @@ public class DvdMediaProvider : IMediaProvider
         DvdCss.RegisterAsDecryptionHandler();
         DvdCss.RegisterLibraryImportResolver();
     }
-    
+
+    /// <inheritdoc />
+    public DiskInfo GetDiskInfo()
+    {
+        return new DiskInfo()
+        {
+            DiskName = Dvd.DiskName,
+            ContentHash = Dvd.ContentHash,
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task LoadAsync()
+    {
+        await Dvd.LoadAsync();
+    }
+
     /// <inheritdoc />
     public async IAsyncEnumerable<IMediaSource> GetSourcesAsync()
     {
-        await Dvd.LoadAsync();
-        
         foreach (var videoStream in Dvd.VideoStreams.Values)
         {
             var source = GetSource(videoStream);

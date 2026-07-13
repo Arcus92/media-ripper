@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using MediaLib;
 using MediaLib.Models;
 using MediaLib.Providers;
 using MediaLib.Sources;
@@ -20,6 +21,12 @@ public interface IMediaProviderService
     /// Closes the current open media provider.
     /// </summary>
     Task CloseAsync();
+
+    /// <summary>
+    /// Gets the disk info of the currently loaded disk info.
+    /// </summary>
+    /// <returns>Returns the disk info.</returns>
+    public DiskInfo? GetDiskInfo();
     
     /// <summary>
     /// Gets if a media provider is opened loaded.

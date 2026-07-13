@@ -9,6 +9,18 @@ namespace MediaLib.Providers;
 public interface IMediaProvider : IDisposable
 {
     /// <summary>
+    /// Returns the disk info from this provider.
+    /// </summary>
+    /// <returns></returns>
+    DiskInfo GetDiskInfo();
+    
+    /// <summary>
+    /// Loads the media provider.
+    /// </summary>
+    /// <returns></returns>
+    Task LoadAsync();
+    
+    /// <summary>
     /// Returns all possible media sources from this provider.
     /// </summary>
     /// <returns>The list of all definitions from this provider.</returns>

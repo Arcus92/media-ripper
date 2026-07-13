@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using MediaLib;
 using MediaLib.Models;
 using MediaLib.Providers;
 using MediaLib.Sources;
@@ -45,6 +46,7 @@ public class MediaProviderService : IMediaProviderService
         try
         {
             _provider = await MediaProviderHelper.GetFromPathAsync(_serviceProvider, path);
+            await _provider.LoadAsync();
 
             IsLoaded = true;
             
@@ -75,6 +77,12 @@ public class MediaProviderService : IMediaProviderService
 
     /// <inheritdoc />
     public bool IsLoaded { get; private set; }
+
+    /// <inheritdoc />
+    public DiskInfo? GetDiskInfo()
+    {
+        return _provider?.GetDiskInfo();
+    }
     
     /// <inheritdoc />
     public event EventHandler? Changed;

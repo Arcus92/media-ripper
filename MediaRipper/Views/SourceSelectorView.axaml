@@ -27,6 +27,12 @@
                     <avalonia:FluentIcon Icon="FolderOpen" />
                 </Button>
                 
+                <Button Command="{Binding CopyContentHashAsync}"
+                        IsEnabled="{Binding IsEnabled}"
+                        ToolTip.Tip="{Binding ContentHash}">
+                    <avalonia:FluentIcon Icon="Copy" />
+                </Button>
+                
                 <Button Command="{Binding RefreshAsync}"
                         IsEnabled="{Binding IsEnabled}"
                         ToolTip.Tip="{DynamicResource Refresh}">

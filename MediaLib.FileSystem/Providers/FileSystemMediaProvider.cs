@@ -28,7 +28,23 @@ public class FileSystemMediaProvider : IMediaProvider
         _contentHash = ContentHash.CalculateHash(path);
         _diskName = Path.GetFileName(_path);
     }
-    
+
+    /// <inheritdoc />
+    public DiskInfo GetDiskInfo()
+    {
+        return new DiskInfo()
+        {
+            DiskName = _diskName,
+            ContentHash = _contentHash
+        };
+    }
+
+    /// <inheritdoc />
+    public Task LoadAsync()
+    {
+        return Task.CompletedTask;
+    }
+
     /// <inheritdoc />
     public async IAsyncEnumerable<IMediaSource> GetSourcesAsync()
     {

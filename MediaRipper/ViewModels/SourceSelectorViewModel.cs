@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using MediaRipper.Models.Outputs;
 using MediaRipper.Services.Interfaces;
+using MediaRipper.Utils;
 using MediaRipper.Views;
 
 namespace MediaRipper.ViewModels;
@@ -23,7 +24,7 @@ public class SourceSelectorViewModel : ViewModelBase
         _storageProviderAccessor = storageProviderAccessor;
         _outputQueueService = outputQueueService;
         
-        _sourcePath = _settingService.Data.SourcePath ?? "";
+        SourcePath = _settingService.Data.SourcePath ?? "";
         _outputQueueService.StatusChanged += OnOutputQueueServiceStatusChanged;
     }
     
@@ -34,31 +35,34 @@ public class SourceSelectorViewModel : ViewModelBase
     {
         await OpenAsync();
     }
-    
-    /// <inheritdoc cref="SourcePath"/>
-    private string _sourcePath;
 
     /// <summary>
     /// Gets and sets the disk input path.
     /// </summary>
     public string SourcePath
     {
-        get => _sourcePath;
-        set => SetProperty(ref _sourcePath, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-    
-    /// <inheritdoc cref="IsEnabled"/>
-    private bool _isEnabled = true;
+
+    /// <summary>
+    /// Gets and sets the disk content hash.
+    /// </summary>
+    public string ContentHash
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
 
     /// <summary>
     /// Gets if this element is enabled.
     /// </summary>
     public bool IsEnabled
     {
-        get => _isEnabled;
-        private set => SetProperty(ref _isEnabled, value);
-    }
-    
+        get;
+        private set => SetProperty(ref field, value);
+    } = true;
+
     private void OnOutputQueueServiceStatusChanged(object? sender, EventArgs e)
     {
         UpdateStatus();
@@ -68,6 +72,12 @@ public class SourceSelectorViewModel : ViewModelBase
     {
         IsEnabled = _outputQueueService.Status != OutputQueueStatus.Running;
     }
+
+    private void UpdateDiskInfo()
+    {
+        var diskInfo = _mediaProviderService.GetDiskInfo();
+        ContentHash = diskInfo?.ContentHash ?? "";
+    }
     
     /// <summary>
     /// Opens and loads the current source path.
@@ -75,8 +85,10 @@ public class SourceSelectorViewModel : ViewModelBase
     public async Task OpenAsync()
     {
         if (!IsEnabled) return;
-        await _mediaProviderService.OpenAsync(_sourcePath);
-        _settingService.Data.SourcePath = _sourcePath;
+        await _mediaProviderService.OpenAsync(SourcePath);
+        UpdateDiskInfo();
+        
+        _settingService.Data.SourcePath = SourcePath;
         _settingService.NotifyChange();
     }
 
@@ -86,7 +98,8 @@ public class SourceSelectorViewModel : ViewModelBase
     public async Task RefreshAsync()
     {
         if (!IsEnabled) return;
-        await _mediaProviderService.OpenAsync(_sourcePath);
+        await _mediaProviderService.OpenAsync(SourcePath);
+        UpdateDiskInfo();
     }
     
     /// <summary>
@@ -104,7 +117,7 @@ public class SourceSelectorViewModel : ViewModelBase
         var paths = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             AllowMultiple = false,
-            SuggestedStartLocation = await storageProvider.TryGetFolderFromPathAsync(_sourcePath)
+            SuggestedStartLocation = await storageProvider.TryGetFolderFromPathAsync(SourcePath)
         });
 
         if (paths.Count >= 1)
@@ -112,6 +125,17 @@ public class SourceSelectorViewModel : ViewModelBase
             SourcePath = paths[0].Path.LocalPath;
             await OpenAsync();
         }
+    }
+
+    /// <summary>
+    /// Copies the content hash into the clipboard.
+    /// </summary>
+    public async Task CopyContentHashAsync()
+    {
+        if (string.IsNullOrEmpty(ContentHash)) return;
+        var clipboard = Clipboard.GetClipboard();
+        if (clipboard is null) return;
+        await clipboard.SetTextAsync(ContentHash);
     }
     
     /// <inheritdoc />

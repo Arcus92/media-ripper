@@ -37,10 +37,24 @@ public class BluRayMediaProvider : IMediaProvider
     }
 
     /// <inheritdoc />
-    public async IAsyncEnumerable<IMediaSource> GetSourcesAsync()
+    public DiskInfo GetDiskInfo()
+    {
+        return new DiskInfo()
+        {
+            DiskName = BluRay.DiskName,
+            ContentHash = BluRay.ContentHash,
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task LoadAsync()
     {
         await BluRay.LoadAsync();
-
+    }
+    
+    /// <inheritdoc />
+    public async IAsyncEnumerable<IMediaSource> GetSourcesAsync()
+    {
         var sources = new List<BluRayMediaSource>();
         foreach (var playlistId in BluRay.Playlists.Keys.Order())
         {
