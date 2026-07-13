@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MediaLib.Models;
 using MediaLib.Output;
+using MediaLib.Utils.IO;
 using MediaRipper.Models.Outputs;
 using MediaRipper.Services.Interfaces;
 
@@ -93,20 +93,14 @@ public class OutputService : IOutputService
             var filename = file.BuildFilename();
             if (filename == file.Filename) continue; // No rename
             
-            // TODO: Check for collisions
-            renameMap.Add(file.Filename, filename);
+            var oldPath = Path.Combine(OutputPath, file.Filename);
+            var newPath = Path.Combine(OutputPath, filename);
             
+            renameMap.Add(oldPath, newPath);
             file.Filename = filename;
         }
 
-        // Apply the rename operations
-        foreach (var (oldFilename, newFilename) in renameMap)
-        {
-            var oldPath = Path.Combine(OutputPath, oldFilename);
-            var newPath = Path.Combine(OutputPath, newFilename);
-            if (!File.Exists(oldPath) || File.Exists(newPath)) continue;
-            File.Move(oldPath, newPath);
-        }
+        FileRenamer.Rename(renameMap);
         
         await WriteOutputInfoAsync(model);
     }
