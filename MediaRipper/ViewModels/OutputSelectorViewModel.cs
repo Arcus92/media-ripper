@@ -100,7 +100,7 @@ public class OutputSelectorViewModel : ViewModelBase
 
         if (paths.Count >= 1)
         {
-            OutputPath = paths[0].Path.AbsolutePath;
+            OutputPath = paths[0].Path.LocalPath;
             await OpenAsync();
         }
     }
