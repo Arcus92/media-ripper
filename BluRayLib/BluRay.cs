@@ -87,6 +87,18 @@ public class BluRay
                 var name = Path.GetFileNameWithoutExtension(file);
                 if (!ushort.TryParse(name, out var id)) continue;
                 
+                // Read the playlist file
+                var item = new Playlist();
+                item.Read(file);
+                Playlists.Add(id, item);
+            }
+            
+            // Load the streams and build the content hash
+            path = Path.Combine(DiskPath, "BDMV/STREAM/");
+            foreach (var file in Directory.EnumerateFiles(path, "*.m2ts"))
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                
                 // Collect infos for the content hash calculation
                 var fileInfo = new FileInfo(file);
                 fileInfos.Add(new ContentHash.HashFileInfo()
@@ -95,13 +107,8 @@ public class BluRay
                     CreationTime = fileInfo.CreationTime,
                     Size = fileInfo.Length,
                 });
-                
-                // Read the playlist file
-                var item = new Playlist();
-                item.Read(file);
-                Playlists.Add(id, item);
             }
-            
+
             // Order the playlist files before calculating the hash.
             ContentHash = fileInfos.OrderBy(i => i.Name).CalculateHash();
         });
