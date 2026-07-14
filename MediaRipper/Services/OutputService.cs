@@ -9,6 +9,7 @@ using MediaLib.Output;
 using MediaLib.Utils.IO;
 using MediaRipper.Models.Outputs;
 using MediaRipper.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace MediaRipper.Services;
 
@@ -18,13 +19,16 @@ namespace MediaRipper.Services;
 public class OutputService : IOutputService
 {
     private readonly IMediaProviderService _mediaProviderService;
+    private readonly ILogger<OutputService> _logger;
 
     /// <summary>
     /// Handling the output directory. Can scan the output directory for existing exports.
     /// </summary>
-    public OutputService(IMediaProviderService mediaProviderService)
+    public OutputService(IMediaProviderService mediaProviderService, ILogger<OutputService> logger)
     {
         _mediaProviderService = mediaProviderService;
+        _logger = logger;
+        
         _mediaProviderService.Changed += OnMediaProviderServiceChanged;
     }
 
@@ -95,12 +99,23 @@ public class OutputService : IOutputService
             
             var oldPath = Path.Combine(OutputPath, file.Filename);
             var newPath = Path.Combine(OutputPath, filename);
-            
-            renameMap.Add(oldPath, newPath);
+            if (File.Exists(oldPath))
+            {
+                renameMap.Add(oldPath, newPath);
+            }
+
             file.Filename = filename;
         }
 
-        FileRenamer.Rename(renameMap);
+        try
+        {
+            FileRenamer.Rename(renameMap);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to rename output files!");
+            return;
+        }
         
         await WriteOutputInfoAsync(model);
     }
