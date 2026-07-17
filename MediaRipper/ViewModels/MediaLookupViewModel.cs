@@ -24,18 +24,15 @@ public class MediaLookupViewModel : ViewModelBase
         _mediaLookupService = mediaLookupService;
     }
 
-    /// <inheritdoc cref="SearchText" />
-    private string _searchText = "";
-
     /// <summary>
     /// Gets and sets the search term.
     /// </summary>
     public string SearchText
     {
-        get => _searchText;
-        set => SetProperty(ref _searchText, value);
-    }
-    
+        get;
+        set => SetProperty(ref field, value);
+    } = "";
+
     /// <summary>
     /// Gets the search result list.
     /// </summary>
@@ -50,67 +47,52 @@ public class MediaLookupViewModel : ViewModelBase
     /// Gets the episode list.
     /// </summary>
     public ObservableCollection<MediaEpisode> Episodes { get; } = [];
-    
-    /// <inheritdoc cref="IsLoading" />
-    private bool _isLoading;
 
     /// <summary>
     /// Gets if the media lookup is loading.
     /// </summary>
     public bool IsLoading
     {
-        get => _isLoading;
-        private set => SetProperty(ref _isLoading, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
-    
-    /// <inheritdoc cref="SelectedMediaItem" />
-    private MediaSearchResult? _selectedMediaItem;
 
     /// <summary>
     /// Gets and sets the selected search result.
     /// </summary>
     public MediaSearchResult? SelectedMediaItem
     {
-        get => _selectedMediaItem;
-        set => SetProperty(ref _selectedMediaItem, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-    
-    /// <inheritdoc cref="SelectedSeason" />
-    private MediaSeason? _selectedSeason;
 
     /// <summary>
     /// Gets and sets the selected season.
     /// </summary>
     public MediaSeason? SelectedSeason
     {
-        get => _selectedSeason;
-        set => SetProperty(ref _selectedSeason, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-    
-    /// <inheritdoc cref="SelectedEpisode" />
-    private MediaEpisode? _selectedEpisode;
 
     /// <summary>
     /// Gets and sets the selected episode.
     /// </summary>
     public MediaEpisode? SelectedEpisode
     {
-        get => _selectedEpisode;
-        set => SetProperty(ref _selectedEpisode, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-
-    /// <inheritdoc cref="IsTvSeries" />
-    private bool _isTvSeries;
 
     /// <summary>
     /// Gets if the selected media item is a TV series.
     /// </summary>
     public bool IsTvSeries
     {
-        get => _isTvSeries;
-        private set => SetProperty(ref _isTvSeries, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
-    
+
     /// <summary>
     /// Executes a search with the <see cref="SearchText"/>.
     /// </summary>

@@ -35,55 +35,43 @@ public class ExportSettingsViewModel : ViewModelBase
     }
 
     #region Selection
-    
-    /// <inheritdoc cref="CanQueueSelection" />
-    private bool _canQueueSelection;
 
     /// <summary>
     /// Gets if the selected item can be queued.
     /// </summary>
     public bool CanQueueSelection
     {
-        get => _canQueueSelection;
-        set => SetProperty(ref _canQueueSelection, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-    
-    /// <inheritdoc cref="CanDequeueSelection" />
-    private bool _canDequeueSelection;
 
     /// <summary>
     /// Gets if the selected item can be dequeued.
     /// </summary>
     public bool CanDequeueSelection
     {
-        get => _canDequeueSelection;
-        set => SetProperty(ref _canDequeueSelection, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-    
-    /// <inheritdoc cref="CanPlaySelection" />
-    private bool _canPlaySelection;
 
     /// <summary>
     /// Gets if the selected item can be played.
     /// </summary>
     public bool CanPlaySelection
     {
-        get => _canPlaySelection;
-        set => SetProperty(ref _canPlaySelection, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-    
-    /// <inheritdoc cref="CanSaveSelection" />
-    private bool _canSaveSelection;
 
     /// <summary>
     /// Gets if the selected item can be saved.
     /// </summary>
     public bool CanSaveSelection
     {
-        get => _canSaveSelection;
-        set => SetProperty(ref _canSaveSelection, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-    
+
     private void OnSourceTreePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
@@ -134,18 +122,15 @@ public class ExportSettingsViewModel : ViewModelBase
     /// Gets the list of all output formats.
     /// </summary>
     public MediaFormat[] AllOutputFormats => ContainerFormats.All;
-    
-    /// <inheritdoc cref="OutputFormat"/>
-    private MediaFormat _outputFormat = ContainerFormats.Mp4;
 
     /// <summary>
     /// Gets and sets the output format.
     /// </summary>
     public MediaFormat OutputFormat
     {
-        get => _outputFormat;
-        set => SetProperty(ref _outputFormat, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = ContainerFormats.Mp4;
 
     #endregion Format settings
     
@@ -159,7 +144,7 @@ public class ExportSettingsViewModel : ViewModelBase
         if (!_sourceTree.TryGetSelectedTitleNode(out var titleNode))
             return;
         
-        var outputDefinition = titleNode.Source.CreateDefaultOutputDefinition(DefaultCodecOptions, _outputFormat);
+        var outputDefinition = titleNode.Source.CreateDefaultOutputDefinition(DefaultCodecOptions, OutputFormat);
 
         if (_mediaLookup.TryGetMediaInfo(out var mediaInfo))
         {

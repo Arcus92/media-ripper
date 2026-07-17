@@ -47,18 +47,15 @@ public class OutputSelectorViewModel : ViewModelBase
         set => SetProperty(ref _outputPath, value);
     }
 
-    /// <inheritdoc cref="IsEnabled"/>
-    private bool _isEnabled = true;
-
     /// <summary>
     /// Gets if this element is enabled.
     /// </summary>
     public bool IsEnabled
     {
-        get => _isEnabled;
-        private set => SetProperty(ref _isEnabled, value);
-    }
-    
+        get;
+        private set => SetProperty(ref field, value);
+    } = true;
+
     private void OnOutputQueueServiceStatusChanged(object? sender, EventArgs e)
     {
         UpdateStatus();

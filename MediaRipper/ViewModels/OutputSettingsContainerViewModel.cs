@@ -28,18 +28,15 @@ public class OutputSettingsContainerViewModel : ViewModelBase
         }
     }
 
-    /// <inheritdoc cref="SelectedItem"/>
-    private OutputViewModel? _selectedItem;
-    
     /// <summary>
     /// Gets and sets the selected output.
     /// </summary>
     public OutputViewModel? SelectedItem
     {
-        get => _selectedItem;
-        set => SetProperty(ref _selectedItem, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-    
+
     /// <inheritdoc />
     public override Control CreateView()
     {

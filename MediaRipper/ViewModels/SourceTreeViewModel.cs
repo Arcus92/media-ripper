@@ -23,21 +23,18 @@ public class SourceTreeViewModel : ViewModelBase
         _mediaProviderService.Changed += OnMediaProviderServiceChanged;
     }
 
-    /// <inheritdoc cref="SelectedItem"/>
-    private BaseSourceModel? _selectedItem;
-
     /// <summary>
     /// Gets and sets the selected title info.
     /// </summary>
     public BaseSourceModel? SelectedItem
     {
-        get => _selectedItem;
-        set => SetProperty(ref _selectedItem, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool TryGetSelectedTitleNode([MaybeNullWhen(false)] out MediaSourceModel media)
     {
-        if (_selectedItem is MediaSourceModel node)
+        if (SelectedItem is MediaSourceModel node)
         {
             media = node;
             return true;

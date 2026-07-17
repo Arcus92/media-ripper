@@ -17,19 +17,16 @@ public class OutputTreeViewModel : ViewModelBase
 
         _outputService.Outputs.MapAndObserve(Items, ModelToViewModel);
     }
-    
-    /// <inheritdoc cref="SelectedItem"/>
-    private OutputViewModel? _selectedItem;
 
     /// <summary>
     /// Gets and sets the selected title info.
     /// </summary>
     public OutputViewModel? SelectedItem
     {
-        get => _selectedItem;
-        set => SetProperty(ref _selectedItem, value);
+        get;
+        set => SetProperty(ref field, value);
     }
-    
+
     /// <summary>
     /// Gets the list of outputs.
     /// </summary>
