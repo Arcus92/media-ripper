@@ -14,16 +14,22 @@
     <Border Padding="10,5">
         <DockPanel>
             <StackPanel Orientation="Horizontal" Spacing="5" DockPanel.Dock="Right">
+                <ComboBox ItemsSource="{Binding AllOutputFormats}" 
+                          SelectedValue="{Binding OutputFormat}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="formats:MediaFormat">
+                            <TextBlock Text="{Binding Extension}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <Button Command="{Binding QueueSelectionAsync}" 
                         IsEnabled="{Binding CanQueueSelection}" 
                         ToolTip.Tip="{DynamicResource QueueSelection}">
                     <avalonia:FluentIcon Icon="Add" />
                 </Button>
-                <Button Command="{Binding DequeueSelectionAsync}"
-                        IsEnabled="{Binding CanDequeueSelection}" 
-                        ToolTip.Tip="{DynamicResource DequeueSelection}">
-                    <avalonia:FluentIcon Icon="Subtract" />
-                </Button>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" Spacing="5">
                 <Button Command="{Binding PlayPreviewAsync}" 
                         IsEnabled="{Binding CanPlaySelection}" 
                         ToolTip.Tip="{DynamicResource Play}">
@@ -34,17 +40,6 @@
                         ToolTip.Tip="{DynamicResource SaveRawSegment}">
                     <avalonia:FluentIcon Icon="Save" />
                 </Button>
-            </StackPanel>
-            
-            <StackPanel Orientation="Horizontal" Spacing="5">
-                <ComboBox ItemsSource="{Binding AllOutputFormats}" 
-                          SelectedValue="{Binding OutputFormat}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate DataType="formats:MediaFormat">
-                            <TextBlock Text="{Binding Extension}"/>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
             </StackPanel>
         </DockPanel>
     </Border>

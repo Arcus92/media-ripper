@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using MediaLib;
 using MediaLib.Formats;
-using MediaRipper.Models.Outputs;
 using MediaRipper.Services.Interfaces;
 using MediaRipper.Views;
 
@@ -40,15 +39,6 @@ public class ExportSettingsViewModel : ViewModelBase
     /// Gets if the selected item can be queued.
     /// </summary>
     public bool CanQueueSelection
-    {
-        get;
-        set => SetProperty(ref field, value);
-    }
-
-    /// <summary>
-    /// Gets if the selected item can be dequeued.
-    /// </summary>
-    public bool CanDequeueSelection
     {
         get;
         set => SetProperty(ref field, value);
@@ -90,14 +80,12 @@ public class ExportSettingsViewModel : ViewModelBase
         {
             var output = _outputService.GetByIdentifier(titleNode.Source.Identifier);
             CanQueueSelection = output is null;
-            CanDequeueSelection = output is not null && output.Status == OutputStatus.Queued;
             CanPlaySelection = canPlayPreview;
             CanSaveSelection = true;
         }
         else
         {
             CanQueueSelection = false;
-            CanDequeueSelection = false;
             CanPlaySelection = false;
             CanSaveSelection = false;
         }
@@ -160,18 +148,6 @@ public class ExportSettingsViewModel : ViewModelBase
         }
         
         await _outputService.AddAsync(outputDefinition);
-        UpdateSelection();
-    }
-
-    public async Task DequeueSelectionAsync()
-    {
-        if (!_sourceTree.TryGetSelectedTitleNode(out var title))
-            return;
-        
-        var output = _outputService.GetByIdentifier(title.Source.Identifier);
-        if (output is null) return;
-        if (output.Status == OutputStatus.Completed) return; // Do not remove completed outputs!
-        await _outputService.RemoveAsync(output);
         UpdateSelection();
     }
 
