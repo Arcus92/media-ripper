@@ -1,7 +1,5 @@
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using MediaRipper.Services.Interfaces;
 using MediaRipper.ViewModels;

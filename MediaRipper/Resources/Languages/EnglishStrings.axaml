@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:system="clr-namespace:System;assembly=System.Runtime">
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+                    x:Class="MediaRipper.Resources.Languages.EnglishStrings">
     
     <!-- General -->
     <system:String x:Key="Cancel">Cancel</system:String>

@@ -13,13 +13,12 @@
      <Application.Resources>
          <ResourceDictionary>
              <ResourceDictionary.MergedDictionaries>
+                 <!-- Default language -->
+                 <ResourceInclude Source="Resources/Languages/EnglishStrings.axaml" />
+                 
                  <MergeResourceInclude Source="Resources/Layouts.axaml" />
                  <MergeResourceInclude Source="Resources/Colors.axaml" />
-                 
-                 <MergeResourceInclude Source="Resources/Strings/Languages.axaml" />
-                 
-                 <!-- Default language -->
-                 <MergeResourceInclude Source="Resources/Strings/English.axaml" />
+                 <MergeResourceInclude Source="Resources/Strings.axaml" />
              </ResourceDictionary.MergedDictionaries>
          </ResourceDictionary>
          

@@ -1,8 +1,8 @@
-using System;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using MediaRipper.Models;
+using MediaRipper.Resources.Languages;
 using MediaRipper.Services.Interfaces;
 
 namespace MediaRipper.Services;
@@ -17,6 +17,15 @@ public class LanguageService : ILanguageService
     /// </summary>
     private ResourceDictionary? _currentLanguageDictionary;
     
+    /// <summary>
+    /// A dictionary of the language classes to make them AOT safe.
+    /// </summary>
+    private readonly Dictionary<AppLanguage, ResourceDictionary> _dictionaries = new()
+    {
+        { AppLanguage.English, new EnglishStrings() },
+        { AppLanguage.German, new GermanStrings() }
+    };
+    
     /// <inheritdoc />
     public void SetLanguage(AppLanguage language)
     {
@@ -24,8 +33,7 @@ public class LanguageService : ILanguageService
         if (Application.Current is null) return;
         var resources = Application.Current.Resources;
         
-        var uri = new Uri($"avares://MediaRipper/Resources/Strings/{language}.axaml");
-        if (AvaloniaXamlLoader.Load(uri) is not ResourceDictionary langaugeDictionary) return;
+        if (!_dictionaries.TryGetValue(language, out var langaugeDictionary)) return;
         
         // Overwrite the resources
         foreach (var (key, value) in langaugeDictionary)
