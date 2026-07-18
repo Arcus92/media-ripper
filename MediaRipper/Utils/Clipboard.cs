@@ -20,8 +20,8 @@ public static class Clipboard
                 return classicDesktopApp.MainWindow?.Clipboard;
             case ISingleViewApplicationLifetime singleViewApp:
             {
-                var visualRoot = singleViewApp.MainView?.GetVisualRoot();
-                if (visualRoot is TopLevel topLevel) 
+                var topLevel = singleViewApp.MainView?.GetVisualParent<TopLevel>();
+                if (topLevel is not null) 
                 {
                     return topLevel.Clipboard;
                 }

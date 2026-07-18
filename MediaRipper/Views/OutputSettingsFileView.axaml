@@ -10,7 +10,7 @@
     <StackPanel Orientation="Vertical" Spacing="5" Margin="0,5">
         <TextBlock Text="{Binding DisplayName}" />
 
-        <TextBox Text="{Binding Model.Name}" Watermark="(Main file)" />
+        <TextBox Text="{Binding Model.Name}" PlaceholderText="{DynamicResource MainFile}" />
     </StackPanel>
     
 </UserControl>

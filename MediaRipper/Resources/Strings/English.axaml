@@ -41,6 +41,7 @@
     <system:String x:Key="Season">Season</system:String>
     <system:String x:Key="Files">Files</system:String>
     <system:String x:Key="OutputFiles">Output files</system:String>
+    <system:String x:Key="MainFile">Main file</system:String>
     
     <!-- Media type -->
     <system:String x:Key="MediaTypeUnset">-/-</system:String>

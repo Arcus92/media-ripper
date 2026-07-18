@@ -37,7 +37,7 @@
                 </StackPanel>
                 <TextBox Text="{Binding SearchText, Mode=TwoWay}" 
                          IsEnabled="{Binding !IsLoading}"
-                         Watermark="{StaticResource Search}">
+                         PlaceholderText="{StaticResource Search}">
                     <TextBox.KeyBindings>
                         <KeyBinding  Command="{Binding SearchAsync}" Gesture="Enter" />
                     </TextBox.KeyBindings>

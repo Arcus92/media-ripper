@@ -41,6 +41,7 @@
     <system:String x:Key="Season">Staffel</system:String>
     <system:String x:Key="Files">Dateien</system:String>
     <system:String x:Key="OutputFiles">Ausgabedateien</system:String>
+    <system:String x:Key="MainFile">Hauptdatei</system:String>
     
     <!-- Media type -->
     <system:String x:Key="MediaTypeUnset">-/-</system:String>
