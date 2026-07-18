@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
         
         // Controller
         collection.AddSingleton<IApplicationService, ApplicationService>();
+        collection.AddSingleton<ILanguageService, LanguageService>();
         collection.AddSingleton<ISettingService, SettingService>();
         collection.AddSingleton<IMediaProviderService, MediaProviderService>();
         collection.AddSingleton<IMediaLookupService, MediaLookupService>();

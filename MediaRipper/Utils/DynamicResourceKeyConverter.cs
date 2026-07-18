@@ -1,8 +1,9 @@
 using System;
 using System.Globalization;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Data.Converters;
+using MediaRipper.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediaRipper.Utils;
 
@@ -14,15 +15,11 @@ public class DynamicResourceKeyConverter : IValueConverter
     /// <inheritdoc />
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (Application.Current is null || value is not string resourceKey) 
-            return value;
-
-        if (Application.Current.TryFindResource(resourceKey, out var resource) && resource is string text)
-        {
-            return text;
-        }
-
-        return value;
+        if (value is not string resourceKey) return value;
+        
+        var app = (App)Application.Current!;
+        var languageService = app.ServiceProvider.GetRequiredService<ILanguageService>();
+        return languageService.Translate(resourceKey);
     }
 
     /// <inheritdoc />

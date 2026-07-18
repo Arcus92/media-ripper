@@ -10,6 +10,11 @@ namespace MediaRipper.Models.Settings;
 public class SettingsData
 {
     /// <summary>
+    /// Gets and sets the application language.
+    /// </summary>
+    public AppLanguage Language { get; set; } = AppLanguage.English;
+    
+    /// <summary>
     /// Gets and sets the last opened source path.
     /// </summary>
     public string? SourcePath { get; set; }
@@ -33,7 +38,7 @@ public class SettingsData
     /// Gets TheMovieDatabase settings.
     /// </summary>
     public TheMovieDatabaseSettings TheMovieDatabase { get; set; } = new();
-
+    
     /// <summary>
     /// Gets the default FFmpeg path for the current platform.
     /// </summary>

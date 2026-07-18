@@ -1,5 +1,7 @@
 using System;
 using Avalonia;
+using MediaRipper.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediaRipper.Models;
 
@@ -32,13 +34,9 @@ public readonly struct EnumModel<T> : IEquatable<EnumModel<T>> where T : struct,
     {
         get
         {
-            if (Application.Current is not null &&
-                Application.Current.Resources.TryGetValue(ResourceName, out var resource) && resource is not null)
-            {
-                return resource.ToString() ?? "";
-            }
-
-            return ResourceName;
+            var app = (App)Application.Current!;
+            var languageService = app.ServiceProvider.GetRequiredService<ILanguageService>();
+            return languageService.Translate(ResourceName) ?? ResourceName;
         }
     }
     

@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using MediaRipper.Models;
 using MediaRipper.Services.Interfaces;
 using MediaRipper.Views;
 
@@ -18,6 +19,24 @@ public class SettingsWindowViewModel : ViewModelBase
     }
 
     #region Properties
+
+    /// <summary>
+    /// Gets and sets the application language.
+    /// </summary>
+    public EnumModel<AppLanguage> Language
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
+
+    /// <summary>
+    /// Gets a list of all languages.
+    /// </summary>
+    public EnumModelList<AppLanguage> AllLanguages { get; } =
+    [
+        new EnumModel<AppLanguage>(AppLanguage.English, "English"),
+        new EnumModel<AppLanguage>(AppLanguage.German, "German")
+    ];
 
     /// <summary>
     /// Gets and sets the FFmpeg path.
@@ -69,6 +88,7 @@ public class SettingsWindowViewModel : ViewModelBase
     
     private void WriteSettingsToProperties()
     {
+        Language = AllLanguages.GetModel(_settingService.Data.Language);
         FFmpegPath = _settingService.Data.FFmpegPath;
         FFplayPath = _settingService.Data.FFplayPath;
         TheMovieDatabaseApiKey = _settingService.Data.TheMovieDatabase.ApiKey;
@@ -77,6 +97,7 @@ public class SettingsWindowViewModel : ViewModelBase
 
     private void WritePropertiesToSettings()
     {
+        _settingService.Data.Language = Language.Value;
         _settingService.Data.FFmpegPath = FFmpegPath;
         _settingService.Data.FFplayPath = FFplayPath;
         _settingService.Data.TheMovieDatabase.ApiKey = TheMovieDatabaseApiKey;

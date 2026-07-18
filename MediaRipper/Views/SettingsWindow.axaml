@@ -14,6 +14,23 @@
     <Grid RowDefinitions="*,Auto">
         <ScrollViewer Grid.Row="0">
             <StackPanel Orientation="Vertical" Margin="5">
+                
+                <!-- General -->
+                <Border Classes="DarkBox">
+                    <StackPanel Orientation="Vertical" Spacing="10">
+                        <TextBlock Classes="Title" Text="{DynamicResource General}" />
+                        
+                        <!-- Language -->
+                        <TextBlock>
+                            <Run Text="{DynamicResource Language}"/>:
+                        </TextBlock>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding AllLanguages}" 
+                                  SelectedValue="{Binding Language, Mode=TwoWay}" />
+                    </StackPanel>
+                </Border>
+                
+                <!-- FFmpeg -->
                 <Border Classes="DarkBox">
                     <StackPanel Orientation="Vertical" Spacing="10">
                         <TextBlock Classes="Title" Text="{DynamicResource FFmpeg}" />
@@ -32,6 +49,7 @@
                     </StackPanel>
                 </Border>
                 
+                <!-- TheMovieDatabase -->
                 <Border Classes="DarkBox">
                     <StackPanel Orientation="Vertical" Spacing="10">
                         <TextBlock Classes="Title" Text="{DynamicResource TheMovieDatabase}" />

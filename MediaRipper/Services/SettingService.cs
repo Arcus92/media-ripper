@@ -14,14 +14,16 @@ namespace MediaRipper.Services;
 public class SettingService : ISettingService
 {
     private readonly ILogger _logger;
+    private readonly ILanguageService _languageService;
     private readonly string _filename = "settings.json";
 
     /// <inheritdoc />
     public SettingsData Data { get; private set; } = new();
 
-    public SettingService(ILogger<SettingService> logger)
+    public SettingService(ILogger<SettingService> logger, ILanguageService languageService)
     {
         _logger = logger;
+        _languageService = languageService;
 
         Load();
     }
@@ -43,6 +45,9 @@ public class SettingService : ISettingService
         {
             MediaLib.FFmpeg.Engine.DefaultBinary = Data.FFmpegPath;
         }
+        
+        // Update the application language
+        _languageService.SetLanguage(Data.Language);
     }
 
     /// <summary>
@@ -93,10 +98,5 @@ public class SettingService : ISettingService
         {
             _logger.LogError(ex, "Failed to save settings file!");
         }
-    }
-    
-    private void OnSettingsDataChanged()
-    {
-        Save();
     }
 }
