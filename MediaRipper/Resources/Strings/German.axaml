@@ -54,10 +54,15 @@
     <system:String x:Key="MediaTypeTrailer">Trailer</system:String>
     
     <!-- Settings -->
+    <system:String x:Key="General">Allgemein</system:String>
     <system:String x:Key="FFmpeg">FFmpeg</system:String>
     <system:String x:Key="FFmpegPath">FFmpeg Pfad</system:String>
     <system:String x:Key="FFplayPath">FFplay Pfad</system:String>
     <system:String x:Key="TheMovieDatabase">TheMovieDatabase</system:String>
-    <system:String x:Key="ApiKey">Api Key</system:String>
+    <system:String x:Key="ApiKey">Api-Schlüssel</system:String>
     <system:String x:Key="Language">Sprache</system:String>
+    <system:String x:Key="Theme">Darstellung</system:String>
+    <system:String x:Key="SystemDefault">System-Standard</system:String>
+    <system:String x:Key="Light">Hell</system:String>
+    <system:String x:Key="Dark">Dunkel</system:String>
 </ResourceDictionary>

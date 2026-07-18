@@ -15,6 +15,11 @@ public class SettingsData
     public AppLanguage Language { get; set; } = AppLanguage.English;
     
     /// <summary>
+    /// Gets and sets the application theme.
+    /// </summary>
+    public AppTheme Theme { get; set; } = AppTheme.Default;
+    
+    /// <summary>
     /// Gets and sets the last opened source path.
     /// </summary>
     public string? SourcePath { get; set; }

@@ -27,6 +27,14 @@
                         <ComboBox HorizontalAlignment="Stretch"
                                   ItemsSource="{Binding AllLanguages}" 
                                   SelectedValue="{Binding Language, Mode=TwoWay}" />
+                        
+                        <!-- Theme -->
+                        <TextBlock>
+                            <Run Text="{DynamicResource Theme}"/>:
+                        </TextBlock>
+                        <ComboBox HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding AllThemes}" 
+                                  SelectedValue="{Binding Theme, Mode=TwoWay}" />
                     </StackPanel>
                 </Border>
                 

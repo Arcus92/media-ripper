@@ -15,15 +15,17 @@ public class SettingService : ISettingService
 {
     private readonly ILogger _logger;
     private readonly ILanguageService _languageService;
+    private readonly IThemeService _themeService;
     private readonly string _filename = "settings.json";
 
     /// <inheritdoc />
     public SettingsData Data { get; private set; } = new();
 
-    public SettingService(ILogger<SettingService> logger, ILanguageService languageService)
+    public SettingService(ILogger<SettingService> logger, ILanguageService languageService, IThemeService themeService)
     {
         _logger = logger;
         _languageService = languageService;
+        _themeService = themeService;
 
         Load();
     }
@@ -48,6 +50,9 @@ public class SettingService : ISettingService
         
         // Update the application language
         _languageService.SetLanguage(Data.Language);
+        
+        // Update the application theme
+        _themeService.SetTheme(Data.Theme);
     }
 
     /// <summary>

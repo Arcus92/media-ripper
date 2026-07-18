@@ -61,4 +61,8 @@
     <system:String x:Key="TheMovieDatabase">TheMovieDatabase</system:String>
     <system:String x:Key="ApiKey">Api key</system:String>
     <system:String x:Key="Language">Language</system:String>
+    <system:String x:Key="Theme">Theme</system:String>
+    <system:String x:Key="SystemDefault">System default</system:String>
+    <system:String x:Key="Light">Light</system:String>
+    <system:String x:Key="Dark">Dark</system:String>
 </ResourceDictionary>

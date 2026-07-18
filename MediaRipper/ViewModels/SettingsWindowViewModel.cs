@@ -37,6 +37,25 @@ public class SettingsWindowViewModel : ViewModelBase
         new EnumModel<AppLanguage>(AppLanguage.English, "English"),
         new EnumModel<AppLanguage>(AppLanguage.German, "German")
     ];
+    
+    /// <summary>
+    /// Gets and sets the application theme.
+    /// </summary>
+    public EnumModel<AppTheme> Theme
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
+
+    /// <summary>
+    /// Gets a list of all themes.
+    /// </summary>
+    public EnumModelList<AppTheme> AllThemes { get; } =
+    [
+        new EnumModel<AppTheme>(AppTheme.Default, "SystemDefault"),
+        new EnumModel<AppTheme>(AppTheme.Light, "Light"),
+        new EnumModel<AppTheme>(AppTheme.Dark, "Dark")
+    ];
 
     /// <summary>
     /// Gets and sets the FFmpeg path.
@@ -89,6 +108,7 @@ public class SettingsWindowViewModel : ViewModelBase
     private void WriteSettingsToProperties()
     {
         Language = AllLanguages.GetModel(_settingService.Data.Language);
+        Theme = AllThemes.GetModel(_settingService.Data.Theme);
         FFmpegPath = _settingService.Data.FFmpegPath;
         FFplayPath = _settingService.Data.FFplayPath;
         TheMovieDatabaseApiKey = _settingService.Data.TheMovieDatabase.ApiKey;
@@ -98,6 +118,7 @@ public class SettingsWindowViewModel : ViewModelBase
     private void WritePropertiesToSettings()
     {
         _settingService.Data.Language = Language.Value;
+        _settingService.Data.Theme = Theme.Value;
         _settingService.Data.FFmpegPath = FFmpegPath;
         _settingService.Data.FFplayPath = FFplayPath;
         _settingService.Data.TheMovieDatabase.ApiKey = TheMovieDatabaseApiKey;
