@@ -13,16 +13,19 @@
     <Border Classes="DarkBox">
         <DockPanel>
             <StackPanel Orientation="Horizontal" Spacing="5" DockPanel.Dock="Right">
-                <Button Command="{Binding OpenSettings}">
+                <Button Command="{Binding OpenSettings}"
+                        ToolTip.Tip="{DynamicResource OpenApplicationSettings}">
                     <avalonia:FluentIcon Icon="Settings" />
                 </Button>
                 <Button Command="{Binding StartQueue}"
                         IsVisible="{Binding !IsRunning}"
-                        IsEnabled="{Binding CanStartQueue}">
+                        IsEnabled="{Binding CanStartQueue}"
+                        ToolTip.Tip="{DynamicResource StartExport}">
                     <avalonia:FluentIcon Icon="Play" />
                 </Button>
                 <Button Command="{Binding StopQueue}"
-                        IsVisible="{Binding IsRunning}">
+                        IsVisible="{Binding IsRunning}"
+                        ToolTip.Tip="{DynamicResource StopExport}">
                     <avalonia:FluentIcon Icon="Stop" />
                 </Button>
             </StackPanel>

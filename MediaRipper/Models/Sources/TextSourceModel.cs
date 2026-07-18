@@ -6,15 +6,15 @@ namespace MediaRipper.Models.Sources;
 
 public class TextSourceModel : BaseSourceModel
 {
-    public TextSourceModel(string text)
+    public TextSourceModel(string titleResourceKey)
     {
-        Text = text;
+        TitleResourceKey = titleResourceKey;
     }
 
     /// <summary>
-    /// Gets the text.
+    /// Gets the resource key of the title.
     /// </summary>
-    public string Text { get; }
+    public string TitleResourceKey { get; }
     
     /// <summary>
     /// Gets the sub-nodes.
@@ -24,7 +24,7 @@ public class TextSourceModel : BaseSourceModel
 
 public class TextSourceModel<TChild> : TextSourceModel where TChild : BaseSourceModel
 {
-    public TextSourceModel(string text) : base(text)
+    public TextSourceModel(string titleResourceKey) : base(titleResourceKey)
     {
     }
 

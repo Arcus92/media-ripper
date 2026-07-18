@@ -10,11 +10,13 @@
     <system:String x:Key="RenameFiles">Rename files</system:String>
     
     <system:String x:Key="Title">Title</system:String>
+    <system:String x:Key="Playlist">Playlist</system:String>
     <system:String x:Key="Segments">Segments</system:String>
+    <system:String x:Key="Subtitles">Subtitles</system:String>
+    <system:String x:Key="Chapter">Chapter</system:String>
     <system:String x:Key="Chapters">Chapters</system:String>
     <system:String x:Key="VideoStreams">Video streams</system:String>
     <system:String x:Key="AudioStreams">Audio streams</system:String>
-    <system:String x:Key="SubtitleStreams">Subtitle streams</system:String>
     
     <!-- Main window -->
     <system:String x:Key="Source">Source</system:String>
@@ -29,6 +31,9 @@
     <system:String x:Key="QueueSelection">Queue selection</system:String>
     <system:String x:Key="DequeueSelection">Dequeue selection</system:String>
     <system:String x:Key="SaveRawSegment">Save raw segment</system:String>
+    <system:String x:Key="OpenApplicationSettings">Open application settings</system:String>
+    <system:String x:Key="StartExport">Start export</system:String>
+    <system:String x:Key="StopExport">Stop export</system:String>
     
     <!-- Media properties -->
     <system:String x:Key="Basename">Basename</system:String>
@@ -49,8 +54,11 @@
     <system:String x:Key="MediaTypeTrailer">Trailer</system:String>
     
     <!-- Settings -->
+    <system:String x:Key="General">General</system:String>
+    <system:String x:Key="FFmpeg">FFmpeg</system:String>
     <system:String x:Key="FFmpegPath">FFmpeg path</system:String>
-    <system:String x:Key="FFplayPath">FFmpeg path</system:String>
-    <system:String x:Key="TheMovieDatabaseApiKey">TheMovieDatabase api key</system:String>
-    <system:String x:Key="TheMovieDatabaseLanguage">TheMovieDatabase language</system:String>
+    <system:String x:Key="FFplayPath">FFplay path</system:String>
+    <system:String x:Key="TheMovieDatabase">TheMovieDatabase</system:String>
+    <system:String x:Key="ApiKey">Api key</system:String>
+    <system:String x:Key="Language">Language</system:String>
 </ResourceDictionary>

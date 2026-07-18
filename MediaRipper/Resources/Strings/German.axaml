@@ -1,0 +1,63 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime">
+    
+    <!-- General -->
+    <system:String x:Key="Cancel">Abbrechen</system:String>
+    <system:String x:Key="Okay">OK</system:String>
+    <system:String x:Key="Apply">Übernehmen</system:String>
+    <system:String x:Key="Search">Suche</system:String>
+    <system:String x:Key="RenameFiles">Dateien umbenennen</system:String>
+    
+    <system:String x:Key="Title">Titel</system:String>
+    <system:String x:Key="Playlist">Wiedergabeliste</system:String>
+    <system:String x:Key="Segments">Segmente</system:String>
+    <system:String x:Key="Subtitles">Untertitel</system:String>
+    <system:String x:Key="Chapter">Kapitel</system:String>
+    <system:String x:Key="Chapters">Kapitel</system:String>
+    <system:String x:Key="VideoStreams">Video-Streams</system:String>
+    <system:String x:Key="AudioStreams">Audio-Streams</system:String>
+    
+    <!-- Main window -->
+    <system:String x:Key="Source">Quelle</system:String>
+    <system:String x:Key="Output">Ausgabe</system:String>
+    <system:String x:Key="Properties">Eigenschaften</system:String>
+    <system:String x:Key="MediaLookup">Media-Suche</system:String>
+    <system:String x:Key="OpenSource">Quelle öffnen</system:String>
+    <system:String x:Key="OpenOutput">Ausgabe öffnen</system:String>
+    <system:String x:Key="Refresh">Aktualisieren</system:String>
+    <system:String x:Key="Play">Abspielen</system:String>
+    <system:String x:Key="Export">Exportieren</system:String>
+    <system:String x:Key="QueueSelection">Auswahl zur Warteschlange hinzufügen</system:String>
+    <system:String x:Key="DequeueSelection">Auswahl von Warteschlange entfernen</system:String>
+    <system:String x:Key="SaveRawSegment">Segment-Rohdaten speichern</system:String>
+    <system:String x:Key="OpenApplicationSettings">Anwendungseinstellungen öffnen</system:String>
+    <system:String x:Key="StartExport">Export starten</system:String>
+    <system:String x:Key="StopExport">Export abbrechen</system:String>
+    
+    <!-- Media properties -->
+    <system:String x:Key="Basename">Basisname</system:String>
+    <system:String x:Key="Episode">Episode</system:String>
+    <system:String x:Key="Season">Staffel</system:String>
+    <system:String x:Key="Files">Dateien</system:String>
+    <system:String x:Key="OutputFiles">Ausgabedateien</system:String>
+    
+    <!-- Media type -->
+    <system:String x:Key="MediaTypeUnset">-/-</system:String>
+    <system:String x:Key="MediaTypeMovie">Film</system:String>
+    <system:String x:Key="MediaTypeEpisode">Folge</system:String>
+    <system:String x:Key="MediaTypeExtra">Extra</system:String>
+    <system:String x:Key="MediaTypeMakingOf">Making Of</system:String>
+    <system:String x:Key="MediaTypeBehindTheScenes">Hinter den Kulissen</system:String>
+    <system:String x:Key="MediaTypeDeletedScenes">Gelöschte Szene</system:String>
+    <system:String x:Key="MediaTypeInterview">Interview</system:String>
+    <system:String x:Key="MediaTypeTrailer">Trailer</system:String>
+    
+    <!-- Settings -->
+    <system:String x:Key="FFmpeg">FFmpeg</system:String>
+    <system:String x:Key="FFmpegPath">FFmpeg Pfad</system:String>
+    <system:String x:Key="FFplayPath">FFplay Pfad</system:String>
+    <system:String x:Key="TheMovieDatabase">TheMovieDatabase</system:String>
+    <system:String x:Key="ApiKey">Api Key</system:String>
+    <system:String x:Key="Language">Sprache</system:String>
+</ResourceDictionary>

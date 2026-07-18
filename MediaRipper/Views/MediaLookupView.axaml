@@ -16,6 +16,11 @@
             <!-- Title -->
             <TextBlock Classes="Title" Text="{DynamicResource MediaLookup}"/>
             
+            <!-- Source -->
+            <TextBlock Opacity="0.6">
+                <Run Text="{DynamicResource Source}"/>: <Run Text="{DynamicResource TheMovieDatabase}"/>
+            </TextBlock>
+            
             <!-- Search box -->
             <DockPanel>
                 <StackPanel Orientation="Horizontal" Margin="5,0,0,0" DockPanel.Dock="Right">

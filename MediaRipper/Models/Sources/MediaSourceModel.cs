@@ -17,12 +17,12 @@ public class MediaSourceModel : BaseSourceModel
 
         var segment = Info.Segments.First();
         
-        VideoStreamNode = new TextSourceModel<VideoSourceModel>("Videos")
+        VideoStreamNode = new TextSourceModel<VideoSourceModel>("VideoStreams")
         {
             IsExpanded = true,
             SubNodes = new ObservableCollection<BaseSourceModel>(segment.VideoStreams.Select(s => new VideoSourceModel(s)))
         };
-        AudioStreamNode = new TextSourceModel<AudioSourceModel>("Audios")
+        AudioStreamNode = new TextSourceModel<AudioSourceModel>("AudioStreams")
         {
             IsExpanded = true,
             SubNodes = new ObservableCollection<BaseSourceModel>(segment.AudioStreams.Select(s => new AudioSourceModel(s)))

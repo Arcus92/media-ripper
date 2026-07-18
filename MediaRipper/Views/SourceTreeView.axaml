@@ -86,7 +86,7 @@
                     <!-- Generic text node (chapter / segment) -->
                     <TreeDataTemplate x:DataType="sources:TextSourceModel" ItemsSource="{Binding SubNodes}">
                         <StackPanel Orientation="Horizontal" Classes="nodeRow">
-                            <TextBlock Text="{Binding Text}"/>
+                            <TextBlock Text="{Binding TitleResourceKey, Converter={StaticResource DynamicResourceKeyConverter}}"/>
                         </StackPanel>
                     </TreeDataTemplate>
                 </TreeView.DataTemplates>
