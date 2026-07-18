@@ -7,6 +7,7 @@
     <system:String x:Key="Okay">Okay</system:String>
     <system:String x:Key="Apply">Apply</system:String>
     <system:String x:Key="Search">Search</system:String>
+    <system:String x:Key="RenameFiles">Rename files</system:String>
     
     <system:String x:Key="Title">Title</system:String>
     <system:String x:Key="Segments">Segments</system:String>
@@ -16,6 +17,10 @@
     <system:String x:Key="SubtitleStreams">Subtitle streams</system:String>
     
     <!-- Main window -->
+    <system:String x:Key="Source">Source</system:String>
+    <system:String x:Key="Output">Output</system:String>
+    <system:String x:Key="Properties">Properties</system:String>
+    <system:String x:Key="MediaLookup">Media lookup</system:String>
     <system:String x:Key="OpenSource">Open source</system:String>
     <system:String x:Key="OpenOutput">Open output</system:String>
     <system:String x:Key="Refresh">Refresh</system:String>
@@ -24,6 +29,13 @@
     <system:String x:Key="QueueSelection">Queue selection</system:String>
     <system:String x:Key="DequeueSelection">Dequeue selection</system:String>
     <system:String x:Key="SaveRawSegment">Save raw segment</system:String>
+    
+    <!-- Media properties -->
+    <system:String x:Key="Basename">Basename</system:String>
+    <system:String x:Key="Episode">Episode</system:String>
+    <system:String x:Key="Season">Season</system:String>
+    <system:String x:Key="Files">Files</system:String>
+    <system:String x:Key="OutputFiles">Output files</system:String>
     
     <!-- Media type -->
     <system:String x:Key="MediaTypeUnset">-/-</system:String>

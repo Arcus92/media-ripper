@@ -10,7 +10,7 @@
              x:DataType="vm:QueueSettingsViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:QueueSettingsViewModel}}">
     
-    <Border Padding="10,5">
+    <Border Classes="DarkBox">
         <DockPanel>
             <StackPanel Orientation="Horizontal" Spacing="5" DockPanel.Dock="Right">
                 <Button Command="{Binding OpenSettings}">

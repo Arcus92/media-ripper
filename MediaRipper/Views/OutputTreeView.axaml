@@ -9,62 +9,65 @@
              x:Class="MediaRipper.Views.OutputTreeView"
              x:DataType="vm:OutputTreeViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:OutputTreeViewModel}}">
-    <ScrollViewer>
-        <TreeView ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
-            <TreeView.Styles>
-                <!-- Disabled text -->
-                <Style Selector=".disabled TextBlock">
-                    <Setter Property="Opacity" Value="0.5"/>
-                </Style>
-                            
-                <!-- Rotating icon -->
-                <Style Selector="avalonia|FluentIcon.rotating">
-                    <Style.Animations>
-                        <Animation Duration="0:0:3" IterationCount="Infinite">
-                            <KeyFrame Cue="0%">
-                                <Setter Property="RotateTransform.Angle" Value="0"/>
-                            </KeyFrame>
-                            <KeyFrame Cue="100%">
-                                <Setter Property="RotateTransform.Angle" Value="360"/>
-                            </KeyFrame>
-                        </Animation>
-                    </Style.Animations>
-                </Style>
-            </TreeView.Styles>
-            
-            <TreeView.DataTemplates>
+    
+    <Border Classes="LightBox">
+        <ScrollViewer>
+            <TreeView ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                <TreeView.Styles>
+                    <!-- Disabled text -->
+                    <Style Selector=".disabled TextBlock">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Style>
+                                
+                    <!-- Rotating icon -->
+                    <Style Selector="avalonia|FluentIcon.rotating">
+                        <Style.Animations>
+                            <Animation Duration="0:0:3" IterationCount="Infinite">
+                                <KeyFrame Cue="0%">
+                                    <Setter Property="RotateTransform.Angle" Value="0"/>
+                                </KeyFrame>
+                                <KeyFrame Cue="100%">
+                                    <Setter Property="RotateTransform.Angle" Value="360"/>
+                                </KeyFrame>
+                            </Animation>
+                        </Style.Animations>
+                    </Style>
+                </TreeView.Styles>
                 
-                <!-- Output -->
-                <TreeDataTemplate x:DataType="vm:OutputViewModel" >
+                <TreeView.DataTemplates>
                     
-                    <DockPanel Classes.disabled="{Binding IsMissing}">
-                        <!-- Icon -->
-                        <avalonia:FluentIcon Icon="{Binding StatusIcon}" 
-                                             Margin="0,0,5,0"
-                                             Classes.rotating="{Binding IsProcessing}" 
-                                             DockPanel.Dock="Left"
-                                             />
+                    <!-- Output -->
+                    <TreeDataTemplate x:DataType="vm:OutputViewModel" >
                         
-                        <!-- Text and progress -->
-                        <DockPanel>
-                            <ProgressBar Value="{Binding Model.Progress}" 
-                                         Maximum="1.0" 
-                                         IsVisible="{Binding IsProcessing}" 
-                                         Margin="0,5,0,0"
-                                         DockPanel.Dock="Bottom" />
+                        <DockPanel Classes.disabled="{Binding IsMissing}">
+                            <!-- Icon -->
+                            <avalonia:FluentIcon Icon="{Binding StatusIcon}" 
+                                                 Margin="0,0,5,0"
+                                                 Classes.rotating="{Binding IsProcessing}" 
+                                                 DockPanel.Dock="Left"
+                                                 />
                             
-                            <TextBlock Text="{Binding Model.Progress, StringFormat='{}{0:P0}'}" 
-                                       IsVisible="{Binding IsProcessing}" 
-                                       VerticalAlignment="Center" 
-                                       TextAlignment="Center"
-                                       Width="60"
-                                       DockPanel.Dock="Right" />
-                            
-                            <TextBlock Text="{Binding Model.Basename}" />
+                            <!-- Text and progress -->
+                            <DockPanel>
+                                <ProgressBar Value="{Binding Model.Progress}" 
+                                             Maximum="1.0" 
+                                             IsVisible="{Binding IsProcessing}" 
+                                             Margin="0,5,0,0"
+                                             DockPanel.Dock="Bottom" />
+                                
+                                <TextBlock Text="{Binding Model.Progress, StringFormat='{}{0:P0}'}" 
+                                           IsVisible="{Binding IsProcessing}" 
+                                           VerticalAlignment="Center" 
+                                           TextAlignment="Center"
+                                           Width="60"
+                                           DockPanel.Dock="Right" />
+                                
+                                <TextBlock Text="{Binding Model.Basename}" />
+                            </DockPanel>
                         </DockPanel>
-                    </DockPanel>
-                </TreeDataTemplate>
-            </TreeView.DataTemplates>
-        </TreeView>
-    </ScrollViewer>
+                    </TreeDataTemplate>
+                </TreeView.DataTemplates>
+            </TreeView>
+        </ScrollViewer>
+    </Border>
 </UserControl>

@@ -11,7 +11,7 @@
              x:DataType="vm:ExportSettingsViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:ExportSettingsViewModel}}">
     
-    <Border Padding="10,5">
+    <Border Classes="DarkBox">
         <DockPanel>
             <StackPanel Orientation="Horizontal" Spacing="5" DockPanel.Dock="Right">
                 <ComboBox ItemsSource="{Binding AllOutputFormats}" 
@@ -43,5 +43,4 @@
             </StackPanel>
         </DockPanel>
     </Border>
-    
 </UserControl>

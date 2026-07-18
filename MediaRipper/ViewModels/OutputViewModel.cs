@@ -106,6 +106,28 @@ public class OutputViewModel : ViewModelBase
     
     #endregion Metadata
     
+    #region Properties
+
+    /// <summary>
+    /// Static field for <see cref="IsFilesExpanded"/> to remember last choice for all new UIs.
+    /// </summary>
+    private static bool _isFilesExpanded;
+
+    /// <summary>
+    /// Gets and sets if the files list is expanded.
+    /// </summary>
+    public bool IsFilesExpanded
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            _isFilesExpanded = value;
+        }
+    } = _isFilesExpanded;
+
+    #endregion Properties
+    
     #region Commands
     
     public async Task ApplyAsync()

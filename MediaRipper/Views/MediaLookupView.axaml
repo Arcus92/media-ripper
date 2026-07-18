@@ -11,8 +11,10 @@
              x:DataType="vm:MediaLookupViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:MediaLookupViewModel}}">
     
-    <Border Padding="10">
-        <StackPanel Orientation="Vertical" Spacing="5">
+    <Border Classes="DarkBox">
+        <StackPanel Orientation="Vertical" Spacing="10">
+            <!-- Title -->
+            <TextBlock Classes="Title" Text="{DynamicResource MediaLookup}"/>
             
             <!-- Search box -->
             <DockPanel>
@@ -93,7 +95,6 @@
             <TextBlock Text="{Binding SelectedEpisode.Description, FallbackValue={}}" 
                        TextWrapping="Wrap"
                        IsVisible="{Binding IsTvSeries}" />
-
         </StackPanel>
     </Border>
 </UserControl>
