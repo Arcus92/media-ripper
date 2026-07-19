@@ -85,6 +85,21 @@ public class BigEndianBinaryReader : IDisposable
     }
     
     /// <summary>
+    /// Reads an 16-bit integer array.
+    /// </summary>
+    /// <param name="count">The number of elements to read.</param>
+    /// <returns></returns>
+    public short[] ReadInt16Array(int count)
+    {
+        var array = new short[count];
+        for (var i = 0; i < count; i++)
+        {
+            array[i] = ReadInt16();
+        }
+        return array;
+    }
+    
+    /// <summary>
     /// Reads an 16-bit unsigned integer.
     /// </summary>
     /// <returns></returns>
@@ -92,6 +107,21 @@ public class BigEndianBinaryReader : IDisposable
     {
         _position += sizeof(ushort);
         return BinaryPrimitives.ReverseEndianness(_reader.ReadUInt16());
+    }
+    
+    /// <summary>
+    /// Reads an 16-bit unsigned integer array.
+    /// </summary>
+    /// <param name="count">The number of elements to read.</param>
+    /// <returns></returns>
+    public ushort[] ReadUInt16Array(int count)
+    {
+        var array = new ushort[count];
+        for (var i = 0; i < count; i++)
+        {
+            array[i] = ReadUInt16();
+        }
+        return array;
     }
     
     /// <summary>
@@ -117,6 +147,21 @@ public class BigEndianBinaryReader : IDisposable
     }
     
     /// <summary>
+    /// Reads an 32-bit integer array.
+    /// </summary>
+    /// <param name="count">The number of elements to read.</param>
+    /// <returns></returns>
+    public int[] ReadInt32Array(int count)
+    {
+        var array = new int[count];
+        for (var i = 0; i < count; i++)
+        {
+            array[i] = ReadInt32();
+        }
+        return array;
+    }
+    
+    /// <summary>
     /// Reads an 32-bit unsigned integer.
     /// </summary>
     /// <returns></returns>
@@ -124,6 +169,21 @@ public class BigEndianBinaryReader : IDisposable
     {
         _position += sizeof(uint);
         return BinaryPrimitives.ReverseEndianness(_reader.ReadUInt32());
+    }
+    
+    /// <summary>
+    /// Reads an 32-bit unsigned integer array.
+    /// </summary>
+    /// <param name="count">The number of elements to read.</param>
+    /// <returns></returns>
+    public uint[] ReadUInt32Array(int count)
+    {
+        var array = new uint[count];
+        for (var i = 0; i < count; i++)
+        {
+            array[i] = ReadUInt32();
+        }
+        return array;
     }
     
     /// <summary>
@@ -228,6 +288,23 @@ public class BigEndianBinaryReader : IDisposable
     }
 
     /// <summary>
+    /// Returns the given number of bytes and checks if they are zero.
+    /// </summary>
+    /// <param name="count">The number of zeros to read.</param>
+    /// <exception cref="IOException">Throws an exception if one byte is not zero.</exception>
+    public void ReadZero(int count = 1)
+    {
+        for (var i = 0; i < count; i++)
+        {
+            var b = ReadByte();
+            if (b != 0)
+            {
+                //throw new IOException("");
+            }
+        }
+    }
+    
+    /// <summary>
     /// Skips to the given position.
     /// Fails if the position was already past.
     /// </summary>
@@ -240,6 +317,17 @@ public class BigEndianBinaryReader : IDisposable
         Skip(diff);
     }
 
+    /// <summary>
+    /// Seeks to the given position.
+    /// </summary>
+    /// <param name="position">The target position.</param>
+    public void SeekTo(long position)
+    {
+        if (position == Position) return;
+        BaseStream.Seek(position, SeekOrigin.Begin);
+        Position = position;
+    }
+    
     /// <summary>
     /// Returns a sub stream with the given length.
     /// </summary>

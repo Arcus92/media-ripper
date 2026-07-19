@@ -1,5 +1,5 @@
-﻿using DvdLib.Streams;
-using DvdLib.Vmg;
+﻿using DvdLib.Data.Models;
+using DvdLib.Streams;
 
 namespace DvdLib;
 

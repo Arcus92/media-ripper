@@ -1,4 +1,4 @@
-namespace DvdLib.Vmg;
+namespace DvdLib.Data.Enums;
 
 public enum MpegVersion : byte
 {

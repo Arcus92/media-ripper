@@ -1,24 +1,32 @@
+using DvdLib.Data.Enums;
 using MediaLib.Utils.IO;
 
-namespace DvdLib.Vmg;
+namespace DvdLib.Data.Models;
 
-public class AudioAttributes
+/// <summary>
+/// Audio Attributes
+/// </summary>
+public struct AudioAttributes
 {
-    public AudioFormat AudioFormat { get; set; }
-    public bool MultichannelExtension { get; set; }
-    public byte LandType { get; set; }
-    public ApplicationMode ApplicationMode { get; set; }
+    public AudioAttributes()
+    {
+    }
+
+    public AudioFormat AudioFormat { get; set; } = default;
+    public bool MultichannelExtension { get; set; }  = false;
+    public byte LandType { get; set; }  = 0;
+    public ApplicationMode ApplicationMode { get; set; } = default;
     
-    public byte Quantization { get; set; }
-    public byte SampleFrequency { get; set; }
-    public byte Channels { get; set; }
+    public byte Quantization { get; set; } = 0;
+    public byte SampleFrequency { get; set; } = 0;
+    public byte Channels { get; set; } = 0;
 
 
     public string LangCode { get; set; } = "";
-    public byte LangExtension { get; set; }
-    public CodeExtension CodeExtension { get; set; }
+    public byte LangExtension { get; set; } = 0;
+    public CodeExtension CodeExtension { get; set; } = default;
     
-    public void Read(BigEndianBinaryReader reader)
+    private void Read(BigEndianBinaryReader reader)
     {
         var b = reader.ReadBits8();
         AudioFormat = (AudioFormat)b.ReadBits(3);
@@ -39,25 +47,14 @@ public class AudioAttributes
         
         b = reader.ReadBits8();
     }
-
-    /// <summary>
-    /// Reads the audio attribute from the reader and returns the instance.
-    /// </summary>
-    /// <param name="reader">The current reader.</param>
-    /// <returns>Returns the read instance.</returns>
+    
     public static AudioAttributes FromReader(BigEndianBinaryReader reader)
     {
         var attr = new AudioAttributes();
         attr.Read(reader);
         return attr;
     }
-
-    /// <summary>
-    /// Reads the given number ob audio attributes from the reader and returns the instances.
-    /// </summary>
-    /// <param name="reader">The current reader.</param>
-    /// <param name="count">The number of items to read.</param>
-    /// <returns>Returns the read instances.</returns>
+    
     public static AudioAttributes[] FromReader(BigEndianBinaryReader reader, int count)
     {
         var array = new AudioAttributes[count];

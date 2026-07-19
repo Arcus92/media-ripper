@@ -1,19 +1,29 @@
 using MediaLib.Utils.IO;
 
-namespace DvdLib.Vmg;
+namespace DvdLib.Data.Models;
 
-public class DvdTime
+/// <summary>
+/// DVD Time
+/// </summary>
+public struct DvdTime
 {
     public byte Hour { get; set; }
     public byte Minute { get; set; }
     public byte Second { get; set; }
     public byte Frame { get; set; }
 
-    public void Read(BigEndianBinaryReader reader)
+    private void Read(BigEndianBinaryReader reader)
     {
         Hour = reader.ReadByte();
         Minute = reader.ReadByte();
         Second = reader.ReadByte();
         Frame = reader.ReadByte();
+    }
+    
+    public static DvdTime FromReader(BigEndianBinaryReader reader)
+    {
+        var time = new DvdTime();
+        time.Read(reader);
+        return time;
     }
 }

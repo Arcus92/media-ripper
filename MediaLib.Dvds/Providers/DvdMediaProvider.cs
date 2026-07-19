@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using DvdLib;
 using DvdLib.Decrypt;
 using DvdLib.Streams;
-using DvdLib.Vmg;
 using MediaLib.Dvds.Exporter;
 using MediaLib.Dvds.Sources;
 using MediaLib.Models;

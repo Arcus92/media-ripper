@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace DvdLib.Vmg;
+namespace DvdLib;
 
 public readonly partial struct VmgIdentifier : IEquatable<VmgIdentifier>
 {

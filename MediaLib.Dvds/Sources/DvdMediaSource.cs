@@ -1,3 +1,4 @@
+using DvdLib.Data.Models;
 using DvdLib.Streams;
 using MediaLib.Formats;
 using MediaLib.Models;
@@ -36,6 +37,7 @@ public class DvdMediaSource : IMediaSource
     private MediaInfo BuildMediaInfo()
     {
         var ifo = _videoStream.Information;
+        var vts = ifo.Vts ?? new VtsiMat();
         var baseName = _videoStream.Identifier.ToFilename();
         ushort streamId = 1;
         
@@ -55,13 +57,13 @@ public class DvdMediaSource : IMediaSource
                     Name = baseName,
                     IsDefault = true
                 }],
-                AudioStreams = ifo.AudioList.Select((a, n) => new AudioInfo()
+                AudioStreams = vts.VtsAudios.Select((a, n) => new AudioInfo()
                 {
                     Id = streamId++,
                     Name = a.LangCode,
                     LanguageCode = a.LangCode,
                 }).ToArray(),
-                SubtitleStreams = ifo.SubPictureList.Select((s, n) => new SubtitleInfo()
+                SubtitleStreams = vts.VtsSubPictures.Select((s, n) => new SubtitleInfo()
                 {
                     Id = streamId++,
                     Name = s.LangCode,
@@ -93,7 +95,8 @@ public class DvdMediaSource : IMediaSource
             Type = OutputStreamType.Video
         });
 
-        foreach (var audio in _videoStream.Information.AudioList)
+        var vts = _videoStream.Information.Vts ?? new VtsiMat();
+        foreach (var audio in vts.VtsAudios)
         {
             streams.Add(new OutputStream
             {
@@ -104,7 +107,7 @@ public class DvdMediaSource : IMediaSource
             });
         }
         
-        foreach (var subPicture in _videoStream.Information.SubPictureList)
+        foreach (var subPicture in vts.VtsSubPictures)
         {
             streams.Add(new OutputStream
             {

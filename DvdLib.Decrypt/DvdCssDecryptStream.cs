@@ -11,9 +11,14 @@ public class DvdCssDecryptStream : Stream
         var fileInfo = new FileInfo(filename);
         _length = fileInfo.Length;
         
-        if (!_dvdCss.Open(filename) || !_dvdCss.Seek(0, DvdCssSeekFlags.Key))
+        if (!_dvdCss.Open(filename))
         {
             throw new IOException($"DvdCss couldn't open disk path: {filename}");
+        }
+
+        if (!_dvdCss.Seek(0, DvdCssSeekFlags.Key))
+        {
+            throw new IOException($"DvdCss couldn't seek to the key data: {filename}");
         }
     }
 
