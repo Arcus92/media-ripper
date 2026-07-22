@@ -201,21 +201,21 @@ public class CommandBuilder
     /// Sets the codec to use for the given stream types.
     /// </summary>
     /// <param name="streamType">The stream type to set the codec.</param>
-    /// <param name="streamIndex">The index of the stream to set the codec.</param>
+    /// <param name="streamId">The index of the stream to set the codec.</param>
     /// <param name="codec">The codec to use.</param>
-    public void Codec(StreamType streamType, int streamIndex, string codec)
+    public void Codec(StreamType streamType, StreamId streamId, string codec)
     {
-        _arguments.Append($"-c:{streamType.Identifier()}:{streamIndex} {codec} ");
+        _arguments.Append($"-c:{streamType.Identifier()}:{streamId} {codec} ");
     }
     
     /// <summary>
     /// Sets the codec to use for the given stream index.
     /// </summary>
-    /// <param name="streamIndex">The index of the stream to set the codec.</param>
+    /// <param name="streamId">The index of the stream to set the codec.</param>
     /// <param name="codec">The codec to use.</param>
-    public void Codec(int streamIndex, string codec)
+    public void Codec(StreamId streamId, string codec)
     {
-        _arguments.Append($"-c:{streamIndex} {codec} ");
+        _arguments.Append($"-c:{streamId} {codec} ");
     }
     
     /// <summary>
@@ -231,10 +231,11 @@ public class CommandBuilder
     /// Maps all streams from the given input file.
     /// </summary>
     /// <param name="inputId">The id of the input file.</param>
-    /// <param name="streamIndex">The index of the stream to set the codec.</param>
-    public void Map(int inputId, int streamIndex)
+    /// <param name="streamId">The index of the stream to set the codec.</param>
+    /// <param name="optional">If set, the convert will not fail if no streams were found.</param>
+    public void Map(int inputId, StreamId streamId, bool optional = false)
     {
-        _arguments.Append($"-map {inputId}:{streamIndex} ");
+        _arguments.Append($"-map {inputId}:{streamId}{(optional?"?":"")} ");
     }
     
     /// <summary>
@@ -253,11 +254,11 @@ public class CommandBuilder
     /// </summary>
     /// <param name="inputId">The id of the input file.</param>
     /// <param name="streamType">The stream type to map.</param>
-    /// <param name="streamIndex">The index of the stream to map.</param>
+    /// <param name="streamId">The index of the stream to map.</param>
     /// <param name="optional">If set, the convert will not fail if no streams were found.</param>
-    public void Map(int inputId, StreamType streamType, int streamIndex, bool optional = false)
+    public void Map(int inputId, StreamType streamType, StreamId streamId, bool optional = false)
     {
-        _arguments.Append($"-map {inputId}:{streamType.Identifier()}:{streamIndex}{(optional?"?":"")} ");
+        _arguments.Append($"-map {inputId}:{streamType.Identifier()}:{streamId}{(optional?"?":"")} ");
     }
     
     /// <summary>
@@ -281,45 +282,45 @@ public class CommandBuilder
     /// <summary>
     /// Sets a metadata property for the given stream.
     /// </summary>
-    /// <param name="streamIndex">The index of the stream to set the metadata.</param>
+    /// <param name="streamId">The index of the stream to set the metadata.</param>
     /// <param name="property">The metadata property name.</param>
     /// <param name="value">The metadata value.</param>
-    public void Metadata(int streamIndex, string property, string value)
+    public void Metadata(StreamId streamId, string property, string value)
     {
-        _arguments.Append($"-metadata:s:{streamIndex} {property}=\"{value}\" ");
+        _arguments.Append($"-metadata:s:{streamId} {property}=\"{value}\" ");
     }
 
     /// <summary>
     /// Sets a metadata property for the given stream.
     /// </summary>
     /// <param name="streamType">The stream type to set the metadata.</param>
-    /// <param name="streamIndex">The index of the stream to set the metadata.</param>
+    /// <param name="streamId">The index of the stream to set the metadata.</param>
     /// <param name="property">The metadata property name.</param>
     /// <param name="value">The metadata value.</param>
-    public void Metadata(StreamType streamType, int streamIndex, string property, string value)
+    public void Metadata(StreamType streamType, StreamId streamId, string property, string value)
     {
-        _arguments.Append($"-metadata:s:{streamType.Identifier()}:{streamIndex} {property}=\"{value}\" ");
+        _arguments.Append($"-metadata:s:{streamType.Identifier()}:{streamId} {property}=\"{value}\" ");
     }
 
     /// <summary>
     /// Sets the disposition flag for the given stream.
     /// </summary>
-    /// <param name="streamIndex">The index of the stream to set the disposition.</param>
+    /// <param name="streamId">The index of the stream to set the disposition.</param>
     /// <param name="value">The disposition flag.</param>
-    public void Disposition(int streamIndex, string value)
+    public void Disposition(StreamId streamId, string value)
     {
-        _arguments.Append($"-disposition:{streamIndex} {value} ");
+        _arguments.Append($"-disposition:{streamId} {value} ");
     }
     
     /// <summary>
     /// Sets the disposition flag for the given stream.
     /// </summary>
     /// <param name="streamType">The stream type to set the disposition.</param>
-    /// <param name="streamIndex">The index of the stream to set the disposition.</param>
+    /// <param name="streamId">The index of the stream to set the disposition.</param>
     /// <param name="value">The disposition flag.</param>
-    public void Disposition(StreamType streamType, int streamIndex, string value)
+    public void Disposition(StreamType streamType, StreamId streamId, string value)
     {
-        _arguments.Append($"-disposition:{streamType.Identifier()}:{streamIndex} {value} ");
+        _arguments.Append($"-disposition:{streamType.Identifier()}:{streamId} {value} ");
     }
 
     /// <summary>
