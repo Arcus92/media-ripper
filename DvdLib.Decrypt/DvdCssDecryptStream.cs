@@ -62,13 +62,13 @@ public class DvdCssDecryptStream : Stream
             // Detect end of cell
             if (_positionCurrent + _bufferOffset >= _positionEnd)
             {
-                return 0;
+                break;
             }
             
             if (_bufferEnd == 0)
             {
                 var ret = ReadBufferAndDecrypt();
-                if (ret < 0) return 0;
+                if (ret < 0) break;
                 _bufferEnd = ret * Dvd.BlockSize;
             }
             

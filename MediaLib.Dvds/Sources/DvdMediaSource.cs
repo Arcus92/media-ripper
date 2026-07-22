@@ -51,7 +51,6 @@ public class DvdMediaSource : IMediaSource
     /// <returns></returns>
     private MediaInfo BuildMediaInfo()
     {
-        var duration = _dvdTitleInfo.Pgc. PlaybackTime.AsTimeSpan();
         var vts = _dvdTitleInfo.TitleSet;
         var baseName = _dvdTitleInfo.Name;
         ushort streamId = 1;
