@@ -1,14 +1,22 @@
-﻿using DvdLib.Data.Models;
-using DvdLib.Streams;
+﻿using System.Text.RegularExpressions;
+using DvdLib.Data.Models;
+using MediaLib.Utils.IO;
 
 namespace DvdLib;
 
-public class Dvd
+public partial class Dvd
 {
+    public const int BlockSize = 2048;
+    
     /// <summary>
-    /// Gets the Dvd disk path.
+    /// Gets the DVD path.
     /// </summary>
     public string DiskPath { get; }
+
+    /// <summary>
+    /// Gets the mount source of the DVD. For example /dev/sr0.
+    /// </summary>
+    public string DiskMountSource { get; private set; }
 
     /// <summary>
     /// Gets the Dvd disk name.
@@ -16,19 +24,20 @@ public class Dvd
     public string DiskName { get; }
     
     /// <summary>
-    /// Gets all loaded title set information from VIDEO_TS.
+    /// Gets all title set information by title set index.
     /// </summary>
-    public Dictionary<VmgIdentifier, Ifo> TitleSets { get; } = new();
+    public Dictionary<ushort, DvdTitleSetInfo> TitleSetInfo { get; } = new();
     
     /// <summary>
     /// Gets all loaded video streams from VIDEO_TS.
     /// </summary>
-    public Dictionary<VmgIdentifier, VideoStream> VideoStreams { get; } = new();
+    public Dictionary<ushort, DvdTitleInfo> TitleInfo { get; } = new();
     
     public Dvd(string diskPath)
     {
         diskPath = Path.GetFullPath(diskPath).TrimEnd('/', '\\'); // Sanitize
         DiskPath = diskPath;
+        DiskMountSource = diskPath;
         DiskName = Path.GetFileName(diskPath);
     }
     
@@ -40,38 +49,90 @@ public class Dvd
     public string ContentHash { get; private set; } = "";
 
     /// <summary>
-    /// Loads the DVD content and populates <see cref="VideoStreams"/>.
+    /// Loads the DVD content and populates <see cref="TitleInfo"/>.
     /// </summary>
     public async Task LoadAsync()
     {
-        TitleSets.Clear();
-        VideoStreams.Clear();
+        TitleSetInfo.Clear();
+        TitleInfo.Clear();
+        DiskMountSource = await MountUtils.GetMountSourceAsync(DiskPath);
         await Task.Run(() =>
         {
             var videoStreamPath = Path.Combine(DiskPath, "VIDEO_TS");
             
-            var titleSets = Directory.EnumerateFiles(videoStreamPath, "*.IFO");
-            foreach (var titleSet in titleSets)
+            var ifoFiles = Directory.EnumerateFiles(videoStreamPath, "*.IFO");
+            foreach (var ifoFile in ifoFiles)
             {
-                var filename = Path.GetFileNameWithoutExtension(titleSet);
-                var identifier = VmgIdentifier.FromFilename(filename);
+                var filename = Path.GetFileNameWithoutExtension(ifoFile);
+                var titleSetIndex = GetTitleSetIndexByFilename(filename);
                 
                 var ifo = new Ifo();
-                ifo.Read(titleSet);
-                TitleSets.Add(identifier, ifo);
+                ifo.Read(ifoFile);
+
+                var fileLengths = GetVobFileLengths(titleSetIndex).ToArray();
+                
+                TitleSetInfo.Add(titleSetIndex, new DvdTitleSetInfo(titleSetIndex, ifo, fileLengths));
             }
             
-            var videoStreams = Directory.EnumerateFiles(videoStreamPath, "*.VOB");
-            foreach (var videoStream in videoStreams)
+            // Reading the main info file with all titles
+            if (!TitleSetInfo.TryGetValue(0, out var vmg) || vmg.Information.TtSrpt is null)
             {
-                var filename = Path.GetFileNameWithoutExtension(videoStream);
-                var identifier = VmgIdentifier.FromFilename(filename);
+                return;
+            }
 
-                var information = TitleSets[identifier.Root];
-                var stream = new VideoStream(identifier, information);
-                VideoStreams.Add(identifier, stream);
+            for (ushort index = 0; index < vmg.Information.TtSrpt.Titles.Length; index++)
+            {
+                var title = vmg.Information.TtSrpt.Titles[index];
+                if (!TitleSetInfo.TryGetValue(title.TitleSetNr, out var titleSet) || 
+                    titleSet.Information.Vts is null ||
+                    titleSet.Information.VtsPttSrpt is null ||
+                    titleSet.Information.VtsPgcit is null)
+                {
+                    continue;
+                }
+
+                var vtsTitle = titleSet.Information.VtsPttSrpt.Titles[title.VtsTtn - 1];
+                var pgc = titleSet.Information.VtsPgcit.PgciSrp[vtsTitle.Ptts[0].Pgcn - 1].Pgc!;
+
+                var stream = new DvdTitleInfo(index, title, titleSet.Information.Vts, vtsTitle.Ptts, pgc);
+                TitleInfo.Add(index, stream);
             }
         });
+    }
+    
+    [GeneratedRegex(@"VTS_(\d\d)_(\d)")]
+    private static partial Regex TitleSetFilenameRegex();
+    
+    private static byte GetTitleSetIndexByFilename(string filename)
+    {
+        if (filename == "VIDEO_TS")
+        {
+            return 0;
+        }
+        
+        var match = TitleSetFilenameRegex().Match(filename);
+        if (!match.Success)
+            throw new ArgumentException($"Unknown filename: {filename}!");
+        
+        var titleSet = byte.Parse(match.Groups[1].Value);
+        return titleSet;
+    }
+
+    private IEnumerable<long> GetVobFileLengths(byte titleSetIndex)
+    {
+        for (var i = 0; i <= 9; i++)
+        {
+            var filename = titleSetIndex == 0 ? 
+                "VIDEO_TS.VOB" : 
+                $"VTS_{titleSetIndex:00}_{i}.VOB";
+
+            var path = Path.Combine(DiskPath, "VIDEO_TS", filename);
+            var fileInfo = new FileInfo(path);
+            if (!fileInfo.Exists) break;
+            yield return fileInfo.Length;
+
+            if (titleSetIndex == 0) break;
+        }
     }
     
     #endregion Info
@@ -79,32 +140,28 @@ public class Dvd
     #region Streams
     
     /// <summary>
-    /// Opens the VOB file with the given name.
+    /// Opens a stream for the given title and cell.
     /// </summary>
-    /// <param name="identifier">The file identifier.</param>
+    /// <param name="titleId">The title id.</param>
+    /// <param name="cellId">The cell id.</param>
     /// <returns>Returns the stream.</returns>
-    public Stream GetVobStream(VmgIdentifier identifier)
+    public Stream GetCellStream(ushort titleId, ushort cellId)
     {
-        var path = Path.Combine(DiskPath, "VIDEO_TS", $"{identifier.ToFilename()}.VOB");
+        var title = TitleInfo[titleId];
+        var cell = title.Pgc.CellPlayback[cellId - 1];
+        
+        var titleSetSector = title.TitleInfo.TitleSetSector;
+        var titleSetDataSector = titleSetSector + title.TitleSet.VtsTtVobs;
+        var cellStartSector = titleSetDataSector + cell.FirstSector;
+        var cellEndSector = titleSetDataSector + cell.LastSector;
         
         // Handle decryption
         if (VobDecryptionHandler is not null)
         {
-            return VobDecryptionHandler.Invoke(this, path);
+            return VobDecryptionHandler.Invoke(this, titleSetDataSector, cellStartSector, cellEndSector);
         }
-        
-        return File.OpenRead(path);
-    }
-    
-    /// <summary>
-    /// Returns the file info for the VOB file.
-    /// </summary>
-    /// <param name="identifier">The file identifier.</param>
-    /// <returns>Returns the file info.</returns>
-    public FileInfo GetVobFileInfo(VmgIdentifier identifier)
-    {
-        var path = Path.Combine(DiskPath, "VIDEO_TS", $"{identifier.ToFilename()}.VOB");
-        return new FileInfo(path);
+
+        throw new NotImplementedException();
     }
     
     #endregion Streams
@@ -114,7 +171,7 @@ public class Dvd
     /// <summary>
     /// The decryption handler method.
     /// </summary>
-    public delegate Stream DecryptionHandler(Dvd dvd, string filename);
+    public delegate Stream DecryptionHandler(Dvd dvd, uint titleSetSector, uint cellSectorStart, uint cellSectorEnd);
 
     /// <summary>
     /// Gets and sets the VOB decryption stream.

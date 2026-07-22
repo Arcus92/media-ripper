@@ -53,9 +53,10 @@ public interface IMediaProviderService
     /// <summary>
     /// Returns the raw media stream from the given source.
     /// </summary>
-    /// <param name="source"></param>
+    /// <param name="source">The source to access the raw stream from.</param>
+    /// <param name="segmentId">The segemnt id to access.</param>
     /// <returns></returns>
-    Stream GetRawStream(IMediaSource source);
+    Stream GetRawStream(IMediaSource source, ushort segmentId);
     
     /// <summary>
     /// Gets if this media provider matches the given output source.

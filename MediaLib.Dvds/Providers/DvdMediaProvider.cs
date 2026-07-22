@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using DvdLib;
 using DvdLib.Decrypt;
-using DvdLib.Streams;
 using MediaLib.Dvds.Exporter;
 using MediaLib.Dvds.Sources;
 using MediaLib.Models;
@@ -52,7 +51,7 @@ public class DvdMediaProvider : IMediaProvider
     /// <inheritdoc />
     public async IAsyncEnumerable<IMediaSource> GetSourcesAsync()
     {
-        foreach (var videoStream in Dvd.VideoStreams.Values)
+        foreach (var videoStream in Dvd.TitleInfo.Values)
         {
             var source = GetSource(videoStream);
             yield return source;
@@ -62,9 +61,9 @@ public class DvdMediaProvider : IMediaProvider
     /// <summary>
     /// Returns the media source for the given video stream.
     /// </summary>
-    /// <param name="videoStream">The DVD video stream.</param>
+    /// <param name="dvdTitleInfo">The DVD video stream.</param>
     /// <returns></returns>
-    private DvdMediaSource GetSource(VideoStream videoStream)
+    private DvdMediaSource GetSource(DvdTitleInfo dvdTitleInfo)
     {
         // Builds the media identifier
         var identifier = new MediaIdentifier
@@ -72,11 +71,11 @@ public class DvdMediaProvider : IMediaProvider
             Type = MediaIdentifierType.Dvd,
             ContentHash = Dvd.ContentHash,
             DiskName = Dvd.DiskName,
-            Id = videoStream.Identifier.ToFilename(),
-            SegmentIds = [videoStream.Identifier.ToSegmentId()],
+            Id = dvdTitleInfo.Index.ToString(),
+            SegmentIds = dvdTitleInfo.Ptts.Select(ptt => ptt.Pgn).ToArray(),
         };
         
-        return new DvdMediaSource(videoStream, identifier);
+        return new DvdMediaSource(dvdTitleInfo, identifier);
     }
     
     /// <inheritdoc />
@@ -86,17 +85,16 @@ public class DvdMediaProvider : IMediaProvider
     }
 
     /// <inheritdoc />
-    public Stream GetRawStream(IMediaSource source)
+    public Stream GetRawStream(IMediaSource source, ushort segmentId)
     {
         if (!Contains(source.Identifier)) throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
 
-        var identifier = VmgIdentifier.FromFilename(source.Identifier.Id);
-        if (!Dvd.VideoStreams.TryGetValue(identifier, out var videoStream))
+        if (!ushort.TryParse(source.Identifier.Id, out var titleId))
         {
-            throw new ArgumentException("Couldn't parse filename.", nameof(source));
+            throw new ArgumentException("Couldn't parse title id.", nameof(source));
         }
-
-        return Dvd.GetVobStream(identifier);
+        
+        return Dvd.GetCellStream(titleId, segmentId);
     }
 
     /// <inheritdoc />

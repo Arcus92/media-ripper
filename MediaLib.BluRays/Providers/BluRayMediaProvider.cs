@@ -138,7 +138,7 @@ public class BluRayMediaProvider : IMediaProvider
     }
 
     /// <inheritdoc />
-    public Stream GetRawStream(IMediaSource source)
+    public Stream GetRawStream(IMediaSource source, ushort segmentId)
     {
         if (!Contains(source.Identifier)) throw new ArgumentException($"The given source isn't contained by this provider.", nameof(source));
 
@@ -147,8 +147,6 @@ public class BluRayMediaProvider : IMediaProvider
             throw new ArgumentException($"Couldn't parse playlist id.", nameof(source));
         }
         
-        var playlist = BluRay.Playlists[playlistId];
-        var segmentId = ushort.Parse(playlist.Items[0].Name);
         return BluRay.GetM2TsStream(segmentId);
     }
 

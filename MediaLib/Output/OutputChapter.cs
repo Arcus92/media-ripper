@@ -1,3 +1,5 @@
+using MediaLib.Models;
+
 namespace MediaLib.Output;
 
 /// <summary>
@@ -20,4 +22,22 @@ public class OutputChapter
     /// Gets and sets the end time of the chapter.
     /// </summary>
     public TimeSpan End { get; set; }
+
+    /// <summary>
+    /// Returns the output chapters from the list of chapter infos.
+    /// </summary>
+    /// <param name="chapters">The chapter infos.</param>
+    /// <returns>Returns the chapter outputs.</returns>
+    public static IEnumerable<OutputChapter> FromChapterInfos(IEnumerable<ChapterInfo> chapters)
+    {
+        foreach (var chapter in chapters)
+        {
+            yield return new OutputChapter()
+            {
+                Name = chapter.Name,
+                Start = chapter.Start,
+                End = chapter.End
+            };
+        }
+    }
 }

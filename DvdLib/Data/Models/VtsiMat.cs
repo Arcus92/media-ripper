@@ -12,7 +12,9 @@ public class VtsiMat
     public byte SpecificationVersion { get; private set; } = 0;
     public uint VtsCategory { get; private set; } = 0;
     public uint VtsiLastByte { get; private set; } = 0;
-    
+
+    public uint VtsmVobs { get; private set; } = 0;
+    public uint VtsTtVobs { get; private set; } = 0;
     public uint VtsPttSrpt { get; private set; } = 0;
     public uint VtsPgcit { get; private set; } = 0;
 
@@ -45,8 +47,8 @@ public class VtsiMat
         VtsiLastByte = reader.ReadUInt32();
         reader.ReadZero(4);
         reader.ReadZero(56);
-        var vtsmVobs = reader.ReadUInt32();
-        var vtsttVobs = reader.ReadUInt32();
+        VtsmVobs = reader.ReadUInt32();
+        VtsTtVobs = reader.ReadUInt32();
         VtsPttSrpt = reader.ReadUInt32();
         VtsPgcit = reader.ReadUInt32();
         var vtsmPgciUt = reader.ReadUInt32();

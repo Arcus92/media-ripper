@@ -102,10 +102,10 @@ public class MediaProviderService : IMediaProviderService
     }
 
     /// <inheritdoc />
-    public Stream GetRawStream(IMediaSource source)
+    public Stream GetRawStream(IMediaSource source, ushort segmentId)
     {
         if (_provider is null) throw new ArgumentException("No media provider has been loaded!", nameof(_provider));
-        return _provider.GetRawStream(source);
+        return _provider.GetRawStream(source, segmentId);
     }
 
     /// <inheritdoc />

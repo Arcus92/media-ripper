@@ -36,9 +36,10 @@ public interface IMediaProvider : IDisposable
     /// <summary>
     /// Returns the raw media stream from the given source.
     /// </summary>
-    /// <param name="source"></param>
+    /// <param name="source">The source to access the raw stream from.</param>
+    /// <param name="segmentId">The segemnt id to access.</param>
     /// <returns></returns>
-    Stream GetRawStream(IMediaSource source);
+    Stream GetRawStream(IMediaSource source, ushort segmentId);
     
     /// <summary>
     /// Returns if the given provider contains the given media by its identifier.

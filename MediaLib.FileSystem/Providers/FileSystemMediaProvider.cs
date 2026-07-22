@@ -63,7 +63,7 @@ public class FileSystemMediaProvider : IMediaProvider
     }
 
     /// <inheritdoc />
-    public Stream GetRawStream(IMediaSource source)
+    public Stream GetRawStream(IMediaSource source, ushort segementId)
     {
         if (!Contains(source.Identifier)) throw new ArgumentException($"The given source isn't contained by this provider.", nameof(source));
         

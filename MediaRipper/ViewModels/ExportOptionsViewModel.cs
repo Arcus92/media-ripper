@@ -174,8 +174,11 @@ public class ExportSettingsViewModel : ViewModelBase
         {
             try
             {
-                await using var stream = _mediaProviderService.GetRawStream(titleNode.Source);
-                await stream.CopyToAsync(process.StandardInput.BaseStream);
+                foreach (var segment in titleNode.Source.Info.Segments)
+                {
+                    await using var stream = _mediaProviderService.GetRawStream(titleNode.Source, segment.Id);
+                    await stream.CopyToAsync(process.StandardInput.BaseStream);
+                }
             }
             catch (IOException)
             {
@@ -192,12 +195,17 @@ public class ExportSettingsViewModel : ViewModelBase
         {
             return;
         }
-        var identifier = titleNode.Source.Identifier; // TODO: Filename
-        var path = Path.Combine(_outputSelector.OutputPath, $"{identifier.DiskName}_{identifier.Id:00000}.m2ts");
-        
-        await using var stream = _mediaProviderService.GetRawStream(titleNode.Source);
-        await using var output = File.Create(path);
-        await stream.CopyToAsync(output);
+
+        foreach (var segment in titleNode.Info.Segments)
+        {
+            var identifier = titleNode.Source.Identifier;
+            var path = Path.Combine(_outputSelector.OutputPath,
+                $"{identifier.DiskName}_{identifier.Id}_{segment.Id}.m2ts");
+
+            await using var stream = _mediaProviderService.GetRawStream(titleNode.Source, segment.Id);
+            await using var output = File.Create(path);
+            await stream.CopyToAsync(output);
+        }
     }
     
     #endregion Commands

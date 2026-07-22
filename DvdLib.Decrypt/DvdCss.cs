@@ -6,8 +6,6 @@ namespace DvdLib.Decrypt;
 
 public partial class DvdCss : IDisposable
 {
-    public const int BlockSize = 2048;
-
     private IntPtr _ptr;
 
     /// <summary>
@@ -93,8 +91,8 @@ public partial class DvdCss : IDisposable
         Dvd.VobDecryptionHandler = VobDecryptionHandler;
     }
 
-    private static Stream VobDecryptionHandler(Dvd dvd, string filename) =>
-        DvdCssDecryptStream.Open(dvd.DiskPath, filename);
+    private static Stream VobDecryptionHandler(Dvd dvd, uint titleSetSector, uint cellSectorStart, uint cellSectorEnd) =>
+        DvdCssDecryptStream.Open(dvd.DiskMountSource, titleSetSector, cellSectorStart, cellSectorEnd);
     
     #region Native
     

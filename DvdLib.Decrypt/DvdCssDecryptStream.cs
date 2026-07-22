@@ -3,33 +3,49 @@ namespace DvdLib.Decrypt;
 public class DvdCssDecryptStream : Stream
 {
     private readonly DvdCss _dvdCss;
+    private readonly long _positionStart;
+    private readonly long _positionEnd;
+    
     private readonly long _length;
     
-    public DvdCssDecryptStream(string filename)
+    public DvdCssDecryptStream(string devicePath, uint titleSetSector, uint cellSectorStart, uint cellSectorEnd)
     {
         _dvdCss = new DvdCss();
-        var fileInfo = new FileInfo(filename);
-        _length = fileInfo.Length;
+        _positionStart = cellSectorStart * Dvd.BlockSize;
+        _positionEnd = (cellSectorEnd + 1) * Dvd.BlockSize;
+        _length = _positionEnd - _positionStart;
         
-        if (!_dvdCss.Open(filename))
+        if (!_dvdCss.Open(devicePath))
         {
-            throw new IOException($"DvdCss couldn't open disk path: {filename}");
+            throw new IOException($"DvdCss couldn't open device: {devicePath}");
         }
-
-        if (!_dvdCss.Seek(0, DvdCssSeekFlags.Key))
+        
+        // Seek to the start of the title set to obtain the decryption key
+        if (!_dvdCss.Seek((int)titleSetSector, DvdCssSeekFlags.Key))
         {
-            throw new IOException($"DvdCss couldn't seek to the key data: {filename}");
+            throw new IOException($"DvdCss couldn't seek to the key data: {devicePath} - sector: {titleSetSector}");
         }
+        
+        // Seek to the initial cell data
+        if (!_dvdCss.Seek((int)cellSectorStart, DvdCssSeekFlags.Mpeg))
+        {
+            throw new IOException($"DvdCss couldn't seek to the cell data: {devicePath} - sector: {cellSectorStart}");
+        }
+        _positionCurrent = _positionStart;
     }
 
     private const int BlocksInBuffer = 32;
-    private const int BufferSize = DvdCss.BlockSize * BlocksInBuffer;
-    private long _fileOffset;
+    private const int BufferSize = Dvd.BlockSize * BlocksInBuffer;
+    private long _positionCurrent;
     private int _bufferOffset;
+    private int _bufferEnd;
     private readonly byte[] _buffer = new byte[BufferSize];
-    private void ReadBufferAndDecrypt()
+    private int ReadBufferAndDecrypt()
     {
-        _dvdCss.Read(_buffer, BlocksInBuffer, DvdCssReadFlags.Decrypt);
+        var remaining = _positionEnd - _positionCurrent - _bufferOffset;
+        var blocks = (int)(remaining / Dvd.BlockSize);
+        if (blocks > BlocksInBuffer) blocks = BlocksInBuffer;
+        return _dvdCss.Read(_buffer, blocks, DvdCssReadFlags.Decrypt);
     }
     
     /// <inheritdoc />
@@ -43,16 +59,21 @@ public class DvdCssDecryptStream : Stream
         var readTotal = 0;
         while (count > 0)
         {
-            if (_bufferOffset == 0)
+            // Detect end of cell
+            if (_positionCurrent + _bufferOffset >= _positionEnd)
             {
-                // Check end of file
-                if (_fileOffset >= _length)
-                    break;
-                ReadBufferAndDecrypt();
+                return 0;
             }
-
+            
+            if (_bufferEnd == 0)
+            {
+                var ret = ReadBufferAndDecrypt();
+                if (ret < 0) return 0;
+                _bufferEnd = ret * Dvd.BlockSize;
+            }
+            
             // Calculate the bytes to read in this chunk
-            var read = BufferSize - _bufferOffset;
+            var read = _bufferEnd - _bufferOffset;
             if (read > count) read = count;
 
             Buffer.BlockCopy(_buffer, _bufferOffset, buffer, offset, read);
@@ -63,13 +84,14 @@ public class DvdCssDecryptStream : Stream
             count -= read;
             
             // Jump to next unit
-            if (_bufferOffset == BufferSize)
+            if (_bufferOffset == _bufferEnd)
             {
-                _fileOffset += BufferSize;
+                _positionCurrent += BufferSize;
                 _bufferOffset = 0;
+                _bufferEnd = 0;
             }
         }
-
+        
         return readTotal;
     }
 
@@ -79,31 +101,36 @@ public class DvdCssDecryptStream : Stream
         // Ignore origin and convert to begin-position
         offset = origin switch
         {
-            SeekOrigin.Current => Position + offset,
-            SeekOrigin.End => Length + offset,
-            _ => offset
+            SeekOrigin.Current => _positionStart + Position + offset,
+            SeekOrigin.End => _positionEnd - offset,
+            _ => _positionStart + offset
         };
 
 
-        var newBufferOffset = (int)(offset % BufferSize);
+        var newBufferOffset = (int)(offset % Dvd.BlockSize);
         var newFileOffset = offset - newBufferOffset;
             
         // Unit is already loaded
-        if (newFileOffset == _fileOffset && _bufferOffset > 0)
+        if (newFileOffset == _positionCurrent && _bufferOffset > 0)
         {
             _bufferOffset = newBufferOffset;
             return offset;
         }
 
-        if (!_dvdCss.Seek((int)(newFileOffset / BufferSize), DvdCssSeekFlags.Key))
+        if (!_dvdCss.Seek((int)(newFileOffset / Dvd.BlockSize), DvdCssSeekFlags.Mpeg))
         {
             throw new IOException("Failed to seek DvdCss stream.");
         }
         
-        _fileOffset = newFileOffset;
+        _positionCurrent = newFileOffset;
         _bufferOffset = newBufferOffset;
+        _bufferEnd = 0;
         if (_bufferOffset != 0)
-            ReadBufferAndDecrypt();
+        {
+            var ret = ReadBufferAndDecrypt();
+            _bufferEnd = ret * Dvd.BlockSize;
+        }
+
         return offset;
     }
 
@@ -134,7 +161,7 @@ public class DvdCssDecryptStream : Stream
     /// <inheritdoc />
     public override long Position
     {
-        get => _fileOffset + _bufferOffset;
+        get => _positionCurrent + _bufferOffset - _positionStart;
         set => Seek(value, SeekOrigin.Begin);
     }
     
@@ -143,13 +170,14 @@ public class DvdCssDecryptStream : Stream
     /// <summary>
     /// Opens a filename from a DVD.
     /// </summary>
-    /// <param name="diskPath">The path to the DVD root directory.</param>
-    /// <param name="filename">The filename to the file.</param>
+    /// <param name="devicePath">The DVD device path.</param>
+    /// <param name="titleSetSector">The absolute starting sector of the title set.</param>
+    /// <param name="cellSectorStart">The absolute cell start sector of the tilt set.</param>
+    /// <param name="cellSectorEnd">The absolute cell start sector of the tilt set.</param>
     /// <returns></returns>
-    public static DvdCssDecryptStream Open(string diskPath, string filename)
+    public static DvdCssDecryptStream Open(string devicePath, uint titleSetSector, uint cellSectorStart, uint cellSectorEnd)
     {
-        var inputPath = Path.Combine(diskPath, filename);
-        var stream = new DvdCssDecryptStream(inputPath);
+        var stream = new DvdCssDecryptStream(devicePath, titleSetSector, cellSectorStart, cellSectorEnd);
         return stream;
     }
     

@@ -45,6 +45,29 @@ public class BluRayMediaSource : IMediaSource
     public ushort PlaylistId { get; }
 
     /// <summary>
+    /// Gets the chapter infos.
+    /// </summary>
+    /// <param name="duration">The total duration.</param>
+    /// <returns></returns>
+    private IEnumerable<ChapterInfo> GetChapterInfos(TimeSpan duration)
+    {
+        return ChapterInfo.FromTimestamps(
+            duration,
+            _playlist.Marks.Select(mark =>
+            {
+                // Adding all previous durations
+                uint offset = 0;
+                for (var i = 0; i < mark.PlayItemId; i++)
+                {
+                    offset += _playlist.Items[i].Duration;
+                }
+
+                var item = _playlist.Items[mark.PlayItemId];
+                return BluRay.TimeSpanFromBluRayTime(offset + mark.TimeStamp - item.InTime);
+            }));
+    }
+    
+    /// <summary>
     /// Builds the media info from the BluRay source.
     /// </summary>
     /// <returns></returns>
@@ -162,48 +185,13 @@ public class BluRayMediaSource : IMediaSource
             segmentInfos.Add(segmentInfo);
         }
         
-        // Build chapters
-        var chapterInfos = new List<ChapterInfo>();
-        var chapterTimestamps = new List<TimeSpan>();
-        foreach (var mark in _playlist.Marks)
-        {
-            // Adding all previous durations
-            uint offset = 0;
-            for (var i = 0; i < mark.PlayItemId; i++)
-            {
-                offset += _playlist.Items[i].Duration;
-            }
-            var item = _playlist.Items[mark.PlayItemId];
-            var timestamp = BluRay.TimeSpanFromBluRayTime(offset + mark.TimeStamp - item.InTime);
-            // Avoid negative
-            if (timestamp < TimeSpan.Zero) timestamp = TimeSpan.Zero;
-            // Avoid timestamp above max length. Also add three-second tolerance.
-            if (timestamp > playlistDuration - TimeSpan.FromSeconds(3)) timestamp = playlistDuration;
-            chapterTimestamps.Add(timestamp);
-        }
-        chapterTimestamps.Add(playlistDuration); // Make sure to add the end of the video.
-        for (var i = 0; i < chapterTimestamps.Count - 1; i++)
-        {
-            var start = chapterTimestamps[i];
-            var end = chapterTimestamps[i + 1];
-            if (start == end) continue;
-            var chapterInfo = new ChapterInfo()
-            {
-                Id = (ushort)chapterInfos.Count,
-                Name = $"Chapter {chapterInfos.Count+1:00}",
-                Start = start,
-                End = end
-            };
-            chapterInfos.Add(chapterInfo);
-        }
-        
         return new MediaInfo
         {
             Id = PlaylistId,
             Name = $"Playlist {PlaylistId}",
             Duration = playlistDuration,
             Segments = segmentInfos.ToArray(),
-            Chapters = chapterInfos.ToArray(),
+            Chapters = GetChapterInfos(playlistDuration).ToArray(),
         };
     }
     
@@ -368,40 +356,6 @@ public class BluRayMediaSource : IMediaSource
         
         var files = OutputHelper.GetFilesByStreams(baseName, streams, codec, containerFormat);
         
-        // Build chapters
-        var chapterInfos = new List<OutputChapter>();
-        var chapterTimestamps = new List<TimeSpan>();
-        foreach (var mark in _playlist.Marks)
-        {
-            // Adding all previous durations
-            uint offset = 0;
-            for (var i = 0; i < mark.PlayItemId; i++)
-            {
-                offset += _playlist.Items[i].Duration;
-            }
-            var item = _playlist.Items[mark.PlayItemId];
-            var timestamp = BluRay.TimeSpanFromBluRayTime(offset + mark.TimeStamp - item.InTime);
-            // Avoid negative
-            if (timestamp < TimeSpan.Zero) timestamp = TimeSpan.Zero;
-            // Avoid timestamp above max length. Also add three-second tolerances.
-            if (timestamp > duration - TimeSpan.FromSeconds(3)) timestamp = duration;
-            chapterTimestamps.Add(timestamp);
-        }
-        chapterTimestamps.Add(duration); // Make sure to add the end of the video.
-        for (var i = 0; i < chapterTimestamps.Count - 1; i++)
-        {
-            var start = chapterTimestamps[i];
-            var end = chapterTimestamps[i + 1];
-            if (start == end) continue;
-            var chapterInfo = new OutputChapter()
-            {
-                Name = $"Chapter {chapterInfos.Count+1:00}",
-                Start = start,
-                End = end
-            };
-            chapterInfos.Add(chapterInfo);
-        }
-        
         return new OutputDefinition()
         {
             Identifier = Identifier,
@@ -412,7 +366,7 @@ public class BluRayMediaSource : IMediaSource
             Duration = duration,
             Codec = codec,
             Files = files.ToArray(),
-            Chapters = chapterInfos.ToArray()
+            Chapters = OutputChapter.FromChapterInfos(GetChapterInfos(duration)).ToArray()
         };
     }
     
