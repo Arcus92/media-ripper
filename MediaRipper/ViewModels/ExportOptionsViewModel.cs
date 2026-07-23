@@ -201,11 +201,8 @@ public class ExportSettingsViewModel : ViewModelBase
             $"{identifier.DiskName}_{identifier.Id}.m2ts");
         
         await using var output = File.Create(path);
-        foreach (var segment in titleNode.Info.Segments)
-        {
-            await using var stream = _mediaProviderService.GetRawStream(titleNode.Source, segment.Id);
-            await stream.CopyToAsync(output);
-        }
+        await using var stream = _mediaProviderService.GetRawStream(titleNode.Source);
+        await stream.CopyToAsync(output);
     }
     
     #endregion Commands

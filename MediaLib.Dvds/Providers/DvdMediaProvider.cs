@@ -6,6 +6,7 @@ using MediaLib.Dvds.Sources;
 using MediaLib.Models;
 using MediaLib.Providers;
 using MediaLib.Sources;
+using MediaLib.Utils.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -84,6 +85,25 @@ public class DvdMediaProvider : IMediaProvider
         return new DvdMediaConverter(_logger, this, parameter);
     }
 
+    /// <inheritdoc />
+    public Stream GetRawStream(IMediaSource source)
+    {
+        if (!Contains(source.Identifier)) throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
+
+        if (!ushort.TryParse(source.Identifier.Id, out var titleId))
+        {
+            throw new ArgumentException("Couldn't parse title id.", nameof(source));
+        }
+        
+        var streamFactories = new List<Func<Stream>>();
+        foreach (var segment in source.Info.Segments)
+        {
+            streamFactories.Add(() => Dvd.GetCellStream(titleId, segment.Id));
+        }
+        
+        return new StreamListReader(streamFactories);
+    }
+    
     /// <inheritdoc />
     public Stream GetRawStream(IMediaSource source, ushort segmentId)
     {

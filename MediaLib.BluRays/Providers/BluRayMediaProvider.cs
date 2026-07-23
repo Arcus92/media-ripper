@@ -6,6 +6,7 @@ using MediaLib.BluRays.Sources;
 using MediaLib.Models;
 using MediaLib.Providers;
 using MediaLib.Sources;
+using MediaLib.Utils.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -138,15 +139,23 @@ public class BluRayMediaProvider : IMediaProvider
     }
 
     /// <inheritdoc />
-    public Stream GetRawStream(IMediaSource source, ushort segmentId)
+    public Stream GetRawStream(IMediaSource source)
     {
-        if (!Contains(source.Identifier)) throw new ArgumentException($"The given source isn't contained by this provider.", nameof(source));
-
-        if (!ushort.TryParse(source.Identifier.Id, out var playlistId))
+        if (!Contains(source.Identifier)) throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
+        
+        var streamFactories = new List<Func<Stream>>();
+        foreach (var segment in source.Info.Segments)
         {
-            throw new ArgumentException($"Couldn't parse playlist id.", nameof(source));
+            streamFactories.Add(() => BluRay.GetM2TsStream(segment.Id));
         }
         
+        return new StreamListReader(streamFactories);
+    }
+    
+    /// <inheritdoc />
+    public Stream GetRawStream(IMediaSource source, ushort segmentId)
+    {
+        if (!Contains(source.Identifier)) throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
         return BluRay.GetM2TsStream(segmentId);
     }
 

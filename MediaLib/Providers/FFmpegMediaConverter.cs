@@ -1,5 +1,6 @@
 using MediaLib.FFmpeg;
 using MediaLib.Output;
+using MediaLib.Utils.IO;
 using Microsoft.Extensions.Logging;
 
 namespace MediaLib.Providers;
@@ -89,13 +90,41 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
     /// <returns>Returns the segment filesize.</returns>
     protected abstract long GetSegmentFilesize(ushort segmentId);
 
+    /// <summary>
+    /// Opens a combined stream with all segments.
+    /// </summary>
+    /// <returns>Returns the complete stream.</returns>
+    public Stream OpenCombinedStream()
+    {
+        var streamFactories = new List<Func<Stream>>();
+        foreach (var segmentId in Parameter.Definition.Identifier.SegmentIds)
+        {
+            streamFactories.Add(() => OpenSegmentStream(segmentId));
+        }
+
+        return new StreamListReader(streamFactories);
+    }
+
+    /// <summary>
+    /// Returns the total filesize of all segments and the length of <see cref="OpenCombinedStream"/>.
+    /// </summary>
+    /// <returns>Returns the complete filesize.</returns>
+    public long GetCombinedFilesize()
+    {
+        long length = 0;
+        foreach (var segmentId in Parameter.Definition.Identifier.SegmentIds)
+        {
+            length += GetSegmentFilesize(segmentId);
+        }
+
+        return length;
+    }
+
     /// <inheritdoc />
     public virtual async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         var definition = Parameter.Definition;
         var outputPath = Parameter.Path;
-        var segmentIds = Parameter.Definition.Identifier.SegmentIds;
-        var firstSegmentId = segmentIds.First();
         var onUpdate = Parameter.OnUpdate;
         
         if (!Provider.Contains(Parameter.Definition.Identifier))
@@ -107,14 +136,13 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
         
         // Mapping the pid to the FFmpeg index
         var idToStream = new Dictionary<ulong, StreamMetadata>();
-        Logger.LogInformation("Collecting metadata from segment {SegmentId} for {Id}",
-            firstSegmentId, definition.Identifier.Id);
+        Logger.LogInformation("Collecting metadata for {Id}", definition.Identifier.Id);
 
         // Before converting, we need to fetch the internal FFmpeg stream index. We cannot use the PIDs for that, and 
         // the order of stream may differ ot hidden streams change the order.
         var metadata = await ffmpeg.GetMetadataAsync(builder =>
         {
-            var inputStream = builder.CreateInputStream(() => OpenSegmentStream(firstSegmentId));
+            var inputStream = builder.CreateInputStream(OpenCombinedStream);
             builder.Input(inputStream);
         }, cancellationToken);
 
@@ -133,26 +161,17 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
         // It will only show the time code for the last stream in our output. This is almost always a subtitle. To be
         // exact, a forced subtitle that is only used a few times in the video.
         // To have a better progress status, we'll track the file position of the virtual input streams.
-        long totalInputSize = 0;
-        var inputStreams = new List<InputStream>();
-        foreach (var segmentId in segmentIds)
-        {
-            totalInputSize += GetSegmentFilesize(segmentId);
-        }
-        
+        var completeInputSize = GetCombinedFilesize();
+        var completeStream = OpenCombinedStream();
+
+
         // Build a better update event to calculate the percentage value by consumed bytes.
         Action<ConverterUpdate>? newOnUpdate = null;
         if (onUpdate is not null)
         {
             newOnUpdate = update =>
             {
-                long position = 0;
-                foreach (var inputStream in inputStreams)
-                {
-                    position += inputStream.Position;
-                }
-
-                update.Percentage = position / (double)totalInputSize;
+                update.Percentage = completeStream.Position / (double)completeInputSize;
                 onUpdate(update);
             };
         }
@@ -164,21 +183,7 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
         InitWorkingFilenames();
         await ffmpeg.ConvertAsync(builder =>
         {
-            // Builds the concat text file in memory
-            var concatStream = new MemoryStream();
-            var concatWriter = new StreamWriter(concatStream);
-            foreach (var segmentId in segmentIds)
-            {
-                var inputStream = builder.CreateInputStream(() => OpenSegmentStream(segmentId));
-                concatWriter.WriteLine($"file '{inputStream.GetPath()}'");
-                inputStreams.Add(inputStream);
-            }
-            concatWriter.Flush();
-            concatStream.Position = 0;
-
-            builder.Format("concat");
-            builder.Safe(0);
-            var input = builder.Input(concatStream);
+            var input = builder.Input(completeStream);
             
             if (definition.ExportChapters)
             {
