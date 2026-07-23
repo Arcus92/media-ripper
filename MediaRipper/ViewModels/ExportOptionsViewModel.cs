@@ -196,14 +196,14 @@ public class ExportSettingsViewModel : ViewModelBase
             return;
         }
 
+        var identifier = titleNode.Source.Identifier;
+        var path = Path.Combine(_outputSelector.OutputPath,
+            $"{identifier.DiskName}_{identifier.Id}.m2ts");
+        
+        await using var output = File.Create(path);
         foreach (var segment in titleNode.Info.Segments)
         {
-            var identifier = titleNode.Source.Identifier;
-            var path = Path.Combine(_outputSelector.OutputPath,
-                $"{identifier.DiskName}_{identifier.Id}_{segment.Id}.m2ts");
-
             await using var stream = _mediaProviderService.GetRawStream(titleNode.Source, segment.Id);
-            await using var output = File.Create(path);
             await stream.CopyToAsync(output);
         }
     }

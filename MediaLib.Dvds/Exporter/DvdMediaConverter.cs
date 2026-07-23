@@ -22,7 +22,7 @@ public class DvdMediaConverter : FFmpegMediaConverter<DvdMediaProvider>
         var titleId = ushort.Parse(Parameter.Definition.Identifier.Id);
         var title = Provider.Dvd.TitleInfo[titleId];
         var cell = title.Pgc.CellPlayback[segmentId - 1];
-        return (cell.LastSector - cell.FirstSector) * Dvd.BlockSize;
+        return (cell.LastSector - cell.FirstSector + 1) * Dvd.BlockSize;
     }
     
     /// <inheritdoc />

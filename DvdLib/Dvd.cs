@@ -74,15 +74,16 @@ public partial class Dvd
                 TitleSetInfo.Add(titleSetIndex, new DvdTitleSetInfo(titleSetIndex, ifo, fileLengths));
             }
             
-            // Reading the main info file with all titles
-            if (!TitleSetInfo.TryGetValue(0, out var vmg) || vmg.Information.TtSrpt is null)
+            // Reading the VIDEO_TS.IFO file with all titles
+            if (!TitleSetInfo.TryGetValue(0, out var info) || info.Information.TtSrpt is null)
             {
                 return;
             }
 
-            for (ushort index = 0; index < vmg.Information.TtSrpt.Titles.Length; index++)
+            for (ushort index = 0; index < info.Information.TtSrpt.Titles.Length; index++)
             {
-                var title = vmg.Information.TtSrpt.Titles[index];
+                var title = info.Information.TtSrpt.Titles[index];
+                // Reading title set .IFO file
                 if (!TitleSetInfo.TryGetValue(title.TitleSetNr, out var titleSet) || 
                     titleSet.Information.Vts is null ||
                     titleSet.Information.VtsPttSrpt is null ||
@@ -94,8 +95,8 @@ public partial class Dvd
                 var vtsTitle = titleSet.Information.VtsPttSrpt.Titles[title.VtsTtn - 1];
                 var pgc = titleSet.Information.VtsPgcit.PgciSrp[vtsTitle.Ptts[0].Pgcn - 1].Pgc!;
 
-                var stream = new DvdTitleInfo(index, title, titleSet.Information.Vts, vtsTitle.Ptts, pgc);
-                TitleInfo.Add(index, stream);
+                var titleInfo = new DvdTitleInfo(index, title, titleSet.Information.Vts, vtsTitle.Ptts, pgc);
+                TitleInfo.Add(index, titleInfo);
             }
         });
     }
@@ -150,15 +151,14 @@ public partial class Dvd
         var title = TitleInfo[titleId];
         var cell = title.Pgc.CellPlayback[cellId - 1];
         
-        var titleSetSector = title.TitleInfo.TitleSetSector;
-        var titleSetDataSector = titleSetSector + title.TitleSet.VtsTtVobs;
-        var cellStartSector = titleSetDataSector + cell.FirstSector;
-        var cellEndSector = titleSetDataSector + cell.LastSector;
+        var titleSetSector = title.TitleInfo.TitleSetSector + title.TitleSet.VtsTtVobs;
+        var cellStartSector = titleSetSector + cell.FirstSector;
+        var cellEndSector = titleSetSector + cell.LastSector;
         
         // Handle decryption
         if (VobDecryptionHandler is not null)
         {
-            return VobDecryptionHandler.Invoke(this, titleSetDataSector, cellStartSector, cellEndSector);
+            return VobDecryptionHandler.Invoke(this, titleSetSector, cellStartSector, cellEndSector);
         }
 
         throw new NotImplementedException();

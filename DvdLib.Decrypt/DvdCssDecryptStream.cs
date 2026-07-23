@@ -3,17 +3,16 @@ namespace DvdLib.Decrypt;
 public class DvdCssDecryptStream : Stream
 {
     private readonly DvdCss _dvdCss;
-    private readonly long _positionStart;
-    private readonly long _positionEnd;
     
-    private readonly long _length;
-    
-    public DvdCssDecryptStream(string devicePath, uint titleSetSector, uint cellSectorStart, uint cellSectorEnd)
+    public DvdCssDecryptStream(string devicePath, uint titleSetSector, uint cellStartSector, uint cellEndSector)
     {
         _dvdCss = new DvdCss();
-        _positionStart = cellSectorStart * Dvd.BlockSize;
-        _positionEnd = (cellSectorEnd + 1) * Dvd.BlockSize;
+        _positionStart = cellStartSector * Dvd.BlockSize;
+        _positionEnd = (cellEndSector + 1) * Dvd.BlockSize;
         _length = _positionEnd - _positionStart;
+
+        _bufferLength = 0;
+        _bufferOffset = 0;
         
         if (!_dvdCss.Open(devicePath))
         {
@@ -27,19 +26,22 @@ public class DvdCssDecryptStream : Stream
         }
         
         // Seek to the initial cell data
-        if (!_dvdCss.Seek((int)cellSectorStart, DvdCssSeekFlags.Mpeg))
+        if (!_dvdCss.Seek((int)cellStartSector, DvdCssSeekFlags.Mpeg))
         {
-            throw new IOException($"DvdCss couldn't seek to the cell data: {devicePath} - sector: {cellSectorStart}");
+            throw new IOException($"DvdCss couldn't seek to the cell data: {devicePath} - sector: {cellStartSector}");
         }
         _positionCurrent = _positionStart;
     }
 
     private const int BlocksInBuffer = 32;
     private const int BufferSize = Dvd.BlockSize * BlocksInBuffer;
+    private readonly long _positionStart;
+    private readonly long _positionEnd;
     private long _positionCurrent;
     private int _bufferOffset;
-    private int _bufferEnd;
+    private int _bufferLength;
     private readonly byte[] _buffer = new byte[BufferSize];
+    private readonly long _length;
     private int ReadBufferAndDecrypt()
     {
         var remaining = _positionEnd - _positionCurrent - _bufferOffset;
@@ -65,15 +67,15 @@ public class DvdCssDecryptStream : Stream
                 break;
             }
             
-            if (_bufferEnd == 0)
+            if (_bufferLength == 0)
             {
                 var ret = ReadBufferAndDecrypt();
                 if (ret < 0) break;
-                _bufferEnd = ret * Dvd.BlockSize;
+                _bufferLength = ret * Dvd.BlockSize;
             }
             
             // Calculate the bytes to read in this chunk
-            var read = _bufferEnd - _bufferOffset;
+            var read = _bufferLength - _bufferOffset;
             if (read > count) read = count;
 
             Buffer.BlockCopy(_buffer, _bufferOffset, buffer, offset, read);
@@ -84,11 +86,11 @@ public class DvdCssDecryptStream : Stream
             count -= read;
             
             // Jump to next unit
-            if (_bufferOffset == _bufferEnd)
+            if (_bufferOffset == _bufferLength)
             {
-                _positionCurrent += BufferSize;
+                _positionCurrent += _bufferLength;
                 _bufferOffset = 0;
-                _bufferEnd = 0;
+                _bufferLength = 0;
             }
         }
         
@@ -124,11 +126,11 @@ public class DvdCssDecryptStream : Stream
         
         _positionCurrent = newFileOffset;
         _bufferOffset = newBufferOffset;
-        _bufferEnd = 0;
+        _bufferLength = 0;
         if (_bufferOffset != 0)
         {
             var ret = ReadBufferAndDecrypt();
-            _bufferEnd = ret * Dvd.BlockSize;
+            _bufferLength = ret * Dvd.BlockSize;
         }
 
         return offset;
@@ -172,13 +174,12 @@ public class DvdCssDecryptStream : Stream
     /// </summary>
     /// <param name="devicePath">The DVD device path.</param>
     /// <param name="titleSetSector">The absolute starting sector of the title set.</param>
-    /// <param name="cellSectorStart">The absolute cell start sector of the tilt set.</param>
-    /// <param name="cellSectorEnd">The absolute cell start sector of the tilt set.</param>
+    /// <param name="cellStartSector">The absolute cell start sector of the tilt set.</param>
+    /// <param name="cellEndSector">The absolute cell start sector of the tilt set.</param>
     /// <returns></returns>
-    public static DvdCssDecryptStream Open(string devicePath, uint titleSetSector, uint cellSectorStart, uint cellSectorEnd)
+    public static DvdCssDecryptStream Open(string devicePath, uint titleSetSector, uint cellStartSector, uint cellEndSector)
     {
-        var stream = new DvdCssDecryptStream(devicePath, titleSetSector, cellSectorStart, cellSectorEnd);
-        return stream;
+        return new DvdCssDecryptStream(devicePath, titleSetSector, cellStartSector, cellEndSector);
     }
     
     #endregion Static

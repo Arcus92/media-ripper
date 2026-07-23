@@ -91,8 +91,8 @@ public partial class DvdCss : IDisposable
         Dvd.VobDecryptionHandler = VobDecryptionHandler;
     }
 
-    private static Stream VobDecryptionHandler(Dvd dvd, uint titleSetSector, uint cellSectorStart, uint cellSectorEnd) =>
-        DvdCssDecryptStream.Open(dvd.DiskMountSource, titleSetSector, cellSectorStart, cellSectorEnd);
+    private static Stream VobDecryptionHandler(Dvd dvd, uint titleSetSector, uint cellStartSector, uint cellEndSector) =>
+        DvdCssDecryptStream.Open(dvd.DiskMountSource, titleSetSector, cellStartSector, cellEndSector);
     
     #region Native
     
