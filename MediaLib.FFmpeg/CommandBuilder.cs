@@ -205,7 +205,7 @@ public class CommandBuilder
     /// <param name="codec">The codec to use.</param>
     public void Codec(StreamType streamType, StreamId streamId, string codec)
     {
-        _arguments.Append($"-c:{streamType.Identifier()}:{streamId} {codec} ");
+        _arguments.Append($"-c:{streamType.Identifier()}:{streamId.Identifier()} {codec} ");
     }
     
     /// <summary>
@@ -215,7 +215,7 @@ public class CommandBuilder
     /// <param name="codec">The codec to use.</param>
     public void Codec(StreamId streamId, string codec)
     {
-        _arguments.Append($"-c:{streamId} {codec} ");
+        _arguments.Append($"-c:{streamId.Identifier()} {codec} ");
     }
     
     /// <summary>
@@ -235,7 +235,7 @@ public class CommandBuilder
     /// <param name="optional">If set, the convert will not fail if no streams were found.</param>
     public void Map(int inputId, StreamId streamId, bool optional = false)
     {
-        _arguments.Append($"-map {inputId}:{streamId}{(optional?"?":"")} ");
+        _arguments.Append($"-map {inputId}:{streamId.Identifier()}{(optional?"?":"")} ");
     }
     
     /// <summary>
@@ -258,7 +258,7 @@ public class CommandBuilder
     /// <param name="optional">If set, the convert will not fail if no streams were found.</param>
     public void Map(int inputId, StreamType streamType, StreamId streamId, bool optional = false)
     {
-        _arguments.Append($"-map {inputId}:{streamType.Identifier()}:{streamId}{(optional?"?":"")} ");
+        _arguments.Append($"-map {inputId}:{streamType.Identifier()}:{streamId.Identifier()}{(optional?"?":"")} ");
     }
     
     /// <summary>
@@ -287,7 +287,7 @@ public class CommandBuilder
     /// <param name="value">The metadata value.</param>
     public void Metadata(StreamId streamId, string property, string value)
     {
-        _arguments.Append($"-metadata:s:{streamId} {property}=\"{value}\" ");
+        _arguments.Append($"-metadata:s:{streamId.Identifier()} {property}=\"{value}\" ");
     }
 
     /// <summary>
@@ -299,7 +299,7 @@ public class CommandBuilder
     /// <param name="value">The metadata value.</param>
     public void Metadata(StreamType streamType, StreamId streamId, string property, string value)
     {
-        _arguments.Append($"-metadata:s:{streamType.Identifier()}:{streamId} {property}=\"{value}\" ");
+        _arguments.Append($"-metadata:s:{streamType.Identifier()}:{streamId.Identifier()} {property}=\"{value}\" ");
     }
 
     /// <summary>
@@ -309,7 +309,7 @@ public class CommandBuilder
     /// <param name="value">The disposition flag.</param>
     public void Disposition(StreamId streamId, string value)
     {
-        _arguments.Append($"-disposition:{streamId} {value} ");
+        _arguments.Append($"-disposition:{streamId.Identifier()} {value} ");
     }
     
     /// <summary>
@@ -320,7 +320,7 @@ public class CommandBuilder
     /// <param name="value">The disposition flag.</param>
     public void Disposition(StreamType streamType, StreamId streamId, string value)
     {
-        _arguments.Append($"-disposition:{streamType.Identifier()}:{streamId} {value} ");
+        _arguments.Append($"-disposition:{streamType.Identifier()}:{streamId.Identifier()} {value} ");
     }
 
     /// <summary>

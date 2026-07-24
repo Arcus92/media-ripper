@@ -37,15 +37,24 @@ public readonly struct StreamId : IEquatable<StreamId>
     /// <returns>Returns the stream id.</returns>
     public static StreamId Pid(int pid) => new(pid, StreamIdType.Pid);
 
-    /// <inheritdoc />
-    public override string ToString()
+    /// <summary>
+    /// Gets the identifier for the FFmpeg command line.
+    /// </summary>
+    /// <returns>Returns the identifier.</returns>
+    public string Identifier()
     {
         if (Type == StreamIdType.Pid)
         {
-            return $"0x{Id:X}";
+            return $"#0x{Id:X}";
         }
         
         return Id.ToString();
+    }
+    
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return Identifier();
     }
     
     /// <inheritdoc />

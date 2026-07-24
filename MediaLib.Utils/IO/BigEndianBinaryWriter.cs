@@ -30,6 +30,14 @@ public class BigEndianBinaryWriter : IDisposable
     }
 
     /// <summary>
+    /// Flushes the internal writer.
+    /// </summary>
+    public void Flush()
+    {
+        _writer.Flush();
+    }
+
+    /// <summary>
     /// Writes a 8-bit byte.
     /// </summary>
     /// <param name="value">The value.</param>

@@ -73,9 +73,9 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
 
     /// <summary>
     /// Returns the index of the FFmpeg stream used for mapping the source data.
-    /// This should either be <see cref="StreamMetadata.Id"/> or <see cref="StreamMetadata.Pid"/>.
+    /// This should either be <see cref="StreamIdType.Index"/> or <see cref="StreamIdType.Pid"/>.
     /// </summary>
-    protected virtual ulong GetStreamIndex(StreamMetadata stream) => stream.Id;
+    protected virtual StreamId GetStreamId(StreamInfo stream) => StreamId.Index(stream.Id);
     
     /// <summary>
     /// Handles the opening of a segment.
@@ -91,6 +91,28 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
     /// <returns>Returns the segment filesize.</returns>
     protected abstract long GetSegmentFilesize(ushort segmentId);
 
+    /// <summary>
+    /// Returns if FFmpeg requires to probe the whole file before converting.
+    /// If a stream was not found in the initial probe, FFmpeg cannot use this stream. Sometimes stream packages for
+    /// subtitles will only appear really late into the media file. The only way to reliably convert all streams is to
+    /// probe the whole file.
+    /// However, this requires two passes of file reading and put the whole stream into memory since FFmpeg is not
+    /// allowed to seek in the input stream. It also breaks the progress bar.
+    /// </summary>
+    /// <returns></returns>
+    protected virtual bool RequireFullProbeSize() => false;
+    
+    /// <summary>
+    /// Is called when the stream data is passed to FFmpeg and allows the converter to add additinal metadata or codecs
+    /// to the converter.
+    /// </summary>
+    /// <param name="stream">The stream added to FFmepg.</param>
+    /// <param name="index">The index of the stream.</param>
+    /// <param name="builder">The FFmpeg command builder.</param>
+    protected virtual void CustomStreamSettings(StreamInfo stream, int index, CommandBuilder builder) 
+    {
+    }
+    
     /// <summary>
     /// Opens a combined stream with all segments.
     /// </summary>
@@ -133,39 +155,15 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
             throw new ArgumentException("Output source is not defined by provider!", nameof(definition));
         }
 
-        var ffmpeg = new Engine();
-        
-        // Mapping the pid to the FFmpeg index
-        var idToStream = new Dictionary<ulong, StreamMetadata>();
-        Logger.LogInformation("Collecting metadata for {Id}", definition.Identifier.Id);
-
-        // Before converting, we need to fetch the internal FFmpeg stream index. We cannot use the PIDs for that, and 
-        // the order of stream may differ ot hidden streams change the order.
-        var metadata = await ffmpeg.GetMetadataAsync(builder =>
-        {
-            var inputStream = builder.CreateInputStream(OpenCombinedStream);
-            builder.Input(inputStream);
-        }, cancellationToken);
-
-        
-        foreach (var input in metadata)
-        {
-            foreach (var stream in input.Streams)
-            {
-                // I had multiple audio entries with the same PID. Using the last one worked for me.
-                idToStream[GetStreamIndex(stream)] = stream;
-            }
-        }
-        
-
         // Collecting total input filesize. The FFmpeg time code doesn't work for progress tracking.
         // It will only show the time code for the last stream in our output. This is almost always a subtitle. To be
         // exact, a forced subtitle that is only used a few times in the video.
         // To have a better progress status, we'll track the file position of the virtual input streams.
         var completeInputSize = GetCombinedFilesize();
         var completeStream = OpenCombinedStream();
-
-
+        
+        var ffmpeg = new Engine();
+        
         // Build a better update event to calculate the percentage value by consumed bytes.
         Action<ConverterUpdate>? newOnUpdate = null;
         if (onUpdate is not null)
@@ -184,6 +182,12 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
         InitWorkingFilenames();
         await ffmpeg.ConvertAsync(builder =>
         {
+            if (RequireFullProbeSize())
+            {
+                builder.ProbeSize(completeInputSize);
+                builder.AnalyzeDuration((long)Parameter.Definition.Duration.TotalMilliseconds * 1000);
+            }
+
             var input = builder.Input(completeStream);
             
             if (definition.ExportChapters)
@@ -230,26 +234,16 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
                 foreach (var stream in file.Streams)
                 {
                     if (!stream.Enabled) continue;
-                    
-                    if (!idToStream.TryGetValue(stream.Id, out var ffmpegStream))
-                    {
-                        Logger.LogError("Couldn't find stream {StreamId} in source file.", stream.Id); 
-                        continue;
-                    }
 
-                    builder.Map(input, (int)ffmpegStream.Id);
+                    var streamId = GetStreamId(stream);
+
+                    builder.Map(input, streamId);
                     if (!string.IsNullOrEmpty(stream.LanguageCode))
                         builder.Metadata(outputStreamCount, "language", stream.LanguageCode);
                     if ((stream.Flags & StreamFlags.Default) != 0)
                         builder.Disposition(outputStreamCount, "default");
-                    
-                    // BluRay PCM isn't supported outside M2TS and must be changed to regular PCM.
-                    if (stream.Type == StreamType.Audio &&
-                        ffmpegStream.Format.StartsWith("pcm_bluray") &&
-                        definition.Codec.AudioCodec == "copy")
-                    {
-                        builder.Codec(outputStreamCount, "pcm_s24le");
-                    }
+
+                    CustomStreamSettings(stream, outputStreamCount, builder);
                     
                     outputStreamCount++;
                 }

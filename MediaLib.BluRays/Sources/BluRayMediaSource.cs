@@ -122,7 +122,7 @@ public class BluRayMediaSource : IMediaSource
                 Id = stream.Entry.RefToStreamId,
                 Type = StreamType.Audio,
                 Name = GetDescriptionFromStream(stream),
-                Format = stream.Attributes.AudioFormat.ToString(),
+                Format = stream.Attributes.CodingType.ToString(),
                 LanguageCode = stream.Attributes.LanguageCode,
                 Flags = first ? StreamFlags.Default : StreamFlags.None,
             });
@@ -136,7 +136,7 @@ public class BluRayMediaSource : IMediaSource
                 Id = stream.Entry.RefToStreamId,
                 Type = StreamType.Audio,
                 Name = GetDescriptionFromStream(stream),
-                Format = stream.Attributes.AudioFormat.ToString(),
+                Format = stream.Attributes.CodingType.ToString(),
                 LanguageCode = stream.Attributes.LanguageCode,
                 Flags = StreamFlags.Secondary | (first ? StreamFlags.Default : StreamFlags.None),
             });

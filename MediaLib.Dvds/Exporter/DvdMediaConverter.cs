@@ -1,6 +1,7 @@
 using DvdLib;
 using MediaLib.Dvds.Providers;
 using MediaLib.FFmpeg;
+using MediaLib.Models;
 using MediaLib.Providers;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +15,10 @@ public class DvdMediaConverter : FFmpegMediaConverter<DvdMediaProvider>
     }
     
     /// <inheritdoc />
-    protected override ulong GetStreamIndex(StreamMetadata stream) => stream.Pid;
+    protected override bool RequireFullProbeSize() => true; // Required for DVDs
+    
+    /// <inheritdoc />
+    protected override StreamId GetStreamId(StreamInfo stream) => StreamId.Pid(stream.Id);
 
     /// <inheritdoc />
     protected override long GetSegmentFilesize(ushort segmentId)
