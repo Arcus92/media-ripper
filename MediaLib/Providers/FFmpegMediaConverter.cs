@@ -1,7 +1,8 @@
 using MediaLib.FFmpeg;
-using MediaLib.Output;
+using MediaLib.Models;
 using MediaLib.Utils.IO;
 using Microsoft.Extensions.Logging;
+using StreamType = MediaLib.Models.StreamType;
 
 namespace MediaLib.Providers;
 
@@ -216,9 +217,9 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
             foreach (var file in definition.Files)
             {
                 // Define codec
-                builder.Codec(StreamType.Video, definition.Codec.VideoCodec);
-                builder.Codec(StreamType.Audio, definition.Codec.AudioCodec);
-                builder.Codec(StreamType.Subtitle, definition.Codec.SubtitleCodec);
+                builder.Codec(FFmpeg.StreamType.Video, definition.Codec.VideoCodec);
+                builder.Codec(FFmpeg.StreamType.Audio, definition.Codec.AudioCodec);
+                builder.Codec(FFmpeg.StreamType.Subtitle, definition.Codec.SubtitleCodec);
             
                 if (definition.Codec.ConstantRateFactor.HasValue) builder.ConstantRateFactor(definition.Codec.ConstantRateFactor.Value);
                 if (definition.Codec.MaxRate.HasValue) builder.MaxRate(definition.Codec.MaxRate.Value);
@@ -239,11 +240,11 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
                     builder.Map(input, (int)ffmpegStream.Id);
                     if (!string.IsNullOrEmpty(stream.LanguageCode))
                         builder.Metadata(outputStreamCount, "language", stream.LanguageCode);
-                    if ((stream.Flags & OutputStreamFlags.Default) != 0)
+                    if ((stream.Flags & StreamFlags.Default) != 0)
                         builder.Disposition(outputStreamCount, "default");
                     
                     // BluRay PCM isn't supported outside M2TS and must be changed to regular PCM.
-                    if (stream.Type == OutputStreamType.Audio &&
+                    if (stream.Type == StreamType.Audio &&
                         ffmpegStream.Format.StartsWith("pcm_bluray") &&
                         definition.Codec.AudioCodec == "copy")
                     {

@@ -1,12 +1,12 @@
 using System.Text.Json.Serialization;
 
-namespace MediaLib.Output;
+namespace MediaLib.Models;
 
 /// <summary>
-/// Defines the type of media for an <see cref="OutputDefinition"/>.
+/// Defines the type of media for the <see cref="MediaMetadata"/>.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter<OutputMediaType>))]
-public enum OutputMediaType
+[JsonConverter(typeof(JsonStringEnumConverter<MediaType>))]
+public enum MediaType
 {
     Unset,
     Movie,

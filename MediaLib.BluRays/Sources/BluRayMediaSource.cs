@@ -43,29 +43,6 @@ public class BluRayMediaSource : IMediaSource
     /// Gets the playlist id.
     /// </summary>
     public ushort PlaylistId { get; }
-
-    /// <summary>
-    /// Gets the chapter infos.
-    /// </summary>
-    /// <param name="duration">The total duration.</param>
-    /// <returns></returns>
-    private IEnumerable<ChapterInfo> GetChapterInfos(TimeSpan duration)
-    {
-        return ChapterInfo.FromTimestamps(
-            duration,
-            _playlist.Marks.Select(mark =>
-            {
-                // Adding all previous durations
-                uint offset = 0;
-                for (var i = 0; i < mark.PlayItemId; i++)
-                {
-                    offset += _playlist.Items[i].Duration;
-                }
-
-                var item = _playlist.Items[mark.PlayItemId];
-                return BluRay.TimeSpanFromBluRayTime(offset + mark.TimeStamp - item.InTime);
-            }));
-    }
     
     /// <summary>
     /// Builds the media info from the BluRay source.
@@ -80,118 +57,161 @@ public class BluRayMediaSource : IMediaSource
         {
             if (!ushort.TryParse(item.Name, out var clipId))
                 continue;
-            
-            // Video streams
-            var first = true;
-            var videoStreamInfos = new List<VideoInfo>();
-            foreach (var stream in item.StreamNumberTable.PrimaryVideoStreams)
-            {
-                if (stream.Entry.RefToStreamId == 0) continue;
-                var streamInfo = new VideoInfo
-                {
-                    Id = stream.Entry.RefToStreamId,
-                    Name = GetDescriptionFromStream(stream),
-                    IsDefault = first
-                };
-                videoStreamInfos.Add(streamInfo);
-                first = false;
-            }
-            foreach (var stream in item.StreamNumberTable.SecondaryVideoStream)
-            {
-                if (stream.Entry.RefToStreamId == 0) continue;
-                var streamInfo = new VideoInfo
-                {
-                    Id = stream.Entry.RefToStreamId,
-                    Name = GetDescriptionFromStream(stream),
-                    IsSecondary = true,
-                    IsDefault = first
-                };
-                videoStreamInfos.Add(streamInfo);
-                first = false;
-            }
-
-            // Audio streams
-            first = true;
-            var audioStreamInfos = new List<AudioInfo>();
-            foreach (var stream in item.StreamNumberTable.PrimaryAudioStreams)
-            {
-                if (stream.Entry.RefToStreamId == 0) continue;
-                var streamInfo = new AudioInfo
-                {
-                    Id = stream.Entry.RefToStreamId,
-                    Name = GetDescriptionFromStream(stream),
-                    LanguageCode = stream.Attributes.LanguageCode,
-                    IsDefault = first
-                };
-                audioStreamInfos.Add(streamInfo);
-                first = false;
-            }
-            foreach (var stream in item.StreamNumberTable.SecondaryAudioStream)
-            {
-                if (stream.Entry.RefToStreamId == 0) continue;
-                var streamInfo = new AudioInfo
-                {
-                    Id = stream.Entry.RefToStreamId,
-                    Name = GetDescriptionFromStream(stream),
-                    LanguageCode = stream.Attributes.LanguageCode,
-                    IsSecondary = true,
-                    IsDefault = first
-                };
-                audioStreamInfos.Add(streamInfo);
-                first = false;
-            }
-            
-            // Subtitle streams
-            first = true;
-            var subtitleStreamInfos = new List<SubtitleInfo>();
-            foreach (var stream in item.StreamNumberTable.PrimaryPgStreams)
-            {
-                if (stream.Entry.RefToStreamId == 0) continue;
-                var streamInfo = new SubtitleInfo
-                {
-                    Id = stream.Entry.RefToStreamId,
-                    Name = GetDescriptionFromStream(stream),
-                    LanguageCode = stream.Attributes.LanguageCode,
-                    IsDefault = first
-                };
-                subtitleStreamInfos.Add(streamInfo);
-                first = false;
-            }
-            foreach (var stream in item.StreamNumberTable.SecondaryPgStream)
-            {
-                if (stream.Entry.RefToStreamId == 0) continue;
-                var streamInfo = new SubtitleInfo
-                {
-                    Id = stream.Entry.RefToStreamId,
-                    Name = GetDescriptionFromStream(stream),
-                    LanguageCode = stream.Attributes.LanguageCode,
-                    IsSecondary = true,
-                    IsDefault = first
-                };
-                subtitleStreamInfos.Add(streamInfo);
-                first = false;
-            }
                 
             var segmentInfo = new SegmentInfo
             {
                 Id = clipId,
                 Name = $"Segment {clipId}",
                 Duration = BluRay.TimeSpanFromBluRayTime(item.Duration),
-                VideoStreams = videoStreamInfos.ToArray(),
-                AudioStreams = audioStreamInfos.ToArray(),
-                SubtitleStreams = subtitleStreamInfos.ToArray(),
             };
             playlistDuration += segmentInfo.Duration;
             segmentInfos.Add(segmentInfo);
         }
         
+        if (_playlist.Items.Length == 0)
+            throw new ArgumentException("Cannot create output for title without segments!", nameof(PlaylistId));
+        
+        var segment = _playlist.Items[0];
+
+        // Calculate total duration
+        var duration = TimeSpan.Zero;
+        foreach (var item in _playlist.Items)
+        {
+            duration += BluRay.TimeSpanFromBluRayTime(item.Duration);
+        }
+        
+        // Collect all streams
+        var streams = new List<StreamInfo>();
+        var first = true;
+        
+        // Video streams
+        foreach (var stream in segment.StreamNumberTable.PrimaryVideoStreams)
+        {
+            if (stream.Entry.RefToStreamId == 0) continue;
+            streams.Add(new StreamInfo()
+            {
+                Id = stream.Entry.RefToStreamId,
+                Type = StreamType.Video,
+                Name = GetDescriptionFromStream(stream),
+                Format = stream.Attributes.VideoFormat.ToString(),
+                Flags = first ? StreamFlags.Default : StreamFlags.None,
+            });
+            first = false;
+        }
+        foreach (var stream in segment.StreamNumberTable.SecondaryVideoStream)
+        {
+            if (stream.Entry.RefToStreamId == 0) continue;
+            streams.Add(new StreamInfo()
+            {
+                Id = stream.Entry.RefToStreamId,
+                Type = StreamType.Video,
+                Name = GetDescriptionFromStream(stream),
+                Format = stream.Attributes.VideoFormat.ToString(),
+                Flags = StreamFlags.Secondary | (first ? StreamFlags.Default : StreamFlags.None),
+            });
+            first = false;
+        }
+        
+        // Audio streams
+        first = true;
+        foreach (var stream in segment.StreamNumberTable.PrimaryAudioStreams)
+        {
+            if (stream.Entry.RefToStreamId == 0) continue;
+            streams.Add(new StreamInfo()
+            {
+                Id = stream.Entry.RefToStreamId,
+                Type = StreamType.Audio,
+                Name = GetDescriptionFromStream(stream),
+                Format = stream.Attributes.AudioFormat.ToString(),
+                LanguageCode = stream.Attributes.LanguageCode,
+                Flags = first ? StreamFlags.Default : StreamFlags.None,
+            });
+            first = false;
+        }
+        foreach (var stream in segment.StreamNumberTable.SecondaryAudioStream)
+        {
+            if (stream.Entry.RefToStreamId == 0) continue;
+            streams.Add(new StreamInfo()
+            {
+                Id = stream.Entry.RefToStreamId,
+                Type = StreamType.Audio,
+                Name = GetDescriptionFromStream(stream),
+                Format = stream.Attributes.AudioFormat.ToString(),
+                LanguageCode = stream.Attributes.LanguageCode,
+                Flags = StreamFlags.Secondary | (first ? StreamFlags.Default : StreamFlags.None),
+            });
+            first = false;
+        }
+        
+        // Subtitles
+        first = true;
+        foreach (var stream in segment.StreamNumberTable.PrimaryPgStreams)
+        {
+            if (stream.Entry.RefToStreamId == 0) continue;
+            streams.Add(new StreamInfo()
+            {
+                Id = stream.Entry.RefToStreamId,
+                Type = StreamType.Subtitle,
+                Name = GetDescriptionFromStream(stream),
+                Format = SubtitleFormats.Pgs.FFmpegFormat,
+                LanguageCode = stream.Attributes.LanguageCode,
+                Flags = first ? StreamFlags.Default : StreamFlags.None,
+            });
+            first = false;
+        }
+        foreach (var stream in segment.StreamNumberTable.SecondaryPgStream)
+        {
+            if (stream.Entry.RefToStreamId == 0) continue;
+            streams.Add(new StreamInfo()
+            {
+                Id = stream.Entry.RefToStreamId,
+                Type = StreamType.Subtitle,
+                Name = GetDescriptionFromStream(stream),
+                Format = SubtitleFormats.Pgs.FFmpegFormat,
+                LanguageCode = stream.Attributes.LanguageCode,
+                Flags = StreamFlags.Secondary | (first ? StreamFlags.Default : StreamFlags.None),
+            });
+            first = false;
+        }
+        
+        // Assume the second subtitle of each language is the forced subtitle
+        var languageCounter = new Dictionary<string, int>();
+        foreach (var stream in streams.Where(stream => stream.Type == StreamType.Subtitle))
+        {
+            var languageCode = stream.LanguageCode ?? "";
+            languageCounter.TryGetValue(languageCode, out var counter);
+
+            if (counter == 1)
+            {
+                stream.Flags |= StreamFlags.Forced;
+            }
+            
+            languageCounter[languageCode] = counter + 1;
+        }
+        
+        var chapters = ChapterInfo.FromTimestamps(
+            duration,
+            _playlist.Marks.Select(mark =>
+            {
+                // Adding all previous durations
+                uint offset = 0;
+                for (var i = 0; i < mark.PlayItemId; i++)
+                {
+                    offset += _playlist.Items[i].Duration;
+                }
+
+                var item = _playlist.Items[mark.PlayItemId];
+                return BluRay.TimeSpanFromBluRayTime(offset + mark.TimeStamp - item.InTime);
+            }));
+        
         return new MediaInfo
         {
-            Id = PlaylistId,
+            Identifier = Identifier,
             Name = $"Playlist {PlaylistId}",
             Duration = playlistDuration,
             Segments = segmentInfos.ToArray(),
-            Chapters = GetChapterInfos(playlistDuration).ToArray(),
+            Streams = streams.ToArray(),
+            Chapters = chapters.ToArray(),
         };
     }
     
@@ -238,204 +258,9 @@ public class BluRayMediaSource : IMediaSource
     /// <inheritdoc />
     public OutputDefinition CreateDefaultOutputDefinition(CodecOptions codec, MediaFormat containerFormat)
     {
-        if (_playlist.Items.Length == 0)
-            throw new ArgumentException("Cannot create output for title without segments!", nameof(PlaylistId));
-
         var baseName = $"{Identifier.DiskName}_{PlaylistId}";
-        var segment = _playlist.Items[0];
-
-        // Calculate total duration
-        var duration = TimeSpan.Zero;
-        foreach (var item in _playlist.Items)
-        {
-            duration += BluRay.TimeSpanFromBluRayTime(item.Duration);
-        }
-        
-        // Collect all streams
-        var streams = new List<OutputStream>();
-        var first = true;
-        
-        // Video streams
-        foreach (var stream in segment.StreamNumberTable.PrimaryVideoStreams)
-        {
-            if (stream.Entry.RefToStreamId == 0) continue;
-            streams.Add(new OutputStream()
-            {
-                Id = stream.Entry.RefToStreamId,
-                Type = OutputStreamType.Video,
-                Format = stream.Attributes.VideoFormat.ToString(),
-                Flags = first ? OutputStreamFlags.Default : OutputStreamFlags.None,
-            });
-            first = false;
-        }
-        foreach (var stream in segment.StreamNumberTable.SecondaryVideoStream)
-        {
-            if (stream.Entry.RefToStreamId == 0) continue;
-            streams.Add(new OutputStream()
-            {
-                Id = stream.Entry.RefToStreamId,
-                Type = OutputStreamType.Video,
-                Format = stream.Attributes.VideoFormat.ToString(),
-                Flags = OutputStreamFlags.Secondary | (first ? OutputStreamFlags.Default : OutputStreamFlags.None),
-            });
-            first = false;
-        }
-        
-        // Audio streams
-        first = true;
-        foreach (var stream in segment.StreamNumberTable.PrimaryAudioStreams)
-        {
-            if (stream.Entry.RefToStreamId == 0) continue;
-            streams.Add(new OutputStream()
-            {
-                Id = stream.Entry.RefToStreamId,
-                Type = OutputStreamType.Audio,
-                Format = stream.Attributes.AudioFormat.ToString(),
-                LanguageCode = stream.Attributes.LanguageCode,
-                Flags = first ? OutputStreamFlags.Default : OutputStreamFlags.None,
-            });
-            first = false;
-        }
-        foreach (var stream in segment.StreamNumberTable.SecondaryAudioStream)
-        {
-            if (stream.Entry.RefToStreamId == 0) continue;
-            streams.Add(new OutputStream()
-            {
-                Id = stream.Entry.RefToStreamId,
-                Type = OutputStreamType.Audio,
-                Format = stream.Attributes.AudioFormat.ToString(),
-                LanguageCode = stream.Attributes.LanguageCode,
-                Flags = OutputStreamFlags.Secondary | (first ? OutputStreamFlags.Default : OutputStreamFlags.None),
-            });
-            first = false;
-        }
-        
-        // Subtitles
-        first = true;
-        foreach (var stream in segment.StreamNumberTable.PrimaryPgStreams)
-        {
-            if (stream.Entry.RefToStreamId == 0) continue;
-            streams.Add(new OutputStream()
-            {
-                Id = stream.Entry.RefToStreamId,
-                Type = OutputStreamType.Subtitle,
-                Format = SubtitleFormats.Pgs.FFmpegFormat,
-                LanguageCode = stream.Attributes.LanguageCode,
-                Flags = first ? OutputStreamFlags.Default : OutputStreamFlags.None,
-            });
-            first = false;
-        }
-        foreach (var stream in segment.StreamNumberTable.SecondaryPgStream)
-        {
-            if (stream.Entry.RefToStreamId == 0) continue;
-            streams.Add(new OutputStream()
-            {
-                Id = stream.Entry.RefToStreamId,
-                Type = OutputStreamType.Subtitle,
-                Format = SubtitleFormats.Pgs.FFmpegFormat,
-                LanguageCode = stream.Attributes.LanguageCode,
-                Flags = OutputStreamFlags.Secondary | (first ? OutputStreamFlags.Default : OutputStreamFlags.None),
-            });
-            first = false;
-        }
-        
-        // Assume the second subtitle of each language is the forced subtitle
-        var languageCounter = new Dictionary<string, int>();
-        foreach (var stream in streams.Where(stream => stream.Type == OutputStreamType.Subtitle))
-        {
-            var languageCode = stream.LanguageCode ?? "";
-            languageCounter.TryGetValue(languageCode, out var counter);
-
-            if (counter == 1)
-            {
-                stream.Flags |= OutputStreamFlags.Forced;
-            }
-            
-            languageCounter[languageCode] = counter + 1;
-        }
-        
-        var files = OutputHelper.GetFilesByStreams(baseName, streams, codec, containerFormat);
-        
-        return new OutputDefinition()
-        {
-            Identifier = Identifier,
-            MediaInfo = new OutputMediaInfo()
-            {
-                Name = baseName,
-            },
-            Duration = duration,
-            Codec = codec,
-            Files = files.ToArray(),
-            Chapters = OutputChapter.FromChapterInfos(GetChapterInfos(duration)).ToArray()
-        };
+        return OutputHelper.CreateDefaultOutputDefinition(baseName, Info, codec, containerFormat);
     }
     
     #endregion Output
-    
-    #region Equals
-
-    /// <summary>
-    /// Compares this playlist with another one and return true if it matches.
-    /// </summary>
-    /// <param name="other">The other playlist.</param>
-    /// <returns></returns>
-    public bool Matches(BluRayMediaSource other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        
-        // Compare segments
-        if (Info.Segments.Length != other.Info.Segments.Length) return false;
-        for (var i = 0; i < Info.Segments.Length; i++)
-        {
-            var segment = Info.Segments[i];
-            var otherSegment = other.Info.Segments[i];
-            
-            if (segment.Id != otherSegment.Id) return false;
-            
-            // Compare video streams
-            if (segment.VideoStreams.Length != otherSegment.VideoStreams.Length) return false;
-            for (var j = 0; j < segment.VideoStreams.Length; j++)
-            {
-                var stream = segment.VideoStreams[j];
-                var otherStream = otherSegment.VideoStreams[j];
-                
-                if (stream.Id != otherStream.Id) return false;
-            }
-            
-            // Compare audio streams
-            if (segment.AudioStreams.Length != otherSegment.AudioStreams.Length) return false;
-            for (var j = 0; j < segment.AudioStreams.Length; j++)
-            {
-                var stream = segment.AudioStreams[j];
-                var otherStream = otherSegment.AudioStreams[j];
-                
-                if (stream.Id != otherStream.Id) return false;
-            }
-            
-            // Compare subtitle streams
-            if (segment.SubtitleStreams.Length != otherSegment.SubtitleStreams.Length) return false;
-            for (var j = 0; j < segment.SubtitleStreams.Length; j++)
-            {
-                var stream = segment.SubtitleStreams[j];
-                var otherStream = otherSegment.SubtitleStreams[j];
-                
-                if (stream.Id != otherStream.Id) return false;
-            }
-        }
-        
-        // Compare chapters
-        if (Info.Chapters.Length != other.Info.Chapters.Length) return false;
-        for (var i = 0; i < Info.Chapters.Length; i++)
-        {
-            var chapter = Info.Chapters[i];
-            var otherChapter = other.Info.Chapters[i];
-            
-            if (chapter.Start != otherChapter.Start) return false;
-            if (chapter.End != otherChapter.End) return false;
-        }
-        
-        return true;
-    }
-    
-    #endregion Equals
 }

@@ -2,16 +2,16 @@ using System.Text;
 using System.Text.Json.Serialization;
 using MediaLib.Utils.IO;
 
-namespace MediaLib.Output;
+namespace MediaLib.Models;
 
 [Serializable]
-public class OutputMediaInfo
+public class MediaMetadata
 {
     /// <summary>
     /// Gets and sets the media type.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public OutputMediaType Type { get; set; } = OutputMediaType.Unset;
+    public MediaType Type { get; set; } = MediaType.Unset;
 
     /// <summary>
     /// Gets and sets the name of this file.

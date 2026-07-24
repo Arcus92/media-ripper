@@ -14,28 +14,33 @@ public class MediaSourceModel : BaseSourceModel
     public MediaSourceModel(IMediaSource source)
     {
         Source = source;
-
-        var segment = Info.Segments.First();
         
         VideoStreamNode = new TextSourceModel<VideoSourceModel>("VideoStreams")
         {
             IsExpanded = true,
-            SubNodes = new ObservableCollection<BaseSourceModel>(segment.VideoStreams.Select(s => new VideoSourceModel(s)))
+            SubNodes = new ObservableCollection<BaseSourceModel>(Info.Streams
+                .Where(s => s.Type == StreamType.Video)
+                .Select(s => new VideoSourceModel(s)))
         };
         AudioStreamNode = new TextSourceModel<AudioSourceModel>("AudioStreams")
         {
             IsExpanded = true,
-            SubNodes = new ObservableCollection<BaseSourceModel>(segment.AudioStreams.Select(s => new AudioSourceModel(s)))
+            SubNodes = new ObservableCollection<BaseSourceModel>(Info.Streams
+                .Where(s => s.Type == StreamType.Audio)
+                .Select(s => new AudioSourceModel(s)))
         };
         SubtitleStreamNode = new TextSourceModel<SubtitleSourceModel>("Subtitles")
         {
             IsExpanded = true,
-            SubNodes = new ObservableCollection<BaseSourceModel>(segment.SubtitleStreams.Select(s => new SubtitleSourceModel(s)))
+            SubNodes = new ObservableCollection<BaseSourceModel>(Info.Streams
+                .Where(s => s.Type == StreamType.Subtitle)
+                .Select(s => new SubtitleSourceModel(s)))
         };
         ChapterNode = new TextSourceModel<ChapterSourceModel>("Chapters")
         {
             IsExpanded = true,
-            SubNodes = new ObservableCollection<BaseSourceModel>(Info.Chapters.Select(c => new ChapterSourceModel(c)))
+            SubNodes = new ObservableCollection<BaseSourceModel>(Info.Chapters
+                .Select(c => new ChapterSourceModel(c)))
         };
         SubNodes = [ VideoStreamNode, AudioStreamNode, SubtitleStreamNode, ChapterNode ];
         
@@ -63,11 +68,6 @@ public class MediaSourceModel : BaseSourceModel
     /// Gets the segment usage text.
     /// </summary>
     public string SegmentDescriptionText { get; }
-
-    /// <summary>
-    /// Gets the media id.
-    /// </summary>
-    public ushort Id => Info.Id;
     
     /// <summary>
     /// Gets the video stream sub node.

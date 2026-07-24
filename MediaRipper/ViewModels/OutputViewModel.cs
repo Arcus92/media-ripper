@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using FluentIcons.Common;
-using MediaLib.Output;
+using MediaLib.Models;
 using MediaRipper.Models;
 using MediaRipper.Models.Outputs;
 using MediaRipper.Services.Interfaces;
@@ -67,20 +67,20 @@ public class OutputViewModel : ViewModelBase
     
     #region Metadata
     
-    public static EnumModelList<OutputMediaType> AllMediaTypes { get; } =
+    public static EnumModelList<MediaType> AllMediaTypes { get; } =
     [
-        new(OutputMediaType.Unset, "MediaTypeUnset"),
-        new(OutputMediaType.Movie, "MediaTypeMovie"),
-        new(OutputMediaType.Episode, "MediaTypeEpisode"),
-        new(OutputMediaType.Extra, "MediaTypeExtra"),
-        new(OutputMediaType.MakingOf, "MediaTypeMakingOf"),
-        new(OutputMediaType.BehindTheScenes, "MediaTypeBehindTheScenes"),
-        new(OutputMediaType.DeletedScenes, "MediaTypeDeletedScenes"),
-        new(OutputMediaType.Interview, "MediaTypeInterview"),
-        new(OutputMediaType.Trailer, "MediaTypeTrailer"),
+        new(MediaLib.Models.MediaType.Unset, "MediaTypeUnset"),
+        new(MediaLib.Models.MediaType.Movie, "MediaTypeMovie"),
+        new(MediaLib.Models.MediaType.Episode, "MediaTypeEpisode"),
+        new(MediaLib.Models.MediaType.Extra, "MediaTypeExtra"),
+        new(MediaLib.Models.MediaType.MakingOf, "MediaTypeMakingOf"),
+        new(MediaLib.Models.MediaType.BehindTheScenes, "MediaTypeBehindTheScenes"),
+        new(MediaLib.Models.MediaType.DeletedScenes, "MediaTypeDeletedScenes"),
+        new(MediaLib.Models.MediaType.Interview, "MediaTypeInterview"),
+        new(MediaLib.Models.MediaType.Trailer, "MediaTypeTrailer"),
     ];
 
-    public EnumModel<OutputMediaType> MediaType
+    public EnumModel<MediaType> MediaType
     {
         get => AllMediaTypes.GetModel(Model.Definition.MediaInfo.Type);
         set => SetProperty(Model.Definition.MediaInfo.Type, value.Value, v => Model.Definition.MediaInfo.Type = v);

@@ -1,4 +1,3 @@
-using MediaLib.FFmpeg;
 using MediaLib.Formats;
 using MediaLib.Models;
 using MediaLib.Output;
@@ -13,15 +12,15 @@ public class FileSystemMediaSource : IMediaSource
 {
     private readonly string _name;
     private readonly string _path;
-    private readonly InputMetadata _metadata;
+    private readonly FFmpeg.InputMetadata _metadata;
     
-    public FileSystemMediaSource(string path, MediaIdentifier identifier, InputMetadata metadata)
+    public FileSystemMediaSource(string path, MediaIdentifier identifier, FFmpeg.InputMetadata metadata)
     {
         _path = path;
         _name = Path.GetFileNameWithoutExtension(path);
         _metadata = metadata;
         Identifier = identifier;
-        Info = GetInfo(_name, metadata);
+        Info = BuildMediaInfo(_name, metadata);
         IgnoreFlags = MediaIgnoreFlags.None;
     }
 
@@ -34,40 +33,48 @@ public class FileSystemMediaSource : IMediaSource
     /// <inheritdoc />
     public MediaIgnoreFlags IgnoreFlags { get; set; }
     
+    /// <summary>
+    /// Gets the media info from the given file.
+    /// </summary>
+    /// <param name="name">The name to the source file.</param>
+    /// <param name="metadata">The FFmpeg metadata.</param>
+    /// <returns>Returns the media info.</returns>
+    private MediaInfo BuildMediaInfo(string name, FFmpeg.InputMetadata metadata)
+    {
+        return new MediaInfo
+        {
+            Identifier = Identifier,
+            Name = name,
+            Duration = metadata.Duration,
+            Segments = [new SegmentInfo
+            {
+                Id = 0,
+                Name = name,
+                Duration = metadata.Duration
+            }],
+            Streams = metadata.Streams.Select(stream => new StreamInfo()
+            {
+                Id = (ushort)stream.Id,
+                Name = stream.Title ?? stream.Type.ToString(),
+                Type = MapStreamType(stream.Type),
+                Format = MapFormat(stream.Format),
+                Flags = MapStreamFlags(stream),
+                Enabled = true,
+                LanguageCode = stream.Language
+            }).ToArray(),
+            Chapters = metadata.Chapters.Select((chapter, index) => new ChapterInfo()
+            {
+                Name = chapter.Title ?? $"Chapter {index + 1:00}",
+                Start = chapter.Start,
+                End = chapter.End,
+            }).ToArray(),
+        };
+    }
+    
     /// <inheritdoc />
     public OutputDefinition CreateDefaultOutputDefinition(CodecOptions codec, MediaFormat containerFormat)
     {
-        var baseName = _name;
-        
-        var streams = _metadata.Streams.Select(stream => new OutputStream()
-        {
-            Id = (ushort)stream.Id,
-            Type = MapStreamType(stream.Type),
-            Format = MapFormat(stream.Format),
-            Flags = MapStreamFlags(stream),
-            Enabled = true,
-            LanguageCode = stream.Language
-        });
-        
-        var files = OutputHelper.GetFilesByStreams(baseName, streams, codec, containerFormat);
-        return new OutputDefinition
-        {
-            Identifier = Identifier,
-            Codec = codec,
-            Duration = _metadata.Duration,
-            MediaInfo = new OutputMediaInfo
-            {
-                Name = _name,
-            },
-            Chapters = Info.Chapters.Select(chapter => new OutputChapter
-            {
-                Name = chapter.Name,
-                Start = chapter.Start,
-                End = chapter.End
-            }).ToArray(),
-            ExportChapters = true,
-            Files = files.ToArray()
-        };
+        return OutputHelper.CreateDefaultOutputDefinition(_name, Info, codec, containerFormat);
     }
 
     /// <summary>
@@ -75,14 +82,14 @@ public class FileSystemMediaSource : IMediaSource
     /// </summary>
     /// <param name="streamType">The FFmpeg stream type.</param>
     /// <returns>Returns the stream output type.</returns>
-    private static OutputStreamType MapStreamType(StreamType streamType)
+    private static StreamType MapStreamType(FFmpeg.StreamType streamType)
     {
         return streamType switch
         {
-            StreamType.Video => OutputStreamType.Video,
-            StreamType.Audio => OutputStreamType.Audio,
-            StreamType.Subtitle => OutputStreamType.Subtitle,
-            StreamType.Attachment => OutputStreamType.Attachment,
+            FFmpeg.StreamType.Video => StreamType.Video,
+            FFmpeg.StreamType.Audio => StreamType.Audio,
+            FFmpeg.StreamType.Subtitle => StreamType.Subtitle,
+            FFmpeg.StreamType.Attachment => StreamType.Attachment,
             _ => throw new ArgumentOutOfRangeException(nameof(streamType), streamType, null)
         };
     }
@@ -92,17 +99,17 @@ public class FileSystemMediaSource : IMediaSource
     /// </summary>
     /// <param name="streamMetadata">The FFmpeg stream metadata.</param>
     /// <returns>Returns the stream output flags.</returns>
-    private static OutputStreamFlags MapStreamFlags(StreamMetadata streamMetadata)
+    private static StreamFlags MapStreamFlags(FFmpeg.StreamMetadata streamMetadata)
     {
-        var flags = OutputStreamFlags.None;
+        var flags = StreamFlags.None;
 
         if (streamMetadata.IsDefault)
         {
-            flags |= OutputStreamFlags.Default;
+            flags |= StreamFlags.Default;
         }
         if (streamMetadata.IsForced)
         {
-            flags |= OutputStreamFlags.Forced;
+            flags |= StreamFlags.Forced;
         }
         
         return flags;
@@ -119,62 +126,6 @@ public class FileSystemMediaSource : IMediaSource
         {
             "subrip" => SubtitleFormats.Subrip.FFmpegFormat,
             _ => format
-        };
-    }
-
-    /// <summary>
-    /// Gets the media info from the given file.
-    /// </summary>
-    /// <param name="name">The name to the source file.</param>
-    /// <param name="metadata">The FFmpeg metadata.</param>
-    /// <returns>Returns the media info.</returns>
-    public static MediaInfo GetInfo(string name, InputMetadata metadata)
-    {
-        return new MediaInfo
-        {
-            Id = 0,
-            Name = name,
-            Chapters = metadata.Chapters.Select((chapter, index) => new ChapterInfo()
-            {
-                Id = (ushort)index,
-                Name = chapter.Title ?? $"Chapter {index + 1:00}",
-                Start = chapter.Start,
-                End = chapter.End,
-            }).ToArray(),
-            Duration = metadata.Duration,
-            Segments = [new SegmentInfo
-            {
-                Id = 0,
-                Name = name,
-                Duration = metadata.Duration,
-                VideoStreams = metadata.Streams
-                    .Where(stream => stream.Type == StreamType.Video)
-                    .Select(stream => new VideoInfo
-                {
-                    Id = stream.Pid,
-                    Name = stream.Format,
-                    IsDefault = stream.IsDefault
-                }).ToArray(),
-                AudioStreams = metadata.Streams
-                    .Where(stream => stream.Type == StreamType.Audio)
-                    .Select(stream => new AudioInfo
-                    {
-                        Id = stream.Pid,
-                        Name = stream.Format,
-                        LanguageCode = stream.Language,
-                        IsDefault = stream.IsDefault
-                    }).ToArray(),
-                
-                SubtitleStreams = metadata.Streams
-                    .Where(stream => stream.Type == StreamType.Subtitle)
-                    .Select(stream => new SubtitleInfo
-                    {
-                        Id = stream.Pid,
-                        Name = stream.Format,
-                        LanguageCode = stream.Language,
-                        IsDefault = stream.IsDefault
-                    }).ToArray(),
-            }]
         };
     }
 }

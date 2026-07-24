@@ -51,38 +51,45 @@ public class DvdMediaSource : IMediaSource
     /// <returns></returns>
     private MediaInfo BuildMediaInfo()
     {
-        var vts = _dvdTitleInfo.TitleSet;
         var baseName = _dvdTitleInfo.Name;
-        ushort streamId = 1;
-
-        var videoStreams = new[]
+        var vts = _dvdTitleInfo.TitleSet;
+        
+        var streams = new List<StreamInfo>
         {
-            new VideoInfo
+            new()
             {
-                Id = streamId++,
-                Name = baseName,
-                IsDefault = true
+                Id = 0x1E0,
+                Type = StreamType.Video,
+                Name = vts.VtsVideo.MpegVersion.ToString()
             }
         };
-        
-        var audioStreams = vts.VtsAudios.Select((a, n) => new AudioInfo()
-        {
-            Id = streamId++,
-            Name = a.LangCode,
-            LanguageCode = a.LangCode,
-        }).ToArray();
 
-        var subtitleStreams = vts.VtsSubPictures.Select((s, n) => new SubtitleInfo()
+        ushort audioId = 0x80; // TODO: Filter by type
+        foreach (var audio in vts.VtsAudios)
         {
-            Id = streamId++,
-            Name = s.LangCode,
-            LanguageCode = s.LangCode
-        }).ToArray();
-        
+            streams.Add(new StreamInfo
+            {
+                Id = audioId++,
+                LanguageCode = audio.LangCode,
+                Type = StreamType.Audio
+            });
+        }
+
+        ushort subPictureId = 0x20;
+        foreach (var subPicture in vts.VtsSubPictures)
+        {
+            streams.Add(new StreamInfo
+            {
+                Id = subPictureId++,
+                LanguageCode = subPicture.LangCode,
+                Type = StreamType.Subtitle,
+                Format = "dvd_subtitle"
+            });
+        }
         
         return new MediaInfo
         {
-            Id = _dvdTitleInfo.Index,
+            Identifier = Identifier,
             Name = baseName,
             Duration = _dvdTitleInfo.Pgc.PlaybackTime.AsTimeSpan(),
             Segments = _dvdTitleInfo.Ptts.Select(ptt => new SegmentInfo
@@ -90,10 +97,8 @@ public class DvdMediaSource : IMediaSource
                 Id = ptt.Pgn,
                 Name = baseName,
                 Duration = _dvdTitleInfo.Pgc.CellPlayback[ptt.Pgn - 1].PlaybackTime.AsTimeSpan(),
-                VideoStreams = videoStreams,
-                AudioStreams = audioStreams,
-                SubtitleStreams = subtitleStreams,
             }).ToArray(),
+            Streams = streams.ToArray(),
             Chapters = GetChapterInfos().ToArray()
         };
     }
@@ -105,59 +110,8 @@ public class DvdMediaSource : IMediaSource
     /// <inheritdoc />
     public OutputDefinition CreateDefaultOutputDefinition(CodecOptions codec, MediaFormat containerFormat)
     {
-        var baseName = _dvdTitleInfo.Name;
-        var duration = _dvdTitleInfo.Pgc.PlaybackTime.AsTimeSpan();
-        var vts = _dvdTitleInfo.TitleSet;
-        
-        var streams = new List<OutputStream>
-        {
-            new()
-            {
-                Enabled = true,
-                Id = 0x1E0,
-                Type = OutputStreamType.Video
-            }
-        };
-
-        ushort audioId = 0x80; // TODO: Filter by type
-        foreach (var audio in vts.VtsAudios)
-        {
-            streams.Add(new OutputStream
-            {
-                Enabled = true,
-                Id = audioId++,
-                LanguageCode = audio.LangCode,
-                Type = OutputStreamType.Audio
-            });
-        }
-
-        ushort subPictureId = 0x20;
-        foreach (var subPicture in vts.VtsSubPictures)
-        {
-            streams.Add(new OutputStream
-            {
-                Enabled = true,
-                Id = subPictureId++,
-                LanguageCode = subPicture.LangCode,
-                Type = OutputStreamType.Subtitle,
-                Format = "dvd_subtitle"
-            });
-        }
-        
-        var files = OutputHelper.GetFilesByStreams(baseName, streams, codec, containerFormat);
-        
-        return new OutputDefinition
-        {
-            Identifier = Identifier,
-            MediaInfo = new OutputMediaInfo
-            {
-                Name = baseName,
-            },
-            Duration = duration,
-            Codec = codec,
-            Files = files.ToArray(),
-            Chapters = OutputChapter.FromChapterInfos(GetChapterInfos()).ToArray()
-        };
+        var baseName = $"{Identifier.DiskName}_{_dvdTitleInfo.Index}";
+        return OutputHelper.CreateDefaultOutputDefinition(baseName, Info, codec, containerFormat);
     }
     
     #endregion Output

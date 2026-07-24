@@ -63,7 +63,7 @@ public class BluRayMediaProvider : IMediaProvider
 
             foreach (var otherSource in sources)
             {
-                if (otherSource.Matches(source))
+                if (otherSource.Info.Matches(source.Info))
                 {
                     source.IgnoreFlags |= MediaIgnoreFlags.Duplicate;
                 }
@@ -111,13 +111,8 @@ public class BluRayMediaProvider : IMediaProvider
         }
 
         // Scan segments
-        var audioStreams = 0;
-        var subtitleStreams = 0;
-        foreach (var segment in source.Info.Segments)
-        {
-            audioStreams += segment.AudioStreams.Length;
-            subtitleStreams += segment.SubtitleStreams.Length;
-        }
+        var audioStreams = source.Info.Streams.Count(s => s.Type == StreamType.Audio);
+        var subtitleStreams = source.Info.Streams.Count(s => s.Type == StreamType.Subtitle);
         if (audioStreams == 0)
         {
             flags |= MediaIgnoreFlags.NoAudio;

@@ -7,14 +7,14 @@ namespace MediaLib.Sources;
 public interface IMediaSource
 {
     /// <summary>
-    /// Gets the media identifier.
-    /// </summary>
-    MediaIdentifier Identifier { get; }
-
-    /// <summary>
     /// Gets the media information.
     /// </summary>
     MediaInfo Info { get; }
+    
+    /// <summary>
+    /// Gets the media identifier.
+    /// </summary>
+    MediaIdentifier Identifier => Info.Identifier;
     
     /// <summary>
     /// Gets the ignore flags of this media.

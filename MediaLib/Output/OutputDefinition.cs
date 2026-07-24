@@ -16,7 +16,7 @@ public class OutputDefinition
     /// <summary>
     /// Gets and sets the media info.
     /// </summary>
-    public OutputMediaInfo MediaInfo { get; set; } = new();
+    public MediaMetadata MediaInfo { get; set; } = new();
 
     /// <summary>
     /// Gets and sets the duration.
@@ -41,5 +41,5 @@ public class OutputDefinition
     /// <summary>
     /// Gets and sets the chapters.
     /// </summary>
-    public OutputChapter[] Chapters { get; set; } = [];
+    public ChapterInfo[] Chapters { get; set; } = [];
 }

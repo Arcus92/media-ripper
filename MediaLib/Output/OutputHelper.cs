@@ -1,10 +1,38 @@
 using System.Text;
 using MediaLib.Formats;
+using MediaLib.Models;
 
 namespace MediaLib.Output;
 
 public static class OutputHelper
 {
+    /// <summary>
+    /// Creates a default output definition for this media info.
+    /// </summary>
+    /// <param name="baseName">The output file basename.</param>
+    /// <param name="mediaInfo">The media info to extract the output from.</param>
+    /// <param name="codec">The codec options to use.</param>
+    /// <param name="containerFormat">The container format to use.</param>
+    /// <returns>Returns the output definition.</returns>
+    public static OutputDefinition CreateDefaultOutputDefinition(string baseName, MediaInfo mediaInfo,
+        CodecOptions codec, MediaFormat containerFormat)
+    {
+        var files = GetFilesByStreams(baseName, mediaInfo.Streams, codec, containerFormat);
+        
+        return new OutputDefinition
+        {
+            Identifier = mediaInfo.Identifier,
+            MediaInfo = new MediaMetadata
+            {
+                Name = baseName,
+            },
+            Duration = mediaInfo.Duration,
+            Codec = codec,
+            Files = files.ToArray(),
+            Chapters = mediaInfo.Chapters
+        };
+    }
+    
     /// <summary>
     /// Returns all output files from the given set of streams when converting to the given output videoFormat.
     /// This will 
@@ -14,11 +42,11 @@ public static class OutputHelper
     /// <param name="codec">The codec options.</param>
     /// <param name="containerFormat">The output container format.</param>
     /// <returns>Returns a list of output files.</returns>
-    public static List<OutputFile> GetFilesByStreams(string baseName, IEnumerable<OutputStream> streams, CodecOptions codec, MediaFormat containerFormat)
+    public static List<OutputFile> GetFilesByStreams(string baseName, IEnumerable<StreamInfo> streams, CodecOptions codec, MediaFormat containerFormat)
     {
         var files = new List<OutputFile>();
 
-        var mainFileStreams = new List<OutputStream>();
+        var mainFileStreams = new List<StreamInfo>();
 
         // Guessing the subtitle type by order.
         var filenameCounter = new Dictionary<string, int>();
@@ -46,7 +74,7 @@ public static class OutputHelper
                     filenameBuilder.Append(stream.LanguageCode);
                 }
 
-                if ((stream.Flags & OutputStreamFlags.Forced) != 0)
+                if ((stream.Flags & StreamFlags.Forced) != 0)
                 {
                     filenameBuilder.Append(".forced");
                 }
@@ -92,12 +120,12 @@ public static class OutputHelper
     /// <param name="containerFormat">The container format.</param>
     /// <param name="stream">The stream to check.</param>
     /// <returns>Returns true, if the stream is supported by the container.</returns>
-    public static bool IsStreamSupported(MediaFormat containerFormat, OutputStream stream)
+    public static bool IsStreamSupported(MediaFormat containerFormat, StreamInfo stream)
     {
         return stream.Type switch
         {
-            OutputStreamType.Video or OutputStreamType.Audio => true, // Assume it is supported.
-            OutputStreamType.Subtitle => ContainerFormats.SupportSubtitle(containerFormat.FFmpegFormat, stream.Format ?? ""),
+            StreamType.Video or StreamType.Audio => true, // Assume it is supported.
+            StreamType.Subtitle => ContainerFormats.SupportSubtitle(containerFormat.FFmpegFormat, stream.Format ?? ""),
             _ => false
         };
     }
@@ -109,15 +137,15 @@ public static class OutputHelper
     /// <param name="stream">The output stream to check.</param>
     /// <param name="result">Returns the media format.</param>
     /// <returns>Returns true, if the format was found.</returns>
-    public static bool TryGetFormatByStream(OutputStream stream, out MediaFormat result)
+    public static bool TryGetFormatByStream(StreamInfo stream, out MediaFormat result)
     {
         switch (stream.Type)
         {
-            case OutputStreamType.Video:
+            case StreamType.Video:
                 return ContainerFormats.All.TryGetFromFormat(stream.Format ?? "", out result);
-            case OutputStreamType.Subtitle:
+            case StreamType.Subtitle:
                 return SubtitleFormats.All.TryGetFromFormat(stream.Format ?? "", out result);
-            case OutputStreamType.Audio:
+            case StreamType.Audio:
                 // Not supported yet
             default:
                 result = default;

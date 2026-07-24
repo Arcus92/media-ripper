@@ -1,31 +1,25 @@
 namespace MediaLib.Models;
 
-public class ChapterInfo : IMediaInfo
+/// <summary>
+/// Defines a chapter in the <see cref="MediaInfo"/>.
+/// </summary>
+[Serializable]
+public class ChapterInfo
 {
     /// <summary>
-    /// Gets the chapter index.
+    /// Gets and sets the chapter name.
     /// </summary>
-    public required ushort Id { get; init; }
-
-    /// <summary>
-    /// Gets the chapter description.
-    /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; set; } = "";
     
     /// <summary>
-    /// Gets the start time of the chapter.
+    /// Gets and sets the start time of the chapter.
     /// </summary>
-    public TimeSpan Start { get; init; }
+    public TimeSpan Start { get; set; }
     
     /// <summary>
-    /// Gets the end time of the chapter.
+    /// Gets and sets the end time of the chapter.
     /// </summary>
-    public TimeSpan End { get; init; }
-    
-    /// <summary>
-    /// Gets the start time of the chapter.
-    /// </summary>
-    public TimeSpan Duration => End - Start;
+    public TimeSpan End { get; set; }
     
     /// <inheritdoc />
     public override string ToString() => Name;
@@ -60,7 +54,6 @@ public class ChapterInfo : IMediaInfo
             if (start == end) continue;
             var chapterInfo = new ChapterInfo
             {
-                Id = id,
                 Name = $"Chapter {id+1:00}",
                 Start = start,
                 End = end

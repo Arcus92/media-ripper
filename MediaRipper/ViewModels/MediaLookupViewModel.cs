@@ -5,11 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using MediaLib.Output;
+using MediaLib.Models;
 using MediaRipper.Models.MediaLookup;
 using MediaRipper.Services.Interfaces;
 using MediaRipper.Views;
 using Microsoft.Extensions.Logging;
+using MediaType = MediaLib.Models.MediaType;
 
 namespace MediaRipper.ViewModels;
 
@@ -157,7 +158,7 @@ public class MediaLookupViewModel : ViewModelBase
                 Seasons.Add(season);
             }
 
-            IsTvSeries = details.MediaType == MediaType.Tv;
+            IsTvSeries = details.MediaType == Models.MediaLookup.MediaType.Tv;
             SelectedSeason = Seasons.FirstOrDefault(s => s.SeasonNumber == 1);
         }
         catch (Exception ex)
@@ -206,28 +207,28 @@ public class MediaLookupViewModel : ViewModelBase
     /// </summary>
     /// <param name="mediaInfo">Returns the media info if selected.</param>
     /// <returns>Returns true, it a media info was selected.</returns>
-    public bool TryGetMediaInfo([MaybeNullWhen(false)] out OutputMediaInfo mediaInfo)
+    public bool TryGetMediaInfo([MaybeNullWhen(false)] out MediaMetadata mediaInfo)
     {
         mediaInfo = null;
         if (SelectedMediaItem is null) return false;
 
         switch (SelectedMediaItem.MediaType)
         {
-            case MediaType.Tv:
+            case Models.MediaLookup.MediaType.Tv:
                 if (SelectedEpisode is null) return false;
-                mediaInfo = new OutputMediaInfo
+                mediaInfo = new MediaMetadata
                 {
                     Name = SelectedEpisode.Name,
-                    Type = OutputMediaType.Episode,
+                    Type = MediaType.Episode,
                     Season = SelectedEpisode.SeasonNumber,
                     Episode = SelectedEpisode.EpisodeNumber
                 };
                 return true;
-            case MediaType.Movie:
-                mediaInfo = new OutputMediaInfo
+            case Models.MediaLookup.MediaType.Movie:
+                mediaInfo = new MediaMetadata
                 {
                     Name = SelectedMediaItem.Name,
-                    Type = OutputMediaType.Movie
+                    Type = MediaType.Movie
                 };
                 return true;
             default:

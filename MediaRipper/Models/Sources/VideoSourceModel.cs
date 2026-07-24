@@ -4,13 +4,7 @@ namespace MediaRipper.Models.Sources;
 
 public class VideoSourceModel : StreamSourceModel
 {
-    public VideoSourceModel(VideoInfo stream) : base(stream)
+    public VideoSourceModel(StreamInfo stream) : base(stream)
     {
-        Stream = stream;
     }
-
-    /// <summary>
-    /// Gets the stream info.
-    /// </summary>
-    public new VideoInfo Stream { get; }
 }

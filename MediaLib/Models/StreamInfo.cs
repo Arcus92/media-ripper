@@ -1,27 +1,50 @@
+using System.Text.Json.Serialization;
+using MediaLib.Output;
+
 namespace MediaLib.Models;
 
-public abstract class StreamInfo : IMediaInfo
+/// <summary>
+/// Defines a stream in an <see cref="OutputFile"/>.
+/// </summary>
+[Serializable]
+public class StreamInfo
 {
     /// <summary>
-    /// Gets the stream id.
+    /// Gets and sets the stream id.
     /// </summary>
-    public required ushort Id { get; init; }
+    public ushort Id { get; set; }
 
     /// <summary>
-    /// Gets the stream's description, like a format type.
+    /// Gets and sets the stream name.
     /// </summary>
-    public required string Name { get; init; }
-
-    /// <summary>
-    /// Gets if this track is a secondary track.
-    /// </summary>
-    public bool IsSecondary { get; init; }
+    [JsonIgnore]
+    public string? Name { get; set; }
     
     /// <summary>
-    /// Gets if this track is the default track.
+    /// Gets and sets the stream type.
     /// </summary>
-    public bool IsDefault { get; init; }
-
-    /// <inheritdoc />
-    public override string ToString() => Name;
+    public StreamType Type { get; set; }
+    
+    /// <summary>
+    /// Gets and sets if this stream is enabled for export.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool Enabled { get; set; } = true;
+    
+    /// <summary>
+    /// Gets and sets the language code of this stream.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? LanguageCode { get; set; }
+    
+    /// <summary>
+    /// Gets the media format of this stream.
+    /// </summary>
+    public string? Format { get; set; }
+    
+    /// <summary>
+    /// Gets the additional stream flags.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public StreamFlags Flags { get; set; }
 }

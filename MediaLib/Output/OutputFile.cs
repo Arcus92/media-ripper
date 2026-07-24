@@ -1,3 +1,5 @@
+using MediaLib.Models;
+
 namespace MediaLib.Output;
 
 /// <summary>
@@ -19,5 +21,5 @@ public class OutputFile
     /// <summary>
     /// Gets and sets the list of streams in this file.
     /// </summary>
-    public OutputStream[] Streams { get; set; } = [];
+    public StreamInfo[] Streams { get; set; } = [];
 }
