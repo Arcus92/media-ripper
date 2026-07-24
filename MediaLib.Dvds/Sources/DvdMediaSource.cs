@@ -1,4 +1,5 @@
 using DvdLib;
+using DvdLib.Data.Enums;
 using MediaLib.Formats;
 using MediaLib.Models;
 using MediaLib.Output;
@@ -54,6 +55,15 @@ public class DvdMediaSource : IMediaSource
         var baseName = _dvdTitleInfo.Name;
         var vts = _dvdTitleInfo.TitleSet;
         
+        
+        // DVD uses fixed PIDs:
+        // Video          0xE0
+        // AC-3	          0x80-0x87
+        // DTS	          0x88-0x8F
+        // LPCM	          0xA0-0xA7
+        // MPEG-1/2 audio 0xC0-0xC7
+        // Subpicture     0x20-0x3F
+        
         var streams = new List<StreamInfo>
         {
             new()
@@ -64,12 +74,24 @@ public class DvdMediaSource : IMediaSource
             }
         };
 
-        ushort audioId = 0x80; // TODO: Filter by type
+        ushort audioIdAc3 = 0x80;
+        ushort audioIdDts = 0x88;
+        ushort audioIdLpcm = 0xA0;
+        ushort audioIdMpeg = 0xC0;
         foreach (var audio in vts.VtsAudios)
         {
+            ushort audioId = audio.AudioFormat switch
+            {
+                AudioFormat.Ac3 => audioIdAc3++,
+                AudioFormat.Dts => audioIdDts++,
+                AudioFormat.Lpcm => audioIdLpcm++,
+                AudioFormat.Mpeg1 or AudioFormat.Mpeg2Ext => audioIdMpeg++,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            
             streams.Add(new StreamInfo
             {
-                Id = audioId++,
+                Id = audioId,
                 LanguageCode = audio.LangCode,
                 Type = StreamType.Audio
             });
