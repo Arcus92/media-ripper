@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using DvdLib.Data.Models;
+using MediaLib.Utils;
 using MediaLib.Utils.IO;
 
 namespace DvdLib;
@@ -58,9 +59,8 @@ public partial class Dvd
         DiskMountSource = await MountUtils.GetMountSourceAsync(DiskPath);
         await Task.Run(() =>
         {
-            var videoStreamPath = Path.Combine(DiskPath, "VIDEO_TS");
-            
-            var ifoFiles = Directory.EnumerateFiles(videoStreamPath, "*.IFO");
+            var path = Path.Combine(DiskPath, "VIDEO_TS");
+            var ifoFiles = Directory.EnumerateFiles(path, "*.IFO");
             foreach (var ifoFile in ifoFiles)
             {
                 var filename = Path.GetFileNameWithoutExtension(ifoFile);
@@ -98,6 +98,25 @@ public partial class Dvd
                 var titleInfo = new DvdTitleInfo(index, title, titleSet.Information.Vts, vtsTitle.Ptts, pgc);
                 TitleInfo.Add(index, titleInfo);
             }
+            
+            // Load the streams and build the content hash
+            var fileInfos = new List<ContentHash.HashFileInfo>();
+            foreach (var file in Directory.EnumerateFiles(path))
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                
+                // Collect infos for the content hash calculation
+                var fileInfo = new FileInfo(file);
+                fileInfos.Add(new ContentHash.HashFileInfo()
+                {
+                    Name = name,
+                    CreationTime = fileInfo.CreationTime,
+                    Size = fileInfo.Length,
+                });
+            }
+
+            // Order the playlist files before calculating the hash.
+            ContentHash = fileInfos.OrderBy(i => i.Name).CalculateHash();
         });
     }
     

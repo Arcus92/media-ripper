@@ -78,8 +78,6 @@ public class BluRay
                 Clips.Add(id, item);
             }
             
-            var fileInfos = new List<ContentHash.HashFileInfo>();
-            
             // Load the playlist from the directory
             path = Path.Combine(DiskPath, "BDMV/PLAYLIST/");
             foreach (var file in Directory.EnumerateFiles(path, "*.mpls"))
@@ -94,6 +92,7 @@ public class BluRay
             }
             
             // Load the streams and build the content hash
+            var fileInfos = new List<ContentHash.HashFileInfo>();
             path = Path.Combine(DiskPath, "BDMV/STREAM/");
             foreach (var file in Directory.EnumerateFiles(path, "*.m2ts"))
             {
