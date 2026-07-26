@@ -6,7 +6,7 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// Audio Attributes
 /// </summary>
-public struct AudioAttributes
+public struct AudioAttributes : IBigEndianBinaryReadable
 {
     public AudioAttributes()
     {
@@ -26,7 +26,8 @@ public struct AudioAttributes
     public byte LangExtension { get; set; } = 0;
     public CodeExtension CodeExtension { get; set; } = default;
     
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    public void Read(BigEndianBinaryReader reader)
     {
         var b = reader.ReadBits8();
         AudioFormat = (AudioFormat)b.ReadBits(3);
@@ -46,22 +47,5 @@ public struct AudioAttributes
         reader.Skip(1);
         
         b = reader.ReadBits8();
-    }
-    
-    public static AudioAttributes FromReader(BigEndianBinaryReader reader)
-    {
-        var attr = new AudioAttributes();
-        attr.Read(reader);
-        return attr;
-    }
-    
-    public static AudioAttributes[] FromReader(BigEndianBinaryReader reader, int count)
-    {
-        var array = new AudioAttributes[count];
-        for (var i = 0; i < count; i++)
-        {
-            array[i] = FromReader(reader);
-        }
-        return array;
     }
 }

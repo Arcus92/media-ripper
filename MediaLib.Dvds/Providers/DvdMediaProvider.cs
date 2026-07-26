@@ -98,7 +98,7 @@ public class DvdMediaProvider : IMediaProvider
         var streamFactories = new List<Func<Stream>>();
         foreach (var segment in source.Info.Segments)
         {
-            streamFactories.Add(() => Dvd.GetCellStream(titleId, segment.Id));
+            streamFactories.Add(() => Dvd.GetProgramStream(titleId, segment.Id));
         }
         
         return new StreamListReader(streamFactories);
@@ -114,7 +114,7 @@ public class DvdMediaProvider : IMediaProvider
             throw new ArgumentException("Couldn't parse title id.", nameof(source));
         }
         
-        return Dvd.GetCellStream(titleId, segmentId);
+        return Dvd.GetProgramStream(titleId, segmentId);
     }
 
     /// <inheritdoc />

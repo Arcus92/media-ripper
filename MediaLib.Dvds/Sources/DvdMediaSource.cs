@@ -114,11 +114,15 @@ public class DvdMediaSource : IMediaSource
             Identifier = Identifier,
             Name = baseName,
             Duration = _dvdTitleInfo.Pgc.PlaybackTime.AsTimeSpan(),
-            Segments = _dvdTitleInfo.Ptts.Select(ptt => new SegmentInfo
+            Segments = _dvdTitleInfo.Ptts.Select(ptt =>
             {
-                Id = ptt.Pgn,
-                Name = baseName,
-                Duration = _dvdTitleInfo.Pgc.CellPlayback[ptt.Pgn - 1].PlaybackTime.AsTimeSpan(),
+                var cellId = _dvdTitleInfo.Pgc.ProgramMap[ptt.Pgn - 1];
+                return new SegmentInfo
+                {
+                    Id = ptt.Pgn,
+                    Name = baseName,
+                    Duration = _dvdTitleInfo.Pgc.CellPlayback[cellId - 1].PlaybackTime.AsTimeSpan(),
+                };
             }).ToArray(),
             Streams = streams.ToArray(),
             Chapters = GetChapterInfos().ToArray()

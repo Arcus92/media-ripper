@@ -5,7 +5,7 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// DVD Information
 /// </summary>
-public class Ifo
+public class Ifo : IBigEndianBinaryReadable
 {
     // https://dvds.beandog.org/doku.php?id=libdvdread
     // https://code.videolan.org/videolan/libdvdread/-/blob/master/src/ifo_read.c?ref_type=heads
@@ -16,6 +16,7 @@ public class Ifo
     public VmgiMat? Vmg { get; private set; }
     public VtsPttSrpt? VtsPttSrpt { get; private set; }
     public Pgcit? VtsPgcit { get; private set; }
+    public CAdtT? CAdtT { get; private set; }
 
     /// <summary>
     /// Reads the IFO file.
@@ -34,10 +35,10 @@ public class Ifo
     public void Read(Stream stream)
     {
         var reader = new BigEndianBinaryReader(stream);
-        Read(reader);
+        ((IBigEndianBinaryReadable)this).Read(reader);
     }
 
-    private void Read(BigEndianBinaryReader reader)
+    void IBigEndianBinaryReadable.Read(BigEndianBinaryReader reader)
     {
         var header = reader.ReadString(12);
         switch (header)
@@ -55,11 +56,11 @@ public class Ifo
 
     private void ReadVmg(BigEndianBinaryReader reader)
     {
-        var vmg = VmgiMat.FromReader(reader);
+        var vmg = reader.Read<VmgiMat>();
         if (vmg.TtSrpt > 0)
         {
             reader.SkipTo(vmg.TtSrpt * Dvd.BlockSize);
-            TtSrpt = TtSrpt.FromReader(reader);
+            TtSrpt = reader.Read<TtSrpt>();
         }
 
         Vmg = vmg;
@@ -67,16 +68,21 @@ public class Ifo
     
     private void ReadVts(BigEndianBinaryReader reader)
     {
-        var vts = VtsiMat.FromReader(reader);
+        var vts = reader.Read<VtsiMat>();
         if (vts.VtsPttSrpt > 0)
         {
             reader.SeekTo(vts.VtsPttSrpt * Dvd.BlockSize);
-            VtsPttSrpt = VtsPttSrpt.FromReader(reader);
+            VtsPttSrpt = reader.Read<VtsPttSrpt>();
         }
         if (vts.VtsPgcit > 0)
         {
             reader.SeekTo(vts.VtsPgcit * Dvd.BlockSize);
-            VtsPgcit = Pgcit.FromReader(reader);
+            VtsPgcit = reader.Read<Pgcit>();
+        }
+        if (vts.VtsCAdt > 0)
+        {
+            reader.SeekTo(vts.VtsCAdt * Dvd.BlockSize);
+            CAdtT = reader.Read<CAdtT>();
         }
 
         Vts = vts;

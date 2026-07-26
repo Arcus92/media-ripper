@@ -5,7 +5,7 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// Video Manager Information Management Table
 /// </summary>
-public class VmgiMat
+public class VmgiMat : IBigEndianBinaryReadable
 {
     public uint VmgLastSector { get; private set; } = 0;
     public uint VmgiLastSector { get; private set; } = 0;
@@ -26,7 +26,8 @@ public class VmgiMat
     public AudioAttributes[] VmgmAudios { get; private set; } = [];
     public SubPictureAttributes[] VmgmSubPictures { get; private set; } = [];
 
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    public void Read(BigEndianBinaryReader reader)
     {
         VmgLastSector = reader.ReadUInt32();
         reader.ReadZero(12);
@@ -57,21 +58,14 @@ public class VmgiMat
         var vmgmVobuAdmap = reader.ReadUInt32();
         reader.ReadZero(32);
         
-        VmgmVideo = VideoAttributes.FromReader(reader);
+        VmgmVideo = reader.Read<VideoAttributes>();
         reader.ReadZero();
         var nrOfVmgmAudioStreams = reader.ReadByte();
-        var vmgmAudioAttr = AudioAttributes.FromReader(reader, 8);
+        var vmgmAudioAttr = reader.Read<AudioAttributes>(8);
         VmgmAudios = vmgmAudioAttr.AsSpan(0, nrOfVmgmAudioStreams).ToArray();
         reader.ReadZero(17);
         var nrOfVmgmSubpStreams = reader.ReadByte();
-        var vmgmSubpAttr = SubPictureAttributes.FromReader(reader, 28);
+        var vmgmSubpAttr = reader.Read<SubPictureAttributes>(28);
         VmgmSubPictures = vmgmSubpAttr.AsSpan(0, nrOfVmgmSubpStreams).ToArray();
-    }
-    
-    public static VmgiMat FromReader(BigEndianBinaryReader reader)
-    {
-        var data = new VmgiMat();
-        data.Read(reader);
-        return data;
     }
 }

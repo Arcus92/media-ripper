@@ -5,7 +5,7 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// Program Chain Information
 /// </summary>
-public class Pgc
+public class Pgc : IBigEndianBinaryReadable
 {
     public DvdTime PlaybackTime { get; private set; } = default;
     public UserOps ProhibitedOps { get; private set; } = default;
@@ -22,17 +22,21 @@ public class Pgc
     public ushort CellPlaybackOffset { get; private set; } = 0;
     public ushort CellPositionOffset { get; private set; } = 0;
 
+    
+    public byte[] ProgramMap { get; private set; } = [];
     public CellPlayback[] CellPlayback { get; private set; } = [];
+    public CellPosition[] CellPosition { get; private set; } = [];
 
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    public void Read(BigEndianBinaryReader reader)
     {
         var start = reader.Position;
         
         reader.Skip(2);
         var nrOfPrograms = reader.ReadByte();
         var nrOfCells = reader.ReadByte();
-        PlaybackTime = DvdTime.FromReader(reader);
-        ProhibitedOps = UserOps.FromReader(reader);
+        PlaybackTime = reader.Read<DvdTime>();
+        ProhibitedOps = reader.Read<UserOps>();
         AudioControl = reader.ReadUInt16Array(8);
         SubpControl = reader.ReadUInt32Array(32);
         NextPgcNr = reader.ReadUInt16();
@@ -46,17 +50,22 @@ public class Pgc
         CellPlaybackOffset = reader.ReadUInt16();
         CellPositionOffset = reader.ReadUInt16();
 
+        if (ProgramMapOffset != 0 && nrOfPrograms > 0)
+        {
+            reader.SeekTo(start + ProgramMapOffset);
+            ProgramMap = reader.ReadBytes(nrOfPrograms);
+        }
+        
         if (CellPlaybackOffset != 0 && nrOfCells > 0)
         {
             reader.SeekTo(start + CellPlaybackOffset);
-            CellPlayback = Models.CellPlayback.FromReader(reader, nrOfCells);
+            CellPlayback = reader.Read<CellPlayback>(nrOfCells);
         }
-    }
-
-    public static Pgc FromReader(BigEndianBinaryReader reader)
-    {
-        var data = new Pgc();
-        data.Read(reader);
-        return data;
+        
+        if (CellPositionOffset != 0 && nrOfCells > 0)
+        {
+            reader.SeekTo(start + CellPositionOffset);
+            CellPosition = reader.Read<CellPosition>(nrOfCells);
+        }
     }
 }

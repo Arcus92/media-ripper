@@ -3,7 +3,7 @@ using MediaLib.Utils.IO;
 
 namespace DvdLib.Data.Models;
 
-public struct SubPictureAttributes
+public struct SubPictureAttributes : IBigEndianBinaryReadable
 {
     public SubPictureAttributes()
     {
@@ -15,7 +15,8 @@ public struct SubPictureAttributes
     public byte LangExtension { get; set; } = 0;
     public CodeExtension CodeExtension { get; set; } = default;
 
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    void IBigEndianBinaryReadable.Read(BigEndianBinaryReader reader)
     {
         var b = reader.ReadBits8();
         CodingMode = (CodingMode)b.ReadBits(3);
@@ -26,22 +27,5 @@ public struct SubPictureAttributes
         LangCode = reader.ReadString(2);
         LangExtension = reader.ReadByte();
         CodeExtension = (CodeExtension)reader.ReadByte();
-    }
-    
-    public static SubPictureAttributes FromReader(BigEndianBinaryReader reader)
-    {
-        var attr = new SubPictureAttributes();
-        attr.Read(reader);
-        return attr;
-    }
-    
-    public static SubPictureAttributes[] FromReader(BigEndianBinaryReader reader, int count)
-    {
-        var array = new SubPictureAttributes[count];
-        for (var i = 0; i < count; i++)
-        {
-            array[i] = FromReader(reader);
-        }
-        return array;
     }
 }

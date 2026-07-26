@@ -5,7 +5,7 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// Playback Type
 /// </summary>
-public struct PlaybackType
+public struct PlaybackType : IBigEndianBinaryReadable
 {
     public PlaybackType()
     {
@@ -19,7 +19,8 @@ public struct PlaybackType
     public bool ChapterSearchOrPlay { get; private set; } = false;
     public bool TitleOrTimePlay { get; private set; } = false;
 
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    public void Read(BigEndianBinaryReader reader)
     {
         var b = reader.ReadBits8();
         b.Skip(1);
@@ -30,12 +31,5 @@ public struct PlaybackType
         JlcExistsInTtDom = b.ReadBit();
         ChapterSearchOrPlay = b.ReadBit();
         TitleOrTimePlay = b.ReadBit();
-    }
-    
-    public static PlaybackType FromReader(BigEndianBinaryReader reader)
-    {
-        var data = new PlaybackType();
-        data.Read(reader);
-        return data;
     }
 }

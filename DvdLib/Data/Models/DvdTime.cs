@@ -5,7 +5,7 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// DVD Time
 /// </summary>
-public struct DvdTime
+public struct DvdTime : IBigEndianBinaryReadable
 {
     /// <summary>
     /// Gets the hours BCD encoded.
@@ -36,7 +36,8 @@ public struct DvdTime
             DecodeBcd(Second));
     }
 
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    public void Read(BigEndianBinaryReader reader)
     {
         Hour = reader.ReadByte();
         Minute = reader.ReadByte();
@@ -47,12 +48,5 @@ public struct DvdTime
     private static int DecodeBcd(byte b)
     {
         return ((b >> 4) & 0x0F) * 10 + (b & 0x0F);
-    }
-    
-    public static DvdTime FromReader(BigEndianBinaryReader reader)
-    {
-        var time = new DvdTime();
-        time.Read(reader);
-        return time;
     }
 }

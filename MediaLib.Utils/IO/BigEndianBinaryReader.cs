@@ -277,6 +277,34 @@ public class BigEndianBinaryReader : IDisposable
     {
         return new BigEndianBitReader<ulong>(ReadUInt64());
     }
+
+    /// <summary>
+    /// Creates and reads a <see cref="IBigEndianBinaryReadable"/> instance.
+    /// </summary>
+    /// <typeparam name="T">The instance type.</typeparam>
+    /// <returns>Returns the instance.</returns>
+    public T Read<T>() where T : IBigEndianBinaryReadable, new()
+    {
+        var instance = new T();
+        instance.Read(this);
+        return instance;
+    }
+    
+    /// <summary>
+    /// Reads an array of <see cref="IBigEndianBinaryReadable"/> instances.
+    /// </summary>
+    /// <param name="count">The number of elements to read.</param>
+    /// <typeparam name="T">The instance type.</typeparam>
+    /// <returns>Returns the instances as array.</returns>
+    public T[] Read<T>(int count) where T : IBigEndianBinaryReadable, new()
+    {
+        var array = new T[count];
+        for (var i = 0; i < count; i++)
+        {
+            array[i] = Read<T>();
+        }
+        return array;
+    }
     
     /// <summary>
     /// Skips the next number of bytes.

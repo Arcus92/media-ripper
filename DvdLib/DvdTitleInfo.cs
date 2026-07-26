@@ -23,7 +23,12 @@ public class DvdTitleInfo
     /// The program chain info.
     /// </summary>
     public Pgc Pgc { get; }
-    
+
+    /// <summary>
+    /// The program chain search pointer.
+    /// </summary>
+    public PgciSrp PgciSrp { get; }
+
     /// <summary>
     /// The title parts.
     /// </summary>
@@ -39,12 +44,13 @@ public class DvdTitleInfo
     /// </summary>
     public string Name => $"Title {Index:00}";
 
-    public DvdTitleInfo(ushort index, TitleInfo titleInfo, VtsiMat titleSet, PttInfo[] ptts, Pgc pgc)
+    public DvdTitleInfo(ushort index, TitleInfo titleInfo, VtsiMat titleSet, PttInfo[] ptts, Pgc pgc, PgciSrp pgciSrp)
     {
         Index = index;
         TitleInfo = titleInfo;
         TitleSet = titleSet;
         Pgc = pgc;
+        PgciSrp = pgciSrp;
         Ptts = ptts;
     }
 }

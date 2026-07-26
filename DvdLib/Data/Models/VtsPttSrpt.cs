@@ -5,11 +5,12 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// PartOfTitle Search Pointer Table
 /// </summary>
-public class VtsPttSrpt
+public class VtsPttSrpt : IBigEndianBinaryReadable
 {
     public Ttu[] Titles { get; private set; } = [];
 
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    public void Read(BigEndianBinaryReader reader)
     {
         var nrOfSrpts = reader.ReadUInt16();
         reader.ReadZero(2);
@@ -35,18 +36,11 @@ public class VtsPttSrpt
                 size = lastByte + 1 - ttuOffset[i];
             }
             var n = size / 4;
-            var ptt = PttInfo.FromReader(reader, (int)n);
+            var ptt = reader.Read<PttInfo>((int)n);
             Titles[i] = new Ttu
             {
                 Ptts = ptt
             };
         }
-    }
-    
-    public static VtsPttSrpt FromReader(BigEndianBinaryReader reader)
-    {
-        var data = new VtsPttSrpt();
-        data.Read(reader);
-        return data;
     }
 }

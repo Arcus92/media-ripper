@@ -5,7 +5,7 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// Video Title Set Information Management Table
 /// </summary>
-public class VtsiMat
+public class VtsiMat : IBigEndianBinaryReadable
 {
     public uint VtsLastSector { get; private set; } = 0;
     public uint VtsiLastSector { get; private set; } = 0;
@@ -18,6 +18,13 @@ public class VtsiMat
     public uint VtsPttSrpt { get; private set; } = 0;
     public uint VtsPgcit { get; private set; } = 0;
 
+    public uint VtsmPgciUt { get; private set; } = 0;
+    public uint VtsTmapt { get; private set; } = 0;
+    public uint VtsmCAdt { get; private set; } = 0;
+    public uint VtsmVobuAdmap { get; private set; } = 0;
+    public uint VtsCAdt { get; private set; } = 0;
+    public uint VtsVobuAdmap { get; private set; } = 0;
+    
     public VideoAttributes VtsmVideo { get; private set; }
     public AudioAttributes[] VtsmAudios { get; private set; } = [];
     public SubPictureAttributes[] VtsmSubPictures { get; private set; } = [];
@@ -26,9 +33,9 @@ public class VtsiMat
     public AudioAttributes[] VtsAudios { get; private set; } = [];
     public SubPictureAttributes[] VtsSubPictures { get; private set; } = [];
     public MultiChannelAttributes[] VtsiMultiChannelAudios { get; private set; } = [];
-
     
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    public void Read(BigEndianBinaryReader reader)
     {
         VtsLastSector = reader.ReadUInt32();
         reader.ReadZero(12);
@@ -51,43 +58,36 @@ public class VtsiMat
         VtsTtVobs = reader.ReadUInt32();
         VtsPttSrpt = reader.ReadUInt32();
         VtsPgcit = reader.ReadUInt32();
-        var vtsmPgciUt = reader.ReadUInt32();
-        var vtsTmapt = reader.ReadUInt32();
-        var vtsmCAdt = reader.ReadUInt32();
-        var vtsmVobuAdmap = reader.ReadUInt32();
-        var vtsCAdt = reader.ReadUInt32();
-        var vtsVobuAdmap = reader.ReadUInt32();
+        VtsmPgciUt = reader.ReadUInt32();
+        VtsTmapt = reader.ReadUInt32();
+        VtsmCAdt = reader.ReadUInt32();
+        VtsmVobuAdmap = reader.ReadUInt32();
+        VtsCAdt = reader.ReadUInt32();
+        VtsVobuAdmap = reader.ReadUInt32();
         reader.ReadZero(24);
         
-        VtsmVideo = VideoAttributes.FromReader(reader);
+        VtsmVideo = reader.Read<VideoAttributes>();
         reader.ReadZero();
         var nrOfVtsmAudioStreams = reader.ReadByte();
-        var vtsmAudioAttr = AudioAttributes.FromReader(reader, 8);
+        var vtsmAudioAttr = reader.Read<AudioAttributes>(8);
         VtsmAudios = vtsmAudioAttr.AsSpan(0, nrOfVtsmAudioStreams).ToArray();
         reader.ReadZero(17);
         var nrOfVtsmSubpStreams = reader.ReadByte();
-        var vtsmSubpAttr = SubPictureAttributes.FromReader(reader, 28);
+        var vtsmSubpAttr = reader.Read<SubPictureAttributes>(28);
         VtsmSubPictures = vtsmSubpAttr.AsSpan(0, nrOfVtsmSubpStreams).ToArray();
         reader.ReadZero(2);
         
-        VtsVideo = VideoAttributes.FromReader(reader);
+        VtsVideo = reader.Read<VideoAttributes>();
         reader.ReadZero();
         var nrOfVtsAudioAttr = reader.ReadByte();
-        var vtsAudioAttr = AudioAttributes.FromReader(reader, 8);
+        var vtsAudioAttr = reader.Read<AudioAttributes>(8);
         VtsAudios = vtsAudioAttr.AsSpan(0, nrOfVtsAudioAttr).ToArray();
         reader.Skip(17);
         var nrOfVtsSubPictureStreams = reader.ReadByte();
-        var vtsSubPictureAttr = SubPictureAttributes.FromReader(reader, 32);
+        var vtsSubPictureAttr = reader.Read<SubPictureAttributes>(32);
         VtsSubPictures = vtsSubPictureAttr.AsSpan(0, nrOfVtsSubPictureStreams).ToArray();
         reader.Skip(2);
-        var vtsMuAudioAttr = MultiChannelAttributes.FromReader(reader, 8);
+        var vtsMuAudioAttr = reader.Read<MultiChannelAttributes>(8);
         VtsiMultiChannelAudios = vtsMuAudioAttr;
-    }
-    
-    public static VtsiMat FromReader(BigEndianBinaryReader reader)
-    {
-        var data = new VtsiMat();
-        data.Read(reader);
-        return data;
     }
 }

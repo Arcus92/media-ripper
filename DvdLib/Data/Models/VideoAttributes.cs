@@ -6,7 +6,7 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// Video Attributes
 /// </summary>
-public struct VideoAttributes
+public struct VideoAttributes : IBigEndianBinaryReadable
 {
     public VideoAttributes()
     {
@@ -25,7 +25,8 @@ public struct VideoAttributes
     public bool LetterBoxed { get; set; } = false;
     public FilmMode FilmMode { get; set; } = default;
 
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    public void Read(BigEndianBinaryReader reader)
     {
         var b = reader.ReadBits8();
         MpegVersion = (MpegVersion)b.ReadBits(2);
@@ -42,22 +43,5 @@ public struct VideoAttributes
         PictureSize =  (PictureSize)b.ReadBits(2);
         LetterBoxed = b.ReadBit();
         FilmMode = (FilmMode)b.ReadBits(1);
-    }
-    
-    public static VideoAttributes FromReader(BigEndianBinaryReader reader)
-    {
-        var attr = new VideoAttributes();
-        attr.Read(reader);
-        return attr;
-    }
-    
-    public static VideoAttributes[] FromReader(BigEndianBinaryReader reader, int count)
-    {
-        var array = new VideoAttributes[count];
-        for (var i = 0; i < count; i++)
-        {
-            array[i] = FromReader(reader);
-        }
-        return array;
     }
 }

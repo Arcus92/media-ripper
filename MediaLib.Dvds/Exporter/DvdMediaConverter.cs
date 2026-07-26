@@ -46,7 +46,7 @@ public class DvdMediaConverter : FFmpegMediaConverter<DvdMediaProvider>
             try
             {
                 Logger.LogInformation("Opening segment #{cellId}", cellId);
-                return Provider.Dvd.GetCellStream(titleId, cellId);
+                return Provider.Dvd.GetProgramStream(titleId, cellId);
             }
             catch (Exception ex)
             {

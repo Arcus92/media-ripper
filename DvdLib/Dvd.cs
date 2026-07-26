@@ -75,27 +75,28 @@ public partial class Dvd
             }
             
             // Reading the VIDEO_TS.IFO file with all titles
-            if (!TitleSetInfo.TryGetValue(0, out var info) || info.Information.TtSrpt is null)
+            if (!TitleSetInfo.TryGetValue(0, out var info) || info.Ifo.TtSrpt is null)
             {
                 return;
             }
 
-            for (ushort index = 0; index < info.Information.TtSrpt.Titles.Length; index++)
+            for (ushort index = 0; index < info.Ifo.TtSrpt.Titles.Length; index++)
             {
-                var title = info.Information.TtSrpt.Titles[index];
+                var title = info.Ifo.TtSrpt.Titles[index];
                 // Reading title set .IFO file
                 if (!TitleSetInfo.TryGetValue(title.TitleSetNr, out var titleSet) || 
-                    titleSet.Information.Vts is null ||
-                    titleSet.Information.VtsPttSrpt is null ||
-                    titleSet.Information.VtsPgcit is null)
+                    titleSet.Ifo.Vts is null ||
+                    titleSet.Ifo.VtsPttSrpt is null ||
+                    titleSet.Ifo.VtsPgcit is null)
                 {
                     continue;
                 }
 
-                var vtsTitle = titleSet.Information.VtsPttSrpt.Titles[title.VtsTtn - 1];
-                var pgc = titleSet.Information.VtsPgcit.PgciSrp[vtsTitle.Ptts[0].Pgcn - 1].Pgc!;
+                var vtsTitle = titleSet.Ifo.VtsPttSrpt.Titles[title.VtsTtn - 1];
+                var pgciSrp = titleSet.Ifo.VtsPgcit.PgciSrp[vtsTitle.Ptts[0].Pgcn - 1];
+                var pgc = pgciSrp.Pgc!;
 
-                var titleInfo = new DvdTitleInfo(index, title, titleSet.Information.Vts, vtsTitle.Ptts, pgc);
+                var titleInfo = new DvdTitleInfo(index, title, titleSet.Ifo.Vts, vtsTitle.Ptts, pgc, pgciSrp);
                 TitleInfo.Add(index, titleInfo);
             }
             
@@ -160,17 +161,18 @@ public partial class Dvd
     #region Streams
     
     /// <summary>
-    /// Opens a stream for the given title and cell.
+    /// Opens a stream for the given title and program.
     /// </summary>
     /// <param name="titleId">The title id.</param>
-    /// <param name="cellId">The cell id.</param>
+    /// <param name="programId">The program id.</param>
     /// <returns>Returns the stream.</returns>
-    public Stream GetCellStream(ushort titleId, ushort cellId)
+    public Stream GetProgramStream(ushort titleId, ushort programId)
     {
         var title = TitleInfo[titleId];
+        var cellId = title.Pgc.ProgramMap[programId - 1];
         var cell = title.Pgc.CellPlayback[cellId - 1];
         
-        var titleSetSector = title.TitleInfo.TitleSetSector + title.TitleSet.VtsTtVobs;
+        var titleSetSector = title.TitleInfo.TitleSetSector + title.TitleSet.VtsTtVobs + title.Pgc.CellPlaybackOffset;
         var cellStartSector = titleSetSector + cell.FirstSector;
         var cellEndSector = titleSetSector + cell.LastSector;
         

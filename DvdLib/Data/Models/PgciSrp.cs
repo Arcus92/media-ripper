@@ -5,7 +5,7 @@ namespace DvdLib.Data.Models;
 /// <summary>
 /// Program Chain Information Search Pointer
 /// </summary>
-public class PgciSrp
+public class PgciSrp : IBigEndianBinaryReadable
 { 
     public byte EntryId { get; private set; } = 0;
     public byte BlockMode { get; private set; } = 0;
@@ -14,7 +14,8 @@ public class PgciSrp
     public uint PgcStartByte { get; private set; } = 0;
     public Pgc? Pgc { get; set; } = null;
 
-    private void Read(BigEndianBinaryReader reader)
+    /// <inheritdoc />
+    public void Read(BigEndianBinaryReader reader)
     {
         EntryId = reader.ReadByte();
         var b = reader.ReadBits8();
@@ -23,22 +24,5 @@ public class PgciSrp
         b.Skip(4);
         PtlIdMask = reader.ReadUInt16();
         PgcStartByte = reader.ReadUInt32();
-    }
-    
-    public static PgciSrp FromReader(BigEndianBinaryReader reader)
-    {
-        var data = new PgciSrp();
-        data.Read(reader);
-        return data;
-    }
-    
-    public static PgciSrp[] FromReader(BigEndianBinaryReader reader, int count)
-    {
-        var array = new PgciSrp[count];
-        for (var i = 0; i < count; i++)
-        {
-            array[i] = FromReader(reader);
-        }
-        return array;
     }
 }

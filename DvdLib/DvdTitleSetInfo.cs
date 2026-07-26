@@ -12,17 +12,17 @@ public class DvdTitleSetInfo
     /// <summary>
     /// Gets the IFO file.
     /// </summary>
-    public Ifo Information { get; }
+    public Ifo Ifo { get; }
     
     /// <summary>
     /// Gets the lengths of the VOB files.
     /// </summary>
     public long[] FileLengths { get; }
     
-    public DvdTitleSetInfo(ushort titleSetIndex, Ifo information, long[] fileLengths)
+    public DvdTitleSetInfo(ushort titleSetIndex, Ifo ifo, long[] fileLengths)
     {
         TitleSetIndex = titleSetIndex;
-        Information = information;
+        Ifo = ifo;
         FileLengths = fileLengths;
     }
 }
