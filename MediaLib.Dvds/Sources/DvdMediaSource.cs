@@ -4,6 +4,7 @@ using MediaLib.Formats;
 using MediaLib.Models;
 using MediaLib.Output;
 using MediaLib.Sources;
+using MediaLib.Utils.Data;
 
 namespace MediaLib.Dvds.Sources;
 
@@ -92,7 +93,7 @@ public class DvdMediaSource : IMediaSource
             streams.Add(new StreamInfo
             {
                 Id = audioId,
-                LanguageCode = audio.LangCode,
+                LanguageCode = MapLanguageCode(audio.LangCode),
                 Type = StreamType.Audio
             });
         }
@@ -103,7 +104,7 @@ public class DvdMediaSource : IMediaSource
             streams.Add(new StreamInfo
             {
                 Id = subPictureId++,
-                LanguageCode = subPicture.LangCode,
+                LanguageCode = MapLanguageCode(subPicture.LangCode),
                 Type = StreamType.Subtitle,
                 Format = "dvd_subtitle"
             });
@@ -127,6 +128,12 @@ public class DvdMediaSource : IMediaSource
             Streams = streams.ToArray(),
             Chapters = GetChapterInfos().ToArray()
         };
+    }
+
+    private string MapLanguageCode(string languageCode)
+    {
+        // DVDs use two-digit (Set 1) language code, FFmpeg requires three-digit (Set2 T) codes.
+        return Iso639.Set1ToSet2T.GetValueOrDefault(languageCode, languageCode);
     }
     
     #endregion Media info
