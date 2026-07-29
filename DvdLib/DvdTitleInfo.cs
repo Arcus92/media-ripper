@@ -7,17 +7,27 @@ public class DvdTitleInfo
     /// <summary>
     /// Gets the title index.
     /// </summary>
-    public ushort Index { get; }
-    
+    public ushort TitleIndex { get; }
+
     /// <summary>
-    /// The title set.
-    /// </summary>
-    public VtsiMat TitleSet { get; }
-    
-    /// <summary>
-    /// Gets the DVD internal title info.
+    /// Gets the internal title info.
     /// </summary>
     public TitleInfo TitleInfo { get; }
+    
+    /// <summary>
+    /// The domain information of the title.
+    /// </summary>
+    public DvdDomainInfo DomainInfo { get; }
+
+    /// <summary>
+    /// The title set information of the title.
+    /// </summary>
+    public VtsiMat TitleSetInfo { get; }
+    
+    /// <summary>
+    /// Gets the title set index.
+    /// </summary>
+    public byte TitleSetIndex => DomainInfo.TitleSetIndex;
 
     /// <summary>
     /// The program chain info.
@@ -33,22 +43,18 @@ public class DvdTitleInfo
     /// The title parts.
     /// </summary>
     public PttInfo[] Ptts { get; }
-
-    /// <summary>
-    /// Gets the title set index.
-    /// </summary>
-    public byte TitleSetIndex => TitleInfo.TitleSetNr;
     
     /// <summary>
     /// Gets the name of this title.
     /// </summary>
-    public string Name => $"Title {Index:00}";
+    public string Name => $"Title {TitleIndex:00}";
 
-    public DvdTitleInfo(ushort index, TitleInfo titleInfo, VtsiMat titleSet, PttInfo[] ptts, Pgc pgc, PgciSrp pgciSrp)
+    public DvdTitleInfo(ushort titleIndex, TitleInfo titleInfo, DvdDomainInfo domainInfo, PttInfo[] ptts, Pgc pgc, PgciSrp pgciSrp)
     {
-        Index = index;
+        TitleIndex = titleIndex;
         TitleInfo = titleInfo;
-        TitleSet = titleSet;
+        DomainInfo = domainInfo;
+        TitleSetInfo = DomainInfo.Ifo.Vts!;
         Pgc = pgc;
         PgciSrp = pgciSrp;
         Ptts = ptts;

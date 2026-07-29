@@ -9,7 +9,7 @@ public class DvdCssDecryptStream : Stream
         _dvdCss = new DvdCss();
         _positionStart = cellStartSector * Dvd.BlockSize;
         _positionEnd = (cellEndSector + 1) * Dvd.BlockSize;
-        _length = _positionEnd - _positionStart;
+        Length = _positionEnd - _positionStart;
 
         _bufferLength = 0;
         _bufferOffset = 0;
@@ -41,7 +41,7 @@ public class DvdCssDecryptStream : Stream
     private int _bufferOffset;
     private int _bufferLength;
     private readonly byte[] _buffer = new byte[BufferSize];
-    private readonly long _length;
+
     private int ReadBufferAndDecrypt()
     {
         var remaining = _positionEnd - _positionCurrent - _bufferOffset;
@@ -107,13 +107,19 @@ public class DvdCssDecryptStream : Stream
             SeekOrigin.End => _positionEnd - offset,
             _ => _positionStart + offset
         };
-
-
+        
+        // Not changed
+        if (offset == Position)
+        {
+            return offset;
+        }
+        
         var newBufferOffset = (int)(offset % Dvd.BlockSize);
         var newFileOffset = offset - newBufferOffset;
-            
+
+        
         // Unit is already loaded
-        if (newFileOffset == _positionCurrent && _bufferOffset > 0)
+        if (newFileOffset == _positionCurrent && newBufferOffset < _bufferLength)
         {
             _bufferOffset = newBufferOffset;
             return offset;
@@ -127,11 +133,6 @@ public class DvdCssDecryptStream : Stream
         _positionCurrent = newFileOffset;
         _bufferOffset = newBufferOffset;
         _bufferLength = 0;
-        if (_bufferOffset != 0)
-        {
-            var ret = ReadBufferAndDecrypt();
-            _bufferLength = ret * Dvd.BlockSize;
-        }
 
         return offset;
     }
@@ -158,7 +159,7 @@ public class DvdCssDecryptStream : Stream
     public override bool CanWrite => false;
 
     /// <inheritdoc />
-    public override long Length => _length;
+    public override long Length { get; }
 
     /// <inheritdoc />
     public override long Position

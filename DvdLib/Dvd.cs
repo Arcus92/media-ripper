@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using DvdLib.Data.Models;
+using DvdLib.VolumeDescriptor;
 using MediaLib.Utils;
 using MediaLib.Utils.IO;
 
@@ -27,7 +28,7 @@ public partial class Dvd
     /// <summary>
     /// Gets all title set information by title set index.
     /// </summary>
-    public Dictionary<ushort, DvdTitleSetInfo> TitleSetInfo { get; } = new();
+    private Dictionary<ushort, DvdDomainInfo> TitleSetInfo { get; } = new();
     
     /// <summary>
     /// Gets all loaded video streams from VIDEO_TS.
@@ -48,6 +49,8 @@ public partial class Dvd
     /// Gets the content hash of the disc. This content hash is compatible with TheDiscDb.
     /// </summary>
     public string ContentHash { get; private set; } = "";
+    
+    private uint _videoTsSectorOffset;
 
     /// <summary>
     /// Loads the DVD content and populates <see cref="TitleInfo"/>.
@@ -57,21 +60,30 @@ public partial class Dvd
         TitleSetInfo.Clear();
         TitleInfo.Clear();
         DiskMountSource = await MountUtils.GetMountSourceAsync(DiskPath);
+        
         await Task.Run(() =>
         {
             var path = Path.Combine(DiskPath, "VIDEO_TS");
-            var ifoFiles = Directory.EnumerateFiles(path, "*.IFO");
-            foreach (var ifoFile in ifoFiles)
+            
+            var rootDirectoryEntry = ReadDirectoryFromVolume();
+            var videoDirectoryEntry = rootDirectoryEntry.GetEntry("VIDEO_TS");
+            if (videoDirectoryEntry is not null)
             {
-                var filename = Path.GetFileNameWithoutExtension(ifoFile);
-                var titleSetIndex = GetTitleSetIndexByFilename(filename);
-                
-                var ifo = new Ifo();
-                ifo.Read(ifoFile);
+                foreach (var entry in videoDirectoryEntry.Entries.Where(e => !e.IsDirectory))
+                {
+                    if (entry.IsDirectory || !entry.Filename.EndsWith(".IFO")) continue;
 
-                var fileLengths = GetVobFileLengths(titleSetIndex).ToArray();
-                
-                TitleSetInfo.Add(titleSetIndex, new DvdTitleSetInfo(titleSetIndex, ifo, fileLengths));
+                    var filePath = Path.Combine(path, entry.Filename);
+                    
+                    var filename = Path.GetFileNameWithoutExtension(entry.Filename);
+                    var titleSetIndex = GetTitleSetIndexByFilename(filename);
+                    
+                    var ifo = new Ifo();
+                    ifo.Read(filePath);
+                    
+                    var domainInfo = new DvdDomainInfo(titleSetIndex, ifo, entry);
+                    TitleSetInfo.Add(titleSetIndex, domainInfo);
+                }
             }
             
             // Reading the VIDEO_TS.IFO file with all titles
@@ -79,10 +91,11 @@ public partial class Dvd
             {
                 return;
             }
+            _videoTsSectorOffset = info.DirectoryEntry.DataLocation;
 
-            for (ushort index = 0; index < info.Ifo.TtSrpt.Titles.Length; index++)
+            for (ushort titleIndex = 0; titleIndex < info.Ifo.TtSrpt.Titles.Length; titleIndex++)
             {
-                var title = info.Ifo.TtSrpt.Titles[index];
+                var title = info.Ifo.TtSrpt.Titles[titleIndex];
                 // Reading title set .IFO file
                 if (!TitleSetInfo.TryGetValue(title.TitleSetNr, out var titleSet) || 
                     titleSet.Ifo.Vts is null ||
@@ -96,8 +109,8 @@ public partial class Dvd
                 var pgciSrp = titleSet.Ifo.VtsPgcit.PgciSrp[vtsTitle.Ptts[0].Pgcn - 1];
                 var pgc = pgciSrp.Pgc!;
 
-                var titleInfo = new DvdTitleInfo(index, title, titleSet.Ifo.Vts, vtsTitle.Ptts, pgc, pgciSrp);
-                TitleInfo.Add(index, titleInfo);
+                var titleInfo = new DvdTitleInfo(titleIndex, title, titleSet, vtsTitle.Ptts, pgc, pgciSrp);
+                TitleInfo.Add(titleIndex, titleInfo);
             }
             
             // Load the streams and build the content hash
@@ -138,25 +151,35 @@ public partial class Dvd
         var titleSet = byte.Parse(match.Groups[1].Value);
         return titleSet;
     }
-
-    private IEnumerable<long> GetVobFileLengths(byte titleSetIndex)
-    {
-        for (var i = 0; i <= 9; i++)
-        {
-            var filename = titleSetIndex == 0 ? 
-                "VIDEO_TS.VOB" : 
-                $"VTS_{titleSetIndex:00}_{i}.VOB";
-
-            var path = Path.Combine(DiskPath, "VIDEO_TS", filename);
-            var fileInfo = new FileInfo(path);
-            if (!fileInfo.Exists) break;
-            yield return fileInfo.Length;
-
-            if (titleSetIndex == 0) break;
-        }
-    }
     
     #endregion Info
+    
+    #region File system
+
+    /// <summary>
+    /// Reads the root directory from the volume descriptor.
+    /// </summary>
+    /// <returns>Returns the root dictionary entry with all sub-entries loaded.</returns>
+    private DirectoryEntry ReadDirectoryFromVolume()
+    {
+        using var stream = GetRawDeviceStream();
+        using var reader = new BigEndianBinaryReader(stream);
+        
+        // Start of Volume Descriptor
+        reader.SeekTo(16 * BlockSize);
+        
+        var volumeDescriptor = reader.Read<VolumeDescriptorSet>();
+        if (volumeDescriptor.Descriptor is PrimaryVolumeDescriptor primaryDescriptor)
+        {
+            var root = primaryDescriptor.RootDirectoryEntry;
+            root.ReadEntries(reader, true);
+            return root;
+        }
+
+        throw new IOException($"Expected PrimaryVolumeDescriptor. Found {volumeDescriptor.Type} instead.");
+    }
+    
+    #endregion File system
     
     #region Streams
     
@@ -172,7 +195,7 @@ public partial class Dvd
         var cellId = title.Pgc.ProgramMap[programId - 1];
         var cell = title.Pgc.CellPlayback[cellId - 1];
         
-        var titleSetSector = title.TitleInfo.TitleSetSector + title.TitleSet.VtsTtVobs + title.Pgc.CellPlaybackOffset;
+        var titleSetSector = _videoTsSectorOffset + title.TitleInfo.TitleSetSector + title.TitleSetInfo.VtsTtVobs;
         var cellStartSector = titleSetSector + cell.FirstSector;
         var cellEndSector = titleSetSector + cell.LastSector;
         
@@ -183,6 +206,16 @@ public partial class Dvd
         }
 
         throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Returns the raw stream of the disk device.
+    /// </summary>
+    /// <returns>Returns the Stream.</returns>
+    private Stream GetRawDeviceStream()
+    {
+        // TODO: Add support for Windows and macOS
+        return new FileStream(DiskMountSource, FileMode.Open, FileAccess.Read, FileShare.Read);
     }
     
     #endregion Streams

@@ -75,6 +75,16 @@ public class BigEndianBinaryReader : IDisposable
     }
     
     /// <summary>
+    /// Reads a signed 8-bit byte.
+    /// </summary>
+    /// <returns></returns>
+    public sbyte ReadSByte()
+    {
+        _position++;
+        return _reader.ReadSByte();
+    }
+    
+    /// <summary>
     /// Reads an 16-bit integer.
     /// </summary>
     /// <returns></returns>

@@ -72,7 +72,7 @@ public class DvdMediaProvider : IMediaProvider
             Type = MediaIdentifierType.Dvd,
             ContentHash = Dvd.ContentHash,
             DiskName = Dvd.DiskName,
-            Id = dvdTitleInfo.Index.ToString(),
+            Id = dvdTitleInfo.TitleIndex.ToString(),
             SegmentIds = dvdTitleInfo.Ptts.Select(ptt => ptt.Pgn).ToArray(),
         };
         

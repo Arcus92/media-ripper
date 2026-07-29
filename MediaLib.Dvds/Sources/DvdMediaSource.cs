@@ -53,7 +53,7 @@ public class DvdMediaSource : IMediaSource
     private MediaInfo BuildMediaInfo()
     {
         var baseName = _dvdTitleInfo.Name;
-        var vts = _dvdTitleInfo.TitleSet;
+        var vts = _dvdTitleInfo.TitleSetInfo;
         
         
         // DVD uses fixed PIDs:
@@ -136,7 +136,7 @@ public class DvdMediaSource : IMediaSource
     /// <inheritdoc />
     public OutputDefinition CreateDefaultOutputDefinition(CodecOptions codec, MediaFormat containerFormat)
     {
-        var baseName = $"{Identifier.DiskName}_{_dvdTitleInfo.Index}";
+        var baseName = $"{Identifier.DiskName}_{_dvdTitleInfo.TitleIndex}";
         return OutputHelper.CreateDefaultOutputDefinition(baseName, Info, codec, containerFormat);
     }
     
