@@ -1,6 +1,6 @@
 namespace DvdLib.Data.Enums;
 
-public enum CodeExtension : byte
+public enum AudioCodeExtension : byte
 {
     Unspecified = 0,
     Normal = 1,

@@ -24,7 +24,7 @@ public struct AudioAttributes : IBigEndianBinaryReadable
 
     public string LangCode { get; set; } = "";
     public byte LangExtension { get; set; } = 0;
-    public CodeExtension CodeExtension { get; set; } = default;
+    public AudioCodeExtension CodeExtension { get; set; } = default;
     
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader)
@@ -43,7 +43,7 @@ public struct AudioAttributes : IBigEndianBinaryReadable
         
         LangCode = reader.ReadString(2);
         LangExtension = reader.ReadByte();
-        CodeExtension = (CodeExtension)reader.ReadByte();
+        CodeExtension = (AudioCodeExtension)reader.ReadByte();
         reader.Skip(1);
         
         b = reader.ReadBits8();

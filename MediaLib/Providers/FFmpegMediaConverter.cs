@@ -242,6 +242,8 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
                         builder.Metadata(outputStreamCount, "language", stream.LanguageCode);
                     if ((stream.Flags & StreamFlags.Default) != 0)
                         builder.Disposition(outputStreamCount, "default");
+                    if ((stream.Flags & StreamFlags.Forced) != 0)
+                        builder.Disposition(outputStreamCount, "forced");
 
                     CustomStreamSettings(stream, outputStreamCount, builder);
                     

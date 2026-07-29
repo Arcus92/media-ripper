@@ -13,7 +13,7 @@ public struct SubPictureAttributes : IBigEndianBinaryReadable
     public LanguageType Type { get; set; } = default;
     public string LangCode { get; set; } = "";
     public byte LangExtension { get; set; } = 0;
-    public CodeExtension CodeExtension { get; set; } = default;
+    public SubPictureCodeExtension CodeExtension { get; set; } = default;
 
     /// <inheritdoc />
     void IBigEndianBinaryReadable.Read(BigEndianBinaryReader reader)
@@ -26,6 +26,6 @@ public struct SubPictureAttributes : IBigEndianBinaryReadable
         reader.ReadZero();
         LangCode = reader.ReadString(2);
         LangExtension = reader.ReadByte();
-        CodeExtension = (CodeExtension)reader.ReadByte();
+        CodeExtension = (SubPictureCodeExtension)reader.ReadByte();
     }
 }

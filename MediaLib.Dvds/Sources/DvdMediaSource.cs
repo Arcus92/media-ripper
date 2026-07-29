@@ -94,6 +94,7 @@ public class DvdMediaSource : IMediaSource
             {
                 Id = audioId,
                 LanguageCode = MapLanguageCode(audio.LangCode),
+                Flags = MapFlags(audio.CodeExtension),
                 Type = StreamType.Audio
             });
         }
@@ -105,6 +106,7 @@ public class DvdMediaSource : IMediaSource
             {
                 Id = subPictureId++,
                 LanguageCode = MapLanguageCode(subPicture.LangCode),
+                Flags = MapFlags(subPicture.CodeExtension),
                 Type = StreamType.Subtitle,
                 Format = "dvd_subtitle"
             });
@@ -127,6 +129,29 @@ public class DvdMediaSource : IMediaSource
             }).ToArray(),
             Streams = streams.ToArray(),
             Chapters = GetChapterInfos().ToArray()
+        };
+    }
+
+    private StreamFlags MapFlags(AudioCodeExtension extension)
+    {
+        return extension switch
+        {
+            AudioCodeExtension.DirectorComments or 
+                AudioCodeExtension.AlternateDirectorComments => StreamFlags.Secondary,
+            _ => StreamFlags.None
+        };
+    }
+    
+    private StreamFlags MapFlags(SubPictureCodeExtension extension)
+    {
+        return extension switch
+        {
+            SubPictureCodeExtension.ForcedCaption => StreamFlags.Forced,
+            
+            SubPictureCodeExtension.DirectorComments or 
+                SubPictureCodeExtension.DirectorCommentsLarge or 
+                SubPictureCodeExtension.DirectorCommentsForChildren => StreamFlags.Secondary,
+            _ => StreamFlags.None
         };
     }
 
