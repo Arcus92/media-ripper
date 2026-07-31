@@ -92,6 +92,10 @@ indent_size = 4
 indent_style = space
 indent_size = 4
 
+[*.yaml]
+indent_style = space
+indent_size = 2
+
 [{*.androidproj,*.ccproj,*.csproj}]
 indent_style = space
 indent_size = 4
