@@ -3,21 +3,26 @@ using System.Numerics;
 namespace MediaLib.Utils.IO;
 
 /// <summary>
-/// A big-endian bit reader. Starts at the left bit.
+/// A big-endian bit writer. Starts at the left bit.
 /// </summary>
 /// <typeparam name="T">The base integer value.</typeparam>
-public unsafe ref struct BigEndianBitReader<T> where T : unmanaged, IBinaryInteger<T>
+public unsafe ref struct BigEndianBitWriter<T> where T : unmanaged, IBinaryInteger<T>
 {
     /// <summary>
     /// The binary value.
     /// </summary>
-    private readonly T _value;
+    private T _value;
     
     /// <summary>
     /// The current bit position. Runs backwards for big endian.
     /// </summary>
     private int _position = Size - 1;
-    
+
+    public BigEndianBitWriter()
+    {
+        _value = default;
+    }
+
     /// <summary>
     /// Gets the number of total bits of <see cref="T"/>.
     /// </summary>
@@ -28,30 +33,29 @@ public unsafe ref struct BigEndianBitReader<T> where T : unmanaged, IBinaryInteg
     /// </summary>
     public int Available => _position;
 
-    public BigEndianBitReader(T value)
+    /// <summary>
+    /// Writes the next bit.
+    /// </summary>
+    public void WriteBit(bool value)
     {
-        _value = value;
+        if (value)
+        {
+            _value |= T.One << _position;
+        }
+        
+        _position--;
     }
 
     /// <summary>
-    /// Reads the next bit.
+    /// Writes the next bits.
     /// </summary>
-    /// <returns></returns>
-    public bool ReadBit()
+    /// <param name="count">The number of bits to write.</param>
+    /// <param name="value">The value to set.</param>
+    public void ReadBits(int count, T value)
     {
-        return (_value & (T.One << _position--)) != T.Zero;
-    }
-
-    /// <summary>
-    /// Reads the next bits.
-    /// </summary>
-    /// <param name="count">The number of bits to read.</param>
-    /// <returns>The value.</returns>
-    public T ReadBits(int count)
-    {
-        var value = (_value << (Size - _position - 1)) >> (Size - count);
+        value = (value << (Size - count)) >> (Size - _position - 1);
         _position -= count;
-        return value;
+        _value |= value;
     }
 
     /// <summary>

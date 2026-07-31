@@ -2,7 +2,6 @@ using MediaLib.FFmpeg;
 using MediaLib.Models;
 using MediaLib.Utils.IO;
 using Microsoft.Extensions.Logging;
-using StreamType = MediaLib.Models.StreamType;
 
 namespace MediaLib.Providers;
 
@@ -117,7 +116,7 @@ public abstract class FFmpegMediaConverter<TProvider> : IMediaConverter where TP
     /// Opens a combined stream with all segments.
     /// </summary>
     /// <returns>Returns the complete stream.</returns>
-    public Stream OpenCombinedStream()
+    protected virtual Stream OpenCombinedStream()
     {
         var streamFactories = new List<Func<Stream>>();
         foreach (var segmentId in Parameter.Definition.Identifier.SegmentIds)
