@@ -26,7 +26,7 @@ public struct VolumeDateTime : IBigEndianBinaryReadable
 
     public DateTimeOffset AsDateTime()
     {
-        return new DateTimeOffset(1900 + Year, Month, Day, Hour, Minute, Second, 0, 
+        return new DateTimeOffset(1900 + Year, Month, Day, Hour, Minute, Second, 0,
             TimeSpan.FromMinutes(Offset * 15));
     }
 

@@ -8,5 +8,5 @@ public enum CharacterCode : byte
     EucKr = 0x04,
     Gb18030_20001 = 0x05,
     CnGb = 0x06,
-    Big5 = 0x07,
+    Big5 = 0x07
 }

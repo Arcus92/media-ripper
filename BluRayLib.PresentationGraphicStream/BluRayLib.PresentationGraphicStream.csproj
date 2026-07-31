@@ -12,11 +12,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Matroska" Version="0.0.12" />
+        <PackageReference Include="Matroska" Version="0.0.12"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MediaLib.Utils\MediaLib.Utils.csproj" />
+        <ProjectReference Include="..\MediaLib.Utils\MediaLib.Utils.csproj"/>
     </ItemGroup>
 
 </Project>

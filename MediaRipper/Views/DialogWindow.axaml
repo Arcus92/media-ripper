@@ -11,19 +11,19 @@
         Title="DialogWindow"
         WindowStartupLocation="CenterOwner"
         Design.DataContext="{utils:DesignResolve {x:Type vm:DialogWindowViewModel}}">
-    
+
     <Grid RowDefinitions="*,Auto">
         <ScrollViewer Grid.Row="0">
             <TextBlock Text="{Binding Text}" Margin="10" />
         </ScrollViewer>
-        
+
         <!-- Button row -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10" Spacing="5" HorizontalAlignment="Right">
-            <Button Command="{Binding Close}" 
-                    Content="{StaticResource Okay}"/>
+            <Button Command="{Binding Close}"
+                    Content="{StaticResource Okay}" />
         </StackPanel>
-        
+
     </Grid>
-    
-    
+
+
 </Window>

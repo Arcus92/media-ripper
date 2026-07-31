@@ -14,74 +14,74 @@
     <Grid RowDefinitions="*,Auto">
         <ScrollViewer Grid.Row="0">
             <StackPanel Orientation="Vertical" Margin="5">
-                
+
                 <!-- General -->
                 <Border Classes="DarkBox">
                     <StackPanel Orientation="Vertical" Spacing="10">
                         <TextBlock Classes="Title" Text="{DynamicResource General}" />
-                        
+
                         <!-- Language -->
                         <TextBlock>
-                            <Run Text="{DynamicResource Language}"/>:
+                            <Run Text="{DynamicResource Language}" />:
                         </TextBlock>
                         <ComboBox HorizontalAlignment="Stretch"
-                                  ItemsSource="{Binding AllLanguages}" 
+                                  ItemsSource="{Binding AllLanguages}"
                                   SelectedValue="{Binding Language, Mode=TwoWay}" />
-                        
+
                         <!-- Theme -->
                         <TextBlock>
-                            <Run Text="{DynamicResource Theme}"/>:
+                            <Run Text="{DynamicResource Theme}" />:
                         </TextBlock>
                         <ComboBox HorizontalAlignment="Stretch"
-                                  ItemsSource="{Binding AllThemes}" 
+                                  ItemsSource="{Binding AllThemes}"
                                   SelectedValue="{Binding Theme, Mode=TwoWay}" />
                     </StackPanel>
                 </Border>
-                
+
                 <!-- FFmpeg -->
                 <Border Classes="DarkBox">
                     <StackPanel Orientation="Vertical" Spacing="10">
                         <TextBlock Classes="Title" Text="{DynamicResource FFmpeg}" />
-                        
+
                         <!-- FFmpeg binary path -->
                         <TextBlock>
-                            <Run Text="{DynamicResource FFmpegPath}"/>:
+                            <Run Text="{DynamicResource FFmpegPath}" />:
                         </TextBlock>
                         <TextBox Text="{Binding FFmpegPath, Mode=TwoWay}" />
-                        
+
                         <!-- FFplay binary path -->
                         <TextBlock>
-                            <Run Text="{DynamicResource FFplayPath}"/>:
+                            <Run Text="{DynamicResource FFplayPath}" />:
                         </TextBlock>
                         <TextBox Text="{Binding FFplayPath, Mode=TwoWay}" />
                     </StackPanel>
                 </Border>
-                
+
                 <!-- TheMovieDatabase -->
                 <Border Classes="DarkBox">
                     <StackPanel Orientation="Vertical" Spacing="10">
                         <TextBlock Classes="Title" Text="{DynamicResource TheMovieDatabase}" />
-                        
+
                         <!-- TheMovieDatabase api key -->
                         <TextBlock>
-                            <Run Text="{DynamicResource ApiKey}"/>:
+                            <Run Text="{DynamicResource ApiKey}" />:
                         </TextBlock>
                         <TextBox Text="{Binding TheMovieDatabaseApiKey, Mode=TwoWay}" PasswordChar="●" />
-                        
+
                         <!-- TheMovieDatabase language -->
                         <TextBlock>
-                            <Run Text="{DynamicResource Language}"/>:
+                            <Run Text="{DynamicResource Language}" />:
                         </TextBlock>
                         <TextBox Text="{Binding TheMovieDatabaseLanguage, Mode=TwoWay}" />
                     </StackPanel>
                 </Border>
             </StackPanel>
         </ScrollViewer>
-        
+
         <!-- Button row -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10" Spacing="5" HorizontalAlignment="Right">
-            <Button Command="{Binding Apply}" 
-                    Content="{StaticResource Apply}"/>
+            <Button Command="{Binding Apply}"
+                    Content="{StaticResource Apply}" />
         </StackPanel>
     </Grid>
 </Window>

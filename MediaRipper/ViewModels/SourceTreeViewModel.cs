@@ -15,7 +15,7 @@ public class SourceTreeViewModel : ViewModelBase
 {
     private readonly ILogger<SourceTreeViewModel> _logger;
     private readonly IMediaProviderService _mediaProviderService;
-    
+
     public SourceTreeViewModel(ILogger<SourceTreeViewModel> logger, IMediaProviderService mediaProviderService)
     {
         _logger = logger;
@@ -24,13 +24,18 @@ public class SourceTreeViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets and sets the selected title info.
+    ///     Gets and sets the selected title info.
     /// </summary>
     public BaseSourceModel? SelectedItem
     {
         get;
         set => SetProperty(ref field, value);
     }
+
+    /// <summary>
+    ///     The title nodes for the tree-view.
+    /// </summary>
+    public ObservableCollection<MediaSourceModel> Items { get; } = [];
 
     public bool TryGetSelectedTitleNode([MaybeNullWhen(false)] out MediaSourceModel media)
     {
@@ -43,7 +48,7 @@ public class SourceTreeViewModel : ViewModelBase
         media = null;
         return false;
     }
-    
+
     private async void OnMediaProviderServiceChanged(object? sender, EventArgs e)
     {
         try
@@ -60,7 +65,7 @@ public class SourceTreeViewModel : ViewModelBase
     {
         Items.Clear();
         if (!_mediaProviderService.IsLoaded) return;
-        
+
         var sources = _mediaProviderService.GetSourcesAsync();
         await foreach (var source in sources)
         {
@@ -71,12 +76,7 @@ public class SourceTreeViewModel : ViewModelBase
             });
         }
     }
-    
-    /// <summary>
-    /// The title nodes for the tree-view.
-    /// </summary>
-    public ObservableCollection<MediaSourceModel> Items { get; } = [];
-    
+
     /// <inheritdoc />
     public override Control CreateView()
     {

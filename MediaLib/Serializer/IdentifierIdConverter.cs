@@ -5,7 +5,7 @@ using MediaLib.Models;
 namespace MediaLib.Serializer;
 
 /// <summary>
-/// A converter that writes the id in the <see cref="MediaIdentifier"/>. This can be a string or a number.
+///     A converter that writes the id in the <see cref="MediaIdentifier" />. This can be a string or a number.
 /// </summary>
 public class IdentifierIdConverter : JsonConverter<string>
 {
@@ -32,7 +32,7 @@ public class IdentifierIdConverter : JsonConverter<string>
             writer.WriteNumberValue(number);
             return;
         }
-        
+
         writer.WriteStringValue(value);
     }
 }

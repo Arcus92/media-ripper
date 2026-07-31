@@ -8,6 +8,7 @@ public class Program
     public ushort ProgramMapPid { get; set; }
 
     public ProgramStream[] Streams { get; set; } = [];
+
     public void Read(BigEndianBinaryReader reader)
     {
         SpnProgramSequenceStart = reader.ReadUInt32();

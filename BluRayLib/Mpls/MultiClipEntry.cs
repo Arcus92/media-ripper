@@ -5,15 +5,15 @@ namespace BluRayLib.Mpls;
 public class MultiClipEntry
 {
     /// <summary>
-    /// Gets the item id.
+    ///     Gets the item id.
     /// </summary>
     public string Name { get; set; } = "";
 
     /// <summary>
-    /// Gets the file type.
+    ///     Gets the file type.
     /// </summary>
     public string Type { get; set; } = "";
-    
+
     public ushort StcId { get; set; }
 
     public void Read(BigEndianBinaryReader reader)

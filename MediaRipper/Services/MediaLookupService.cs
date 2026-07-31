@@ -11,12 +11,12 @@ using MediaRipper.Services.Interfaces;
 namespace MediaRipper.Services;
 
 /// <summary>
-/// The service to lookup media information from an online service.
+///     The service to lookup media information from an online service.
 /// </summary>
 public class MediaLookupService : IMediaLookupService
 {
     private readonly ISettingService _settingService;
-    
+
     public MediaLookupService(IHttpClientFactory httpClientFactory, ISettingService settingService)
     {
         _settingService = settingService;
@@ -37,7 +37,6 @@ public class MediaLookupService : IMediaLookupService
         var list = new List<MediaSearchResult>();
 
         foreach (var result in response.Results)
-        {
             switch (result)
             {
                 case TvResult tvResult:
@@ -47,7 +46,7 @@ public class MediaLookupService : IMediaLookupService
                         MediaType = MediaType.Tv,
                         Name = tvResult.Name,
                         Description = tvResult.Overview,
-                        ReleaseDate = tvResult.FirstAirDate,
+                        ReleaseDate = tvResult.FirstAirDate
                     });
                     break;
                 case MovieResult movieResult:
@@ -61,8 +60,7 @@ public class MediaLookupService : IMediaLookupService
                     });
                     break;
             }
-        }
-        
+
         return list.ToArray();
     }
 
@@ -77,22 +75,43 @@ public class MediaLookupService : IMediaLookupService
         };
     }
 
+    /// <inheritdoc />
+    public async Task<MediaSeasonDetails> GetSeasonDetailsAsync(int seriesId, int seasonNumber)
+    {
+        var response = await MovieDatabaseApi.Tv.SeasonAsync(seriesId, seasonNumber, Language);
+        return new MediaSeasonDetails
+        {
+            Id = response.Id,
+            Name = response.Name,
+            SeasonNumber = response.SeasonNumber,
+            Episodes = response.Episodes.Select(e => new MediaEpisode
+            {
+                Id = e.Id,
+                Name = e.Name,
+                SeasonNumber = e.SeasonNumber,
+                EpisodeNumber = e.EpisodeNumber,
+                Description = e.Overview,
+                Duration = e.Runtime.HasValue ? TimeSpan.FromMinutes(e.Runtime.Value) : null
+            }).ToArray()
+        };
+    }
+
     private async Task<MediaDetails> GetMovieDetailsAsync(int id)
     {
-        var response = await MovieDatabaseApi.Movie.DetailsAsync(id, language: Language);
+        var response = await MovieDatabaseApi.Movie.DetailsAsync(id, Language);
         return new MediaDetails
         {
             Id = response.Id,
             MediaType = MediaType.Movie,
             Name = response.Title,
             Description = response.Overview,
-            ReleaseDate = response.ReleaseDate,
+            ReleaseDate = response.ReleaseDate
         };
     }
-    
+
     private async Task<MediaDetails> GetTvSeriesDetailsAsync(int id)
     {
-        var response = await MovieDatabaseApi.Tv.DetailsAsync(id, language: Language);
+        var response = await MovieDatabaseApi.Tv.DetailsAsync(id, Language);
         return new MediaDetails
         {
             Id = response.Id,
@@ -109,28 +128,7 @@ public class MediaLookupService : IMediaLookupService
                 Description = s.Overview,
                 SeriesId = id,
                 SeasonNumber = s.SeasonNumber,
-                EpisodeCount = s.EpisodeCount,
-            }).ToArray()
-        };
-    }
-    
-    /// <inheritdoc />
-    public async Task<MediaSeasonDetails> GetSeasonDetailsAsync(int seriesId, int seasonNumber)
-    {
-        var response = await MovieDatabaseApi.Tv.SeasonAsync(seriesId, seasonNumber, language: Language);
-        return new MediaSeasonDetails
-        {
-            Id = response.Id,
-            Name = response.Name,
-            SeasonNumber = response.SeasonNumber,
-            Episodes = response.Episodes.Select(e => new MediaEpisode
-            {
-                Id = e.Id,
-                Name = e.Name,
-                SeasonNumber = e.SeasonNumber,
-                EpisodeNumber = e.EpisodeNumber,
-                Description = e.Overview,
-                Duration = e.Runtime.HasValue ? TimeSpan.FromMinutes(e.Runtime.Value) : null
+                EpisodeCount = s.EpisodeCount
             }).ToArray()
         };
     }

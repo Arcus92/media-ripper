@@ -10,5 +10,5 @@ public enum SubPathType : byte
     InMuxSynchronousType = 0x07,
     StereoscopicVideo = 0x08,
     StereoscopicInteractiveGraphicsMenu = 0x09,
-    DolbyVisionEnhancementLayer = 0x0A,
+    DolbyVisionEnhancementLayer = 0x0A
 }

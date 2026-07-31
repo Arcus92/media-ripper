@@ -3,26 +3,26 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// Program Chain Information
+///     Program Chain Information
 /// </summary>
 public class Pgc : IBigEndianBinaryReadable
 {
-    public DvdTime PlaybackTime { get; private set; } = default;
-    public UserOps ProhibitedOps { get; private set; } = default;
+    public DvdTime PlaybackTime { get; private set; }
+    public UserOps ProhibitedOps { get; private set; }
     public ushort[] AudioControl { get; private set; } = [];
     public uint[] SubpControl { get; private set; } = [];
-    public ushort NextPgcNr { get; private set; } = 0;
-    public ushort PrevPgcNr { get; private set; } = 0;
-    public ushort GroupPgcNr { get; private set; } = 0;
-    public byte PgPlaybackMode { get; private set; } = 0;
-    public byte StillTime { get; private set; } = 0;
+    public ushort NextPgcNr { get; private set; }
+    public ushort PrevPgcNr { get; private set; }
+    public ushort GroupPgcNr { get; private set; }
+    public byte PgPlaybackMode { get; private set; }
+    public byte StillTime { get; private set; }
     public uint[] Palette { get; private set; } = [];
-    public ushort CommandTblOffset { get; private set; } = 0;
-    public ushort ProgramMapOffset { get; private set; } = 0;
-    public ushort CellPlaybackOffset { get; private set; } = 0;
-    public ushort CellPositionOffset { get; private set; } = 0;
+    public ushort CommandTblOffset { get; private set; }
+    public ushort ProgramMapOffset { get; private set; }
+    public ushort CellPlaybackOffset { get; private set; }
+    public ushort CellPositionOffset { get; private set; }
 
-    
+
     public byte[] ProgramMap { get; private set; } = [];
     public CellPlayback[] CellPlayback { get; private set; } = [];
     public CellPosition[] CellPosition { get; private set; } = [];
@@ -31,7 +31,7 @@ public class Pgc : IBigEndianBinaryReadable
     public void Read(BigEndianBinaryReader reader)
     {
         var start = reader.Position;
-        
+
         reader.Skip(2);
         var nrOfPrograms = reader.ReadByte();
         var nrOfCells = reader.ReadByte();
@@ -55,13 +55,13 @@ public class Pgc : IBigEndianBinaryReadable
             reader.SeekTo(start + ProgramMapOffset);
             ProgramMap = reader.ReadBytes(nrOfPrograms);
         }
-        
+
         if (CellPlaybackOffset != 0 && nrOfCells > 0)
         {
             reader.SeekTo(start + CellPlaybackOffset);
             CellPlayback = reader.Read<CellPlayback>(nrOfCells);
         }
-        
+
         if (CellPositionOffset != 0 && nrOfCells > 0)
         {
             reader.SeekTo(start + CellPositionOffset);

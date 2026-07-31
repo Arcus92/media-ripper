@@ -17,9 +17,9 @@ public class OutputListViewModel : ViewModelBase
 
         _outputService.Outputs.MapAndObserve(Items, ModelToViewModel);
     }
-    
+
     /// <summary>
-    /// Gets the list of outputs.
+    ///     Gets the list of outputs.
     /// </summary>
     public ObservableCollection<OutputViewModel> Items { get; } = [];
 
@@ -28,7 +28,7 @@ public class OutputListViewModel : ViewModelBase
         var viewModel = new OutputViewModel(_outputService, output);
         return viewModel;
     }
-    
+
     /// <inheritdoc />
     public override Control CreateView()
     {

@@ -5,12 +5,12 @@ namespace BluRayLib.Movie;
 public class MovieObjects
 {
     /// <summary>
-    /// Gets and sets the movie objects.
+    ///     Gets and sets the movie objects.
     /// </summary>
     public MovieObject[] Objects { get; set; } = [];
-    
+
     /// <summary>
-    /// Reads the movie-objects file.
+    ///     Reads the movie-objects file.
     /// </summary>
     /// <param name="path">The path to the playlist file.</param>
     public void Read(string path)
@@ -18,9 +18,9 @@ public class MovieObjects
         using var fileStream = File.OpenRead(path);
         Read(fileStream);
     }
-    
+
     /// <summary>
-    /// Reads the movie-objects file from stream.
+    ///     Reads the movie-objects file from stream.
     /// </summary>
     /// <param name="stream">The stream.</param>
     public void Read(Stream stream)
@@ -39,12 +39,12 @@ public class MovieObjects
             throw new InvalidDataException($"Invalid MovieObjects version: {version}!");
 
         var extensionDataStart = reader.ReadUInt32();
-        
+
         reader.SkipTo(40);
-        
+
         var length = reader.ReadUInt32();
         var start = reader.Position;
-        
+
         reader.Skip(4);
         var count = reader.ReadUInt16();
         Objects = new MovieObject[count];
@@ -54,7 +54,7 @@ public class MovieObjects
             obj.Read(reader);
             Objects[i] = obj;
         }
-        
+
         reader.SkipTo(start + length);
     }
 }

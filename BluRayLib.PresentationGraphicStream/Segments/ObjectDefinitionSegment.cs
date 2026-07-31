@@ -5,7 +5,7 @@ namespace BluRayLib.PresentationGraphicStream.Segments;
 public struct ObjectDefinitionSegment : IPresentationGraphicSegment
 {
     /// <summary>
-    /// The type byte in the PGS.
+    ///     The type byte in the PGS.
     /// </summary>
     public const byte Type = 0x15;
 
@@ -21,7 +21,7 @@ public struct ObjectDefinitionSegment : IPresentationGraphicSegment
         Height = 0;
         Data = Array.Empty<byte>();
     }
-    
+
     public ushort Id { get; set; }
     public byte VersionNumber { get; set; }
     public byte LastInSequenceFlag { get; set; }
@@ -35,12 +35,12 @@ public struct ObjectDefinitionSegment : IPresentationGraphicSegment
     private const byte FirstAndLastInSequence = LastInSequence | FirstInSequence;
 
     /// <summary>
-    /// Gets if this is the first element in the sequence.
+    ///     Gets if this is the first element in the sequence.
     /// </summary>
     public bool IsFirstInSequence => (LastInSequenceFlag & FirstInSequence) != 0;
-    
+
     /// <summary>
-    /// Gets if this is the last element in the sequence.
+    ///     Gets if this is the last element in the sequence.
     /// </summary>
     public bool IsLastInSequence => (LastInSequenceFlag & LastInSequence) != 0;
 
@@ -50,7 +50,7 @@ public struct ObjectDefinitionSegment : IPresentationGraphicSegment
         Id = reader.ReadUInt16();
         VersionNumber = reader.ReadByte();
         LastInSequenceFlag = reader.ReadByte();
-        
+
         // This is the total data length of ALL segments.
         // We need to add all data segments to encode the image.
         if (IsFirstInSequence)
@@ -88,13 +88,8 @@ public struct ObjectDefinitionSegment : IPresentationGraphicSegment
     /// <inheritdoc />
     public ushort GetSegmentLength()
     {
-        if (IsFirstInSequence)
-        {
-            return (ushort)(11 + Data.Length);
-        }
-        else
-        {
-            return (ushort)(4 + Data.Length);
-        }
+        if (IsFirstInSequence) return (ushort)(11 + Data.Length);
+
+        return (ushort)(4 + Data.Length);
     }
 }

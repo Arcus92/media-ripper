@@ -3,7 +3,7 @@ using MediaLib.Utils.IO;
 namespace DvdLib.VolumeDescriptor;
 
 /// <summary>
-/// Volume file-system header (ISO 9660).
+///     Volume file-system header (ISO 9660).
 /// </summary>
 public class VolumeDescriptorSet : IBigEndianBinaryReadable
 {
@@ -11,7 +11,7 @@ public class VolumeDescriptorSet : IBigEndianBinaryReadable
     public string Identifier { get; set; } = "";
     public byte Version { get; set; }
     public IVolumeDescriptor? Descriptor { get; set; }
-    
+
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader)
     {

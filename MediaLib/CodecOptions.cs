@@ -10,34 +10,34 @@ public readonly struct CodecOptions
     }
 
     /// <summary>
-    /// Gets and sets the FFmpeg video codec.
+    ///     Gets and sets the FFmpeg video codec.
     /// </summary>
     public string VideoCodec { get; init; } = "copy";
-    
+
     /// <summary>
-    /// Gets and sets the FFmpeg audio codec.
+    ///     Gets and sets the FFmpeg audio codec.
     /// </summary>
     public string AudioCodec { get; init; } = "copy";
-    
+
     /// <summary>
-    /// Gets and sets the FFmpeg subtitle codec.
+    ///     Gets and sets the FFmpeg subtitle codec.
     /// </summary>
     public string SubtitleCodec { get; init; } = "copy";
-    
+
     /// <summary>
-    /// Gets and sets the FFmpeg constant rate factor.
+    ///     Gets and sets the FFmpeg constant rate factor.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public int? ConstantRateFactor { get; init; }  = null;
-    
+    public int? ConstantRateFactor { get; init; } = null;
+
     /// <summary>
-    /// Gets and sets the FFmpeg max bitrate.
+    ///     Gets and sets the FFmpeg max bitrate.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int? MaxRate { get; init; } = null;
 
     /// <summary>
-    /// Gets and sets the FFmpeg buffer size.
+    ///     Gets and sets the FFmpeg buffer size.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int? BufferSize { get; init; } = null;

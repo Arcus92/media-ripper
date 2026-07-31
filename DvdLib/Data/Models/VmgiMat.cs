@@ -3,26 +3,26 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// Video Manager Information Management Table
+///     Video Manager Information Management Table
 /// </summary>
 public class VmgiMat : IBigEndianBinaryReadable
 {
-    public uint VmgLastSector { get; private set; } = 0;
-    public uint VmgiLastSector { get; private set; } = 0;
-    public byte SpecificationVersion { get; private set; } = 0;
-    public uint VmgCategory { get; private set; } = 0;
-    public ushort VmgNrOfVolumes { get; private set; } = 0;
-    public ushort VmgThisVolumeNr { get; private set; } = 0;
-    public byte DiscSide { get; private set; } = 0;
-    public ushort VmgNrOfTitleSets { get; private set; } = 0;
+    public uint VmgLastSector { get; private set; }
+    public uint VmgiLastSector { get; private set; }
+    public byte SpecificationVersion { get; private set; }
+    public uint VmgCategory { get; private set; }
+    public ushort VmgNrOfVolumes { get; private set; }
+    public ushort VmgThisVolumeNr { get; private set; }
+    public byte DiscSide { get; private set; }
+    public ushort VmgNrOfTitleSets { get; private set; }
     public string ProviderIdentifier { get; private set; } = "";
-    public ulong VmgPosCode { get; private set; } = 0;
-    public uint VmgiLastByte { get; private set; } = 0;
-    public uint FirstPlayPgc { get; private set; } = 0;
-    
-    public uint TtSrpt { get; private set; } = 0;
-    
-    public VideoAttributes VmgmVideo { get; private set; } = default;
+    public ulong VmgPosCode { get; private set; }
+    public uint VmgiLastByte { get; private set; }
+    public uint FirstPlayPgc { get; private set; }
+
+    public uint TtSrpt { get; private set; }
+
+    public VideoAttributes VmgmVideo { get; private set; }
     public AudioAttributes[] VmgmAudios { get; private set; } = [];
     public SubPictureAttributes[] VmgmSubPictures { get; private set; } = [];
 
@@ -46,7 +46,7 @@ public class VmgiMat : IBigEndianBinaryReadable
         VmgiLastByte = reader.ReadUInt32();
         FirstPlayPgc = reader.ReadUInt32();
         reader.ReadZero(56);
-        
+
         // Sector
         var vmgmVobs = reader.ReadUInt32();
         TtSrpt = reader.ReadUInt32();
@@ -57,7 +57,7 @@ public class VmgiMat : IBigEndianBinaryReadable
         var vmgmCAdt = reader.ReadUInt32();
         var vmgmVobuAdmap = reader.ReadUInt32();
         reader.ReadZero(32);
-        
+
         VmgmVideo = reader.Read<VideoAttributes>();
         reader.ReadZero();
         var nrOfVmgmAudioStreams = reader.ReadByte();

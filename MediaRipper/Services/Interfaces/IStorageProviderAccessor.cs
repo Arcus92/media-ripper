@@ -5,7 +5,7 @@ namespace MediaRipper.Services.Interfaces;
 public interface IStorageProviderAccessor
 {
     /// <summary>
-    /// Gets the storage provider.
+    ///     Gets the storage provider.
     /// </summary>
     IStorageProvider? StorageProvider { get; set; }
 }

@@ -3,32 +3,33 @@ using MediaLib.Utils.IO;
 namespace BluRayLib.PresentationGraphicStream;
 
 /// <summary>
-/// A Presentation Graphic Stream (PGS) from a .sup file.
+///     A Presentation Graphic Stream (PGS) from a .sup file.
 /// </summary>
 public class SupFilePresentationGraphicStream : IPresentationGraphicStream, IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// The stream to read the .sup file from.
+    ///     The stream to read the .sup file from.
     /// </summary>
     private readonly Stream _stream;
 
     /// <summary>
-    /// Creates a .sup file PGS.
+    ///     Creates a .sup file PGS.
     /// </summary>
     /// <param name="filename">The file to read from.</param>
-    public SupFilePresentationGraphicStream(string filename) : this(new FileStream(filename, FileMode.Open, FileAccess.Read))
+    public SupFilePresentationGraphicStream(string filename) : this(new FileStream(filename, FileMode.Open,
+        FileAccess.Read))
     {
     }
-    
+
     /// <summary>
-    /// Creates a .sup file PGS.
+    ///     Creates a .sup file PGS.
     /// </summary>
     /// <param name="stream">The stream to read from.</param>
     public SupFilePresentationGraphicStream(Stream stream)
     {
         _stream = stream;
     }
-    
+
     /// <inheritdoc />
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async IAsyncEnumerable<DisplaySet> ReadAsync()
@@ -39,11 +40,11 @@ public class SupFilePresentationGraphicStream : IPresentationGraphicStream, IDis
         while (reader.BaseStream.Position < reader.BaseStream.Length)
         {
             var displaySet = new DisplaySet();
-            displaySet.Read(reader, includeHeader: true);
+            displaySet.Read(reader);
             yield return displaySet;
         }
     }
-    
+
     #region IDisposable
 
     /// <inheritdoc />
@@ -57,6 +58,6 @@ public class SupFilePresentationGraphicStream : IPresentationGraphicStream, IDis
     {
         await _stream.DisposeAsync();
     }
-    
+
     #endregion IDisposable
 }

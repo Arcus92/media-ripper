@@ -5,13 +5,13 @@ namespace BluRayLib.PresentationGraphicStream.Segments;
 public struct WindowDefinitionSegment : IPresentationGraphicSegment
 {
     /// <summary>
-    /// The type byte in the PGS.
+    ///     The type byte in the PGS.
     /// </summary>
     public const byte Type = 0x17;
-    
+
     /// <inheritdoc />
     static byte IPresentationGraphicSegment.Type => Type;
-    
+
     public WindowDefinitionSegment()
     {
         Windows = Array.Empty<WindowDefinition>();
@@ -27,7 +27,7 @@ public struct WindowDefinitionSegment : IPresentationGraphicSegment
         public ushort Width { get; set; }
         public ushort Height { get; set; }
     }
-    
+
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader, ushort segmentLength)
     {
@@ -45,7 +45,7 @@ public struct WindowDefinitionSegment : IPresentationGraphicSegment
             Windows[i] = window;
         }
     }
-    
+
     /// <inheritdoc />
     public void Write(BigEndianBinaryWriter writer)
     {
@@ -59,7 +59,7 @@ public struct WindowDefinitionSegment : IPresentationGraphicSegment
             writer.Write(window.Height);
         }
     }
-    
+
     /// <inheritdoc />
     public ushort GetSegmentLength()
     {

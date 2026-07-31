@@ -1,7 +1,7 @@
 namespace MediaLib.FFmpeg;
 
 /// <summary>
-/// An exception when FFmpeg returned an invalid exit code.
+///     An exception when FFmpeg returned an invalid exit code.
 /// </summary>
 public class FFmpegException : Exception
 {
@@ -10,14 +10,14 @@ public class FFmpegException : Exception
         ExitCode = exitCode;
         Output = output;
     }
-    
+
     /// <summary>
-    /// Gets the exit code of FFmpeg.
+    ///     Gets the exit code of FFmpeg.
     /// </summary>
     public int ExitCode { get; init; }
 
     /// <summary>
-    /// Gets the FFmpeg console output.
+    ///     Gets the FFmpeg console output.
     /// </summary>
     public string Output { get; init; }
 }

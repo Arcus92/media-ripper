@@ -3,5 +3,5 @@ namespace DvdLib.Data.Enums;
 public enum DisplayAspectRatio : byte
 {
     Ratio4_3 = 0,
-    Ratio16_9 = 3,
+    Ratio16_9 = 3
 }

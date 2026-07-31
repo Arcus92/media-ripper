@@ -3,40 +3,20 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// DVD Information
+///     DVD Information
 /// </summary>
 public class Ifo : IBigEndianBinaryReadable
 {
     // https://dvds.beandog.org/doku.php?id=libdvdread
     // https://code.videolan.org/videolan/libdvdread/-/blob/master/src/ifo_read.c?ref_type=heads
     // https://code.videolan.org/videolan/libdvdread/-/blob/master/src/dvdread/ifo_types.h?ref_type=heads
-    
+
     public VtsiMat? Vts { get; private set; }
     public TtSrpt? TtSrpt { get; private set; }
     public VmgiMat? Vmg { get; private set; }
     public VtsPttSrpt? VtsPttSrpt { get; private set; }
     public Pgcit? VtsPgcit { get; private set; }
     public CAdtT? CAdtT { get; private set; }
-
-    /// <summary>
-    /// Reads the IFO file.
-    /// </summary>
-    /// <param name="path">The path to the IFO file.</param>
-    public void Read(string path)
-    {
-        using var fileStream = File.OpenRead(path);
-        Read(fileStream);
-    }
-    
-    /// <summary>
-    /// Reads the IFO file from stream.
-    /// </summary>
-    /// <param name="stream">The stream.</param>
-    public void Read(Stream stream)
-    {
-        var reader = new BigEndianBinaryReader(stream);
-        ((IBigEndianBinaryReadable)this).Read(reader);
-    }
 
     void IBigEndianBinaryReadable.Read(BigEndianBinaryReader reader)
     {
@@ -54,6 +34,26 @@ public class Ifo : IBigEndianBinaryReadable
         }
     }
 
+    /// <summary>
+    ///     Reads the IFO file.
+    /// </summary>
+    /// <param name="path">The path to the IFO file.</param>
+    public void Read(string path)
+    {
+        using var fileStream = File.OpenRead(path);
+        Read(fileStream);
+    }
+
+    /// <summary>
+    ///     Reads the IFO file from stream.
+    /// </summary>
+    /// <param name="stream">The stream.</param>
+    public void Read(Stream stream)
+    {
+        var reader = new BigEndianBinaryReader(stream);
+        ((IBigEndianBinaryReadable)this).Read(reader);
+    }
+
     private void ReadVmg(BigEndianBinaryReader reader)
     {
         var vmg = reader.Read<VmgiMat>();
@@ -65,7 +65,7 @@ public class Ifo : IBigEndianBinaryReadable
 
         Vmg = vmg;
     }
-    
+
     private void ReadVts(BigEndianBinaryReader reader)
     {
         var vts = reader.Read<VtsiMat>();
@@ -74,11 +74,13 @@ public class Ifo : IBigEndianBinaryReadable
             reader.SeekTo(vts.VtsPttSrpt * Dvd.BlockSize);
             VtsPttSrpt = reader.Read<VtsPttSrpt>();
         }
+
         if (vts.VtsPgcit > 0)
         {
             reader.SeekTo(vts.VtsPgcit * Dvd.BlockSize);
             VtsPgcit = reader.Read<Pgcit>();
         }
+
         if (vts.VtsCAdt > 0)
         {
             reader.SeekTo(vts.VtsCAdt * Dvd.BlockSize);

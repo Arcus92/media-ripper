@@ -3,28 +3,28 @@ using System.Numerics;
 namespace MediaLib.Utils.IO;
 
 /// <summary>
-/// A big-endian bit reader. Starts at the left bit.
+///     A big-endian bit reader. Starts at the left bit.
 /// </summary>
 /// <typeparam name="T">The base integer value.</typeparam>
 public unsafe ref struct BigEndianBitReader<T> where T : unmanaged, IBinaryInteger<T>
 {
     /// <summary>
-    /// The binary value.
+    ///     The binary value.
     /// </summary>
     private readonly T _value;
-    
+
     /// <summary>
-    /// The current bit position. Runs backwards for big endian.
+    ///     The current bit position. Runs backwards for big endian.
     /// </summary>
     private int _position = Size - 1;
-    
+
     /// <summary>
-    /// Gets the number of total bits of <see cref="T"/>.
+    ///     Gets the number of total bits of <see cref="T" />.
     /// </summary>
     private static readonly int Size = sizeof(T) * 8;
-    
+
     /// <summary>
-    /// Gets the number of available bits.
+    ///     Gets the number of available bits.
     /// </summary>
     public int Available => _position;
 
@@ -34,7 +34,7 @@ public unsafe ref struct BigEndianBitReader<T> where T : unmanaged, IBinaryInteg
     }
 
     /// <summary>
-    /// Reads the next bit.
+    ///     Reads the next bit.
     /// </summary>
     /// <returns></returns>
     public bool ReadBit()
@@ -43,7 +43,7 @@ public unsafe ref struct BigEndianBitReader<T> where T : unmanaged, IBinaryInteg
     }
 
     /// <summary>
-    /// Reads the next bits.
+    ///     Reads the next bits.
     /// </summary>
     /// <param name="count">The number of bits to read.</param>
     /// <returns>The value.</returns>
@@ -55,7 +55,7 @@ public unsafe ref struct BigEndianBitReader<T> where T : unmanaged, IBinaryInteg
     }
 
     /// <summary>
-    /// Skips the number of bits.
+    ///     Skips the number of bits.
     /// </summary>
     /// <param name="count">The number of bits to skip.</param>
     public void Skip(int count)

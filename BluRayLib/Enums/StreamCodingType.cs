@@ -21,5 +21,5 @@ public enum StreamCodingType : byte
     DtsHDSecondaryAudioStream = 0xA2,
     PresentationGraphicsStream = 0x90,
     InteractiveGraphicsStream = 0x91,
-    TextSubtitleStream = 0x92,
+    TextSubtitleStream = 0x92
 }

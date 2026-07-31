@@ -3,7 +3,7 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// PartOfTitle Search Pointer Table
+///     PartOfTitle Search Pointer Table
 /// </summary>
 public class VtsPttSrpt : IBigEndianBinaryReadable
 {
@@ -18,23 +18,16 @@ public class VtsPttSrpt : IBigEndianBinaryReadable
 
         // Read the ttu offset
         var ttuOffset = new uint[nrOfSrpts];
-        for (var i = 0; i < nrOfSrpts; i++)
-        {
-            ttuOffset[i] = reader.ReadUInt32();
-        }
-        
+        for (var i = 0; i < nrOfSrpts; i++) ttuOffset[i] = reader.ReadUInt32();
+
         Titles = new Ttu[nrOfSrpts];
         for (var i = 0; i < nrOfSrpts; i++)
         {
             uint size;
             if (i < nrOfSrpts - 1)
-            {
-                size = ttuOffset[i + 1] -  ttuOffset[i];
-            }
+                size = ttuOffset[i + 1] - ttuOffset[i];
             else
-            {
                 size = lastByte + 1 - ttuOffset[i];
-            }
             var n = size / 4;
             var ptt = reader.Read<PttInfo>((int)n);
             Titles[i] = new Ttu

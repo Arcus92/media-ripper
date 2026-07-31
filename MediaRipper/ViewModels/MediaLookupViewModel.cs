@@ -26,7 +26,7 @@ public class MediaLookupViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets and sets the search term.
+    ///     Gets and sets the search term.
     /// </summary>
     public string SearchText
     {
@@ -35,22 +35,22 @@ public class MediaLookupViewModel : ViewModelBase
     } = "";
 
     /// <summary>
-    /// Gets the search result list.
+    ///     Gets the search result list.
     /// </summary>
     public ObservableCollection<MediaSearchResult> SearchResults { get; } = [];
 
     /// <summary>
-    /// Gets the season list.
+    ///     Gets the season list.
     /// </summary>
     public ObservableCollection<MediaSeason> Seasons { get; } = [];
-    
+
     /// <summary>
-    /// Gets the episode list.
+    ///     Gets the episode list.
     /// </summary>
     public ObservableCollection<MediaEpisode> Episodes { get; } = [];
 
     /// <summary>
-    /// Gets if the media lookup is loading.
+    ///     Gets if the media lookup is loading.
     /// </summary>
     public bool IsLoading
     {
@@ -59,7 +59,7 @@ public class MediaLookupViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets and sets the selected search result.
+    ///     Gets and sets the selected search result.
     /// </summary>
     public MediaSearchResult? SelectedMediaItem
     {
@@ -68,7 +68,7 @@ public class MediaLookupViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets and sets the selected season.
+    ///     Gets and sets the selected season.
     /// </summary>
     public MediaSeason? SelectedSeason
     {
@@ -77,7 +77,7 @@ public class MediaLookupViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets and sets the selected episode.
+    ///     Gets and sets the selected episode.
     /// </summary>
     public MediaEpisode? SelectedEpisode
     {
@@ -86,7 +86,7 @@ public class MediaLookupViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets if the selected media item is a TV series.
+    ///     Gets if the selected media item is a TV series.
     /// </summary>
     public bool IsTvSeries
     {
@@ -95,7 +95,7 @@ public class MediaLookupViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Executes a search with the <see cref="SearchText"/>.
+    ///     Executes a search with the <see cref="SearchText" />.
     /// </summary>
     public async Task SearchAsync()
     {
@@ -107,10 +107,7 @@ public class MediaLookupViewModel : ViewModelBase
         try
         {
             var results = await _mediaLookupService.SearchAsync(SearchText);
-            foreach (var result in results)
-            {
-                SearchResults.Add(result);
-            }
+            foreach (var result in results) SearchResults.Add(result);
 
             SelectedMediaItem = SearchResults.FirstOrDefault();
         }
@@ -125,7 +122,7 @@ public class MediaLookupViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Clears all input fields
+    ///     Clears all input fields
     /// </summary>
     public void Clear()
     {
@@ -135,9 +132,9 @@ public class MediaLookupViewModel : ViewModelBase
         SelectedSeason = null;
         SelectedEpisode = null;
     }
-    
+
     /// <summary>
-    /// Fetches the media details.
+    ///     Fetches the media details.
     /// </summary>
     private async Task FetchDetailsAsync()
     {
@@ -147,16 +144,13 @@ public class MediaLookupViewModel : ViewModelBase
         SelectedEpisode = null;
         IsTvSeries = false;
         if (SelectedMediaItem is null) return;
-        
+
         IsLoading = true;
         try
         {
             var details = await _mediaLookupService.GetDetailsAsync(SelectedMediaItem);
 
-            foreach (var season in details.Seasons)
-            {
-                Seasons.Add(season);
-            }
+            foreach (var season in details.Seasons) Seasons.Add(season);
 
             IsTvSeries = details.MediaType == Models.MediaLookup.MediaType.Tv;
             SelectedSeason = Seasons.FirstOrDefault(s => s.SeasonNumber == 1);
@@ -172,24 +166,21 @@ public class MediaLookupViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Fetches the season details.
+    ///     Fetches the season details.
     /// </summary>
     private async Task FetchSeasonAsync()
     {
         Episodes.Clear();
         SelectedEpisode = null;
         if (SelectedSeason is null) return;
-        
+
         IsLoading = true;
         try
         {
             var details = await _mediaLookupService.GetSeasonDetailsAsync(SelectedSeason);
 
-            foreach (var episode in details.Episodes)
-            {
-                Episodes.Add(episode);
-            }
-            
+            foreach (var episode in details.Episodes) Episodes.Add(episode);
+
             SelectedEpisode = Episodes.FirstOrDefault(e => e.EpisodeNumber == 1);
         }
         catch (Exception ex)
@@ -203,7 +194,7 @@ public class MediaLookupViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the output media info from the selected media item, season and episode.
+    ///     Gets the output media info from the selected media item, season and episode.
     /// </summary>
     /// <param name="mediaInfo">Returns the media info if selected.</param>
     /// <returns>Returns true, it a media info was selected.</returns>
@@ -235,9 +226,9 @@ public class MediaLookupViewModel : ViewModelBase
                 return false;
         }
     }
-    
+
     /// <summary>
-    /// Moves to the next episode.
+    ///     Moves to the next episode.
     /// </summary>
     public void IncreaseEpisodeNumber()
     {
@@ -247,7 +238,7 @@ public class MediaLookupViewModel : ViewModelBase
         var nextEpisode = Episodes.FirstOrDefault(e => e.EpisodeNumber == episodeNumber + 1);
         SelectedEpisode = nextEpisode;
     }
-    
+
     /// <inheritdoc />
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {

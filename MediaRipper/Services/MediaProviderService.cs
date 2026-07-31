@@ -13,43 +13,40 @@ using Microsoft.Extensions.Logging;
 namespace MediaRipper.Services;
 
 /// <summary>
-/// Handles disk loading and collects exportable titles from the disk. Currently, only BluRay is supported.
+///     Handles disk loading and collects exportable titles from the disk. Currently, only BluRay is supported.
 /// </summary>
 public class MediaProviderService : IMediaProviderService
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<MediaProviderService> _logger;
-    
+    private readonly IServiceProvider _serviceProvider;
+
+    /// <summary>
+    ///     The current loaded media provider.
+    /// </summary>
+    private IMediaProvider? _provider;
+
     public MediaProviderService(IServiceProvider serviceProvider, ILogger<MediaProviderService> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
     }
-    
-    /// <summary>
-    /// The current loaded media provider.
-    /// </summary>
-    private IMediaProvider? _provider;
-    
+
     /// <inheritdoc />
     public async Task OpenAsync(string path)
     {
         await CloseAsync();
 
-        if (string.IsNullOrEmpty(path))
-        {
-            return;
-        }
-        
+        if (string.IsNullOrEmpty(path)) return;
+
         _logger.LogInformation("Opening directory: {Path}", path);
-        
+
         try
         {
             _provider = await MediaProviderHelper.GetFromPathAsync(_serviceProvider, path);
             await _provider.LoadAsync();
 
             IsLoaded = true;
-            
+
             _logger.LogInformation("Directory '{Path}' opened by provider {Provider}", path, _provider.GetType().Name);
             Changed?.Invoke(this, EventArgs.Empty);
         }
@@ -65,9 +62,9 @@ public class MediaProviderService : IMediaProviderService
     {
         if (!IsLoaded) return Task.CompletedTask;
         if (_provider is null) return Task.CompletedTask;
-        
+
         _logger.LogInformation("Closing provider: {Provider}", _provider.GetType().Name);
-        
+
         _provider.Dispose();
         _provider = null;
         IsLoaded = false;
@@ -83,17 +80,17 @@ public class MediaProviderService : IMediaProviderService
     {
         return _provider?.GetDiskInfo();
     }
-    
+
     /// <inheritdoc />
     public event EventHandler? Changed;
-    
+
     /// <inheritdoc />
     public IAsyncEnumerable<IMediaSource> GetSourcesAsync()
     {
         if (_provider is null) throw new ArgumentException("No media provider has been loaded!", nameof(_provider));
         return _provider.GetSourcesAsync();
     }
-    
+
     /// <inheritdoc />
     public IMediaConverter CreateConverter(MediaConverterParameter parameter)
     {
@@ -107,7 +104,7 @@ public class MediaProviderService : IMediaProviderService
         if (_provider is null) throw new ArgumentException("No media provider has been loaded!", nameof(_provider));
         return _provider.GetRawStream(source);
     }
-    
+
     /// <inheritdoc />
     public Stream GetRawStream(IMediaSource source, ushort segmentId)
     {

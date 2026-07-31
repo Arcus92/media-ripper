@@ -16,8 +16,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DvdLib\DvdLib.csproj" />
-      <ProjectReference Include="..\MediaLib.Utils\MediaLib.Utils.csproj" />
+        <ProjectReference Include="..\DvdLib\DvdLib.csproj"/>
+        <ProjectReference Include="..\MediaLib.Utils\MediaLib.Utils.csproj"/>
     </ItemGroup>
 
 </Project>

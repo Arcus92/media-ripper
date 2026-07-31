@@ -3,7 +3,7 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// PartOfTitle Search Pointer Table
+///     PartOfTitle Search Pointer Table
 /// </summary>
 public class TtSrpt : IBigEndianBinaryReadable
 {

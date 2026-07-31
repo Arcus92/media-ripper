@@ -5,13 +5,13 @@ namespace BluRayLib.PresentationGraphicStream.Segments;
 public struct PaletteDefinitionSegment : IPresentationGraphicSegment
 {
     /// <summary>
-    /// The type byte in the PGS.
+    ///     The type byte in the PGS.
     /// </summary>
     public const byte Type = 0x14;
-    
+
     /// <inheritdoc />
     static byte IPresentationGraphicSegment.Type => Type;
-    
+
     public PaletteDefinitionSegment()
     {
         Id = 0;
@@ -21,29 +21,29 @@ public struct PaletteDefinitionSegment : IPresentationGraphicSegment
 
     public byte Id { get; set; }
     public byte VersionNumber { get; set; }
-    
+
     public Dictionary<byte, Entry> Entries { get; set; }
 
     public readonly struct Entry
-    { 
+    {
         public byte Y { get; init; }
         public byte Cr { get; init; }
         public byte Cb { get; init; }
         public byte A { get; init; }
     }
-    
+
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader, ushort segmentLength)
     {
         Id = reader.ReadByte();
         VersionNumber = reader.ReadByte();
-        
+
         var count = (segmentLength - 2) / 5;
         Entries = new Dictionary<byte, Entry>();
         for (var i = 0; i < count; i++)
         {
             var id = reader.ReadByte();
-            var entry = new Entry()
+            var entry = new Entry
             {
                 Y = reader.ReadByte(),
                 Cr = reader.ReadByte(),
@@ -53,7 +53,7 @@ public struct PaletteDefinitionSegment : IPresentationGraphicSegment
             Entries.Add(id, entry);
         }
     }
-    
+
     /// <inheritdoc />
     public void Write(BigEndianBinaryWriter writer)
     {
@@ -68,7 +68,7 @@ public struct PaletteDefinitionSegment : IPresentationGraphicSegment
             writer.Write(pair.Value.A);
         }
     }
-    
+
     /// <inheritdoc />
     public ushort GetSegmentLength()
     {

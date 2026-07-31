@@ -3,7 +3,7 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// Playback Type
+///     Playback Type
 /// </summary>
 public struct PlaybackType : IBigEndianBinaryReadable
 {

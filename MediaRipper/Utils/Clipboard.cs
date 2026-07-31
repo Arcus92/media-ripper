@@ -9,7 +9,7 @@ namespace MediaRipper.Utils;
 public static class Clipboard
 {
     /// <summary>
-    /// Gets the clipboard api for the current platform.
+    ///     Gets the clipboard api for the current platform.
     /// </summary>
     /// <returns>Returns the clipboard api if available.</returns>
     public static IClipboard? GetClipboard()
@@ -21,10 +21,7 @@ public static class Clipboard
             case ISingleViewApplicationLifetime singleViewApp:
             {
                 var topLevel = singleViewApp.MainView?.GetVisualParent<TopLevel>();
-                if (topLevel is not null) 
-                {
-                    return topLevel.Clipboard;
-                }
+                if (topLevel is not null) return topLevel.Clipboard;
 
                 break;
             }

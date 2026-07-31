@@ -15,31 +15,32 @@ namespace MediaLib.Dvds.Providers;
 public class DvdMediaProvider : IMediaProvider
 {
     private readonly ILogger _logger;
-    
-    /// <summary>
-    /// Gets the Dvd disk information.
-    /// </summary>
-    public Dvd Dvd { get; }
 
-    public DvdMediaProvider(IServiceProvider serviceProvider, string path)
-    {
-        _logger = serviceProvider.GetRequiredService<ILogger<DvdMediaProvider>>();;
-        Dvd = new Dvd(path);
-    }
-    
     static DvdMediaProvider()
     {
         DvdCss.RegisterAsDecryptionHandler();
         DvdCss.RegisterLibraryImportResolver();
     }
 
+    public DvdMediaProvider(IServiceProvider serviceProvider, string path)
+    {
+        _logger = serviceProvider.GetRequiredService<ILogger<DvdMediaProvider>>();
+        ;
+        Dvd = new Dvd(path);
+    }
+
+    /// <summary>
+    ///     Gets the Dvd disk information.
+    /// </summary>
+    public Dvd Dvd { get; }
+
     /// <inheritdoc />
     public DiskInfo GetDiskInfo()
     {
-        return new DiskInfo()
+        return new DiskInfo
         {
             DiskName = Dvd.DiskName,
-            ContentHash = Dvd.ContentHash,
+            ContentHash = Dvd.ContentHash
         };
     }
 
@@ -59,8 +60,58 @@ public class DvdMediaProvider : IMediaProvider
         }
     }
 
+    /// <inheritdoc />
+    public IMediaConverter CreateConverter(MediaConverterParameter parameter)
+    {
+        return new DvdMediaConverter(_logger, this, parameter);
+    }
+
+    /// <inheritdoc />
+    public Stream GetRawStream(IMediaSource source)
+    {
+        if (!Contains(source.Identifier))
+            throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
+
+        if (!ushort.TryParse(source.Identifier.Id, out var titleId))
+            throw new ArgumentException("Couldn't parse title id.", nameof(source));
+
+        var streamFactories = new List<Func<Stream>>();
+        foreach (var segment in source.Info.Segments)
+            streamFactories.Add(() => Dvd.GetProgramStream(titleId, segment.Id));
+
+        return new StreamListReader(streamFactories);
+    }
+
+    /// <inheritdoc />
+    public Stream GetRawStream(IMediaSource source, ushort segmentId)
+    {
+        if (!Contains(source.Identifier))
+            throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
+
+        if (!ushort.TryParse(source.Identifier.Id, out var titleId))
+            throw new ArgumentException("Couldn't parse title id.", nameof(source));
+
+        return Dvd.GetProgramStream(titleId, segmentId);
+    }
+
+    /// <inheritdoc />
+    public bool Contains(MediaIdentifier identifier)
+    {
+        return identifier.Type == MediaIdentifierType.Dvd && identifier.ContentHash == Dvd.ContentHash;
+    }
+
+    #region Dispose
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        // Nothing to do
+    }
+
+    #endregion Dispose
+
     /// <summary>
-    /// Returns the media source for the given video stream.
+    ///     Returns the media source for the given video stream.
     /// </summary>
     /// <param name="dvdTitleInfo">The DVD video stream.</param>
     /// <returns></returns>
@@ -73,82 +124,29 @@ public class DvdMediaProvider : IMediaProvider
             ContentHash = Dvd.ContentHash,
             DiskName = Dvd.DiskName,
             Id = dvdTitleInfo.TitleIndex.ToString(),
-            SegmentIds = dvdTitleInfo.Ptts.Select(ptt => ptt.Pgn).ToArray(),
+            SegmentIds = dvdTitleInfo.Ptts.Select(ptt => ptt.Pgn).ToArray()
         };
-        
+
         return new DvdMediaSource(dvdTitleInfo, identifier);
     }
-    
-    /// <inheritdoc />
-    public IMediaConverter CreateConverter(MediaConverterParameter parameter)
-    {
-        return new DvdMediaConverter(_logger, this, parameter);
-    }
 
-    /// <inheritdoc />
-    public Stream GetRawStream(IMediaSource source)
-    {
-        if (!Contains(source.Identifier)) throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
-
-        if (!ushort.TryParse(source.Identifier.Id, out var titleId))
-        {
-            throw new ArgumentException("Couldn't parse title id.", nameof(source));
-        }
-        
-        var streamFactories = new List<Func<Stream>>();
-        foreach (var segment in source.Info.Segments)
-        {
-            streamFactories.Add(() => Dvd.GetProgramStream(titleId, segment.Id));
-        }
-        
-        return new StreamListReader(streamFactories);
-    }
-    
-    /// <inheritdoc />
-    public Stream GetRawStream(IMediaSource source, ushort segmentId)
-    {
-        if (!Contains(source.Identifier)) throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
-
-        if (!ushort.TryParse(source.Identifier.Id, out var titleId))
-        {
-            throw new ArgumentException("Couldn't parse title id.", nameof(source));
-        }
-        
-        return Dvd.GetProgramStream(titleId, segmentId);
-    }
-
-    /// <inheritdoc />
-    public bool Contains(MediaIdentifier identifier)
-    {
-        return identifier.Type == MediaIdentifierType.Dvd && identifier.ContentHash == Dvd.ContentHash;
-    }
-    
     /// <summary>
-    /// Tries to create a media converter for the given directory.
+    ///     Tries to create a media converter for the given directory.
     /// </summary>
     /// <param name="serviceProvider">The service provider.</param>
     /// <param name="path">The disk path.</param>
     /// <param name="provider">Returns the created provider.</param>
     /// <returns>Returns if the path is valid and a provider was created.</returns>
-    public static bool TryCreate(IServiceProvider serviceProvider, string path, [MaybeNullWhen(false)] out DvdMediaProvider provider)
+    public static bool TryCreate(IServiceProvider serviceProvider, string path,
+        [MaybeNullWhen(false)] out DvdMediaProvider provider)
     {
         if (!Directory.Exists(Path.Combine(path, "VIDEO_TS")))
         {
             provider = null;
             return false;
         }
-        
+
         provider = new DvdMediaProvider(serviceProvider, path);
         return true;
     }
-
-    #region Dispose
-    
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        // Nothing to do
-    }
-    
-    #endregion Dispose
 }

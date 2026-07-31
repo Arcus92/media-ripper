@@ -5,39 +5,39 @@ namespace BluRayLib.Mpls;
 public class SubPlayItem
 {
     /// <summary>
-    /// Gets the item id.
+    ///     Gets the item id.
     /// </summary>
     public string Name { get; set; } = "";
 
     /// <summary>
-    /// Gets the file type.
+    ///     Gets the file type.
     /// </summary>
     public string Type { get; set; } = "";
-    
+
     public byte ConnectionCondition { get; set; }
     public bool IsMultiClipEntries { get; set; }
-    
+
     public ushort StcId { get; set; }
     public uint InTime { get; set; }
     public uint OutTime { get; set; }
-    
+
     public ushort SyncPlayItemId { get; set; }
     public uint SyncStartPts { get; set; }
-    
+
     public uint Duration => OutTime - InTime;
 
     public MultiClipEntry[] MultiClipEntries { get; set; } = [];
 
     /// <summary>
-    /// Gets the mask table.
+    ///     Gets the mask table.
     /// </summary>
     public MaskTable MaskTable { get; } = new();
-    
+
     public void Read(BigEndianBinaryReader reader)
     {
         var length = reader.ReadUInt16();
         var start = reader.Position;
-        
+
         Name = reader.ReadString(5);
         Type = reader.ReadString(4);
         reader.Skip(3);
@@ -63,7 +63,7 @@ public class SubPlayItem
                 MultiClipEntries[i] = entry;
             }
         }
-        
+
         reader.SkipTo(start + length);
     }
 }

@@ -1,7 +1,7 @@
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// PartOfTitle Information
+///     PartOfTitle Information
 /// </summary>
 public class Ttu
 {

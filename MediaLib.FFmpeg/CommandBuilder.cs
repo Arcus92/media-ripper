@@ -3,32 +3,32 @@ using System.Text;
 namespace MediaLib.FFmpeg;
 
 /// <summary>
-/// A class to build the ffmpeg command line.
+///     A class to build the ffmpeg command line.
 /// </summary>
 public class CommandBuilder
 {
     /// <summary>
-    /// The internal string builder.
+    ///     The internal string builder.
     /// </summary>
     private readonly StringBuilder _arguments = new();
 
     /// <summary>
-    /// Gets the arguments.
-    /// </summary>
-    public string Arguments => _arguments.ToString();
-
-    /// <summary>
-    /// Gets all input streams.
-    /// </summary>
-    public List<InputStream> InputStreams { get; } = [];
-    
-    /// <summary>
-    /// The number of inputs.
+    ///     The number of inputs.
     /// </summary>
     private int _inputs;
 
     /// <summary>
-    /// Adds an input to the converter and returns it's index.
+    ///     Gets the arguments.
+    /// </summary>
+    public string Arguments => _arguments.ToString();
+
+    /// <summary>
+    ///     Gets all input streams.
+    /// </summary>
+    public List<InputStream> InputStreams { get; } = [];
+
+    /// <summary>
+    ///     Adds an input to the converter and returns it's index.
     /// </summary>
     /// <param name="path">The file path</param>
     /// <returns>Returns the id of the input.</returns>
@@ -39,7 +39,7 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Adds an input stream to the converter and returns it's index.
+    ///     Adds an input stream to the converter and returns it's index.
     /// </summary>
     /// <param name="stream">The stream.</param>
     /// <returns>Returns the id of the input.</returns>
@@ -47,9 +47,9 @@ public class CommandBuilder
     {
         return Input(CreateInputStream(stream));
     }
-    
+
     /// <summary>
-    /// Adds an input stream to the converter and returns it's index.
+    ///     Adds an input stream to the converter and returns it's index.
     /// </summary>
     /// <param name="streamFunc">The stream creation callback.</param>
     /// <returns>Returns the id of the input.</returns>
@@ -57,9 +57,9 @@ public class CommandBuilder
     {
         return Input(CreateInputStream(streamFunc));
     }
-    
+
     /// <summary>
-    /// Adds an input stream to the converter and returns it's index.
+    ///     Adds an input stream to the converter and returns it's index.
     /// </summary>
     /// <param name="inputStream">The input stream.</param>
     /// <returns>Returns the id of the input.</returns>
@@ -69,16 +69,16 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Gets the next FFmpeg file name.
+    ///     Gets the next FFmpeg file name.
     /// </summary>
     /// <returns></returns>
     private string GetNextPipeName()
     {
         return $"ffpipe_{InputStreams.Count}_{DateTime.Now.Ticks}";
     }
-    
+
     /// <summary>
-    /// Creates a new input stream.
+    ///     Creates a new input stream.
     /// </summary>
     /// <param name="streamFunc">The stream creation callback.</param>
     /// <returns></returns>
@@ -89,9 +89,9 @@ public class CommandBuilder
         InputStreams.Add(inputStream);
         return inputStream;
     }
-    
+
     /// <summary>
-    /// Creates a new input stream.
+    ///     Creates a new input stream.
     /// </summary>
     /// <param name="stream">The stream.</param>
     /// <returns></returns>
@@ -102,18 +102,18 @@ public class CommandBuilder
         InputStreams.Add(inputStream);
         return inputStream;
     }
-    
+
     /// <summary>
-    /// Sets the decryption key.
+    ///     Sets the decryption key.
     /// </summary>
     /// <param name="key">The decryption key.</param>
     public void DecryptionKey(string key)
     {
         _arguments.Append($"-decryption_key {key} ");
     }
-    
+
     /// <summary>
-    /// Forces an output format.
+    ///     Forces an output format.
     /// </summary>
     /// <param name="extension">The output file extension without dot.</param>
     public void Format(string extension)
@@ -122,7 +122,7 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Sets the safe mode level.
+    ///     Sets the safe mode level.
     /// </summary>
     /// <param name="value">The save mode level.</param>
     public void Safe(int value)
@@ -131,20 +131,20 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Sets the progress output pipe.
+    ///     Sets the progress output pipe.
     /// </summary>
     /// <param name="url">The output pipe to receive the progress data.</param>
     public void Progress(string url)
     {
         _arguments.Append($"-progress {url} ");
     }
-    
+
     /// <summary>
-    /// Sets if the output file should be overwritten if it exists.
+    ///     Sets if the output file should be overwritten if it exists.
     /// </summary>
     /// <param name="overwrite">
-    /// If set to true, the file will be overwritten without asking.
-    /// If set to false, the converts fails it the exists. 
+    ///     If set to true, the file will be overwritten without asking.
+    ///     If set to false, the converts fails it the exists.
     /// </param>
     public void OverwriteOutput(bool overwrite = true)
     {
@@ -152,16 +152,16 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Sets the max bit rate.
+    ///     Sets the max bit rate.
     /// </summary>
     /// <param name="value">The bit rate in k.</param>
     public void MaxRate(int value)
     {
         _arguments.Append($"-maxrate {value}k ");
     }
-    
+
     /// <summary>
-    /// Sets the buffer size.
+    ///     Sets the buffer size.
     /// </summary>
     /// <param name="value">The buffer size in k.</param>
     public void BufferSize(int value)
@@ -170,7 +170,7 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Sets the constant rate factor.
+    ///     Sets the constant rate factor.
     /// </summary>
     /// <param name="value">The constant rate factor.</param>
     public void ConstantRateFactor(int value)
@@ -179,16 +179,16 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Sets the codec to use for all streams.
+    ///     Sets the codec to use for all streams.
     /// </summary>
     /// <param name="codec">The codec to use.</param>
     public void Codec(string codec)
     {
         _arguments.Append($"-c {codec} ");
     }
-    
+
     /// <summary>
-    /// Sets the codec to use for the given stream types.
+    ///     Sets the codec to use for the given stream types.
     /// </summary>
     /// <param name="streamType">The stream type to set the codec.</param>
     /// <param name="codec">The codec to use.</param>
@@ -196,9 +196,9 @@ public class CommandBuilder
     {
         _arguments.Append($"-c:{streamType.Identifier()} {codec} ");
     }
-    
+
     /// <summary>
-    /// Sets the codec to use for the given stream types.
+    ///     Sets the codec to use for the given stream types.
     /// </summary>
     /// <param name="streamType">The stream type to set the codec.</param>
     /// <param name="streamId">The index of the stream to set the codec.</param>
@@ -207,9 +207,9 @@ public class CommandBuilder
     {
         _arguments.Append($"-c:{streamType.Identifier()}:{streamId.Identifier()} {codec} ");
     }
-    
+
     /// <summary>
-    /// Sets the codec to use for the given stream index.
+    ///     Sets the codec to use for the given stream index.
     /// </summary>
     /// <param name="streamId">The index of the stream to set the codec.</param>
     /// <param name="codec">The codec to use.</param>
@@ -217,40 +217,40 @@ public class CommandBuilder
     {
         _arguments.Append($"-c:{streamId.Identifier()} {codec} ");
     }
-    
+
     /// <summary>
-    /// Maps all streams from the given input file.
+    ///     Maps all streams from the given input file.
     /// </summary>
     /// <param name="inputId">The id of the input file.</param>
     public void Map(int inputId)
     {
         _arguments.Append($"-map {inputId} ");
     }
-    
+
     /// <summary>
-    /// Maps all streams from the given input file.
+    ///     Maps all streams from the given input file.
     /// </summary>
     /// <param name="inputId">The id of the input file.</param>
     /// <param name="streamId">The index of the stream to set the codec.</param>
     /// <param name="optional">If set, the convert will not fail if no streams were found.</param>
     public void Map(int inputId, StreamId streamId, bool optional = false)
     {
-        _arguments.Append($"-map {inputId}:{streamId.Identifier()}{(optional?"?":"")} ");
+        _arguments.Append($"-map {inputId}:{streamId.Identifier()}{(optional ? "?" : "")} ");
     }
-    
+
     /// <summary>
-    /// Maps all streams of the given type from the given input file.
+    ///     Maps all streams of the given type from the given input file.
     /// </summary>
     /// <param name="inputId">The id of the input file.</param>
     /// <param name="streamType">The stream type to map.</param>
     /// <param name="optional">If set, the convert will not fail if no streams were found.</param>
     public void Map(int inputId, StreamType streamType, bool optional = false)
     {
-        _arguments.Append($"-map {inputId}:{streamType.Identifier()}{(optional?"?":"")} ");
+        _arguments.Append($"-map {inputId}:{streamType.Identifier()}{(optional ? "?" : "")} ");
     }
-    
+
     /// <summary>
-    /// Maps the streams of the given type with the given index from the given input file.
+    ///     Maps the streams of the given type with the given index from the given input file.
     /// </summary>
     /// <param name="inputId">The id of the input file.</param>
     /// <param name="streamType">The stream type to map.</param>
@@ -258,29 +258,29 @@ public class CommandBuilder
     /// <param name="optional">If set, the convert will not fail if no streams were found.</param>
     public void Map(int inputId, StreamType streamType, StreamId streamId, bool optional = false)
     {
-        _arguments.Append($"-map {inputId}:{streamType.Identifier()}:{streamId.Identifier()}{(optional?"?":"")} ");
+        _arguments.Append($"-map {inputId}:{streamType.Identifier()}:{streamId.Identifier()}{(optional ? "?" : "")} ");
     }
-    
+
     /// <summary>
-    /// Maps the chapters from the given input stream.
+    ///     Maps the chapters from the given input stream.
     /// </summary>
     /// <param name="inputId">The id of the input file.</param>
     public void MapChapters(int inputId)
     {
         _arguments.Append($"-map_chapters {inputId} ");
     }
-    
+
     /// <summary>
-    /// Maps the metadata from the given input stream.
+    ///     Maps the metadata from the given input stream.
     /// </summary>
     /// <param name="inputId">The id of the input file.</param>
     public void MapMetadata(int inputId)
     {
         _arguments.Append($"-map_metadata {inputId} ");
     }
-    
+
     /// <summary>
-    /// Sets a metadata property for the given stream.
+    ///     Sets a metadata property for the given stream.
     /// </summary>
     /// <param name="streamId">The index of the stream to set the metadata.</param>
     /// <param name="property">The metadata property name.</param>
@@ -291,7 +291,7 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Sets a metadata property for the given stream.
+    ///     Sets a metadata property for the given stream.
     /// </summary>
     /// <param name="streamType">The stream type to set the metadata.</param>
     /// <param name="streamId">The index of the stream to set the metadata.</param>
@@ -303,7 +303,7 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Sets the disposition flag for the given stream.
+    ///     Sets the disposition flag for the given stream.
     /// </summary>
     /// <param name="streamId">The index of the stream to set the disposition.</param>
     /// <param name="value">The disposition flag.</param>
@@ -311,9 +311,9 @@ public class CommandBuilder
     {
         _arguments.Append($"-disposition:{streamId.Identifier()} {value} ");
     }
-    
+
     /// <summary>
-    /// Sets the disposition flag for the given stream.
+    ///     Sets the disposition flag for the given stream.
     /// </summary>
     /// <param name="streamType">The stream type to set the disposition.</param>
     /// <param name="streamId">The index of the stream to set the disposition.</param>
@@ -324,16 +324,16 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Seeks to the given timestamp.
+    ///     Seeks to the given timestamp.
     /// </summary>
     /// <param name="value">The timestamp to seek to.</param>
     public void Seek(TimeSpan value)
     {
         _arguments.Append($"-ss {value} ");
     }
-    
+
     /// <summary>
-    /// Seeks to the given timestamp in the input file.
+    ///     Seeks to the given timestamp in the input file.
     /// </summary>
     /// <param name="value">The timestamp to seek to.</param>
     /// <param name="inputId">The id of the input file</param>
@@ -341,18 +341,18 @@ public class CommandBuilder
     {
         _arguments.Append($"-ss {value} {inputId} ");
     }
-    
+
     /// <summary>
-    /// Sets the duration.
+    ///     Sets the duration.
     /// </summary>
     /// <param name="value">The duration.</param>
     public void Duration(TimeSpan value)
     {
         _arguments.Append($"-t {value} ");
     }
-    
+
     /// <summary>
-    /// Sets the duration of the input file.
+    ///     Sets the duration of the input file.
     /// </summary>
     /// <param name="value">The duration.</param>
     /// <param name="inputId">The id of the input file</param>
@@ -360,9 +360,9 @@ public class CommandBuilder
     {
         _arguments.Append($"-t {value} {inputId} ");
     }
-    
+
     /// <summary>
-    /// Sets the error detection handling.
+    ///     Sets the error detection handling.
     /// </summary>
     /// <param name="value">The error detection value.</param>
     public void ErrorDetection(string value)
@@ -371,15 +371,15 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Ignores errors in the incoming streams.
+    ///     Ignores errors in the incoming streams.
     /// </summary>
     public void IgnoreErrors()
     {
         ErrorDetection("ignore_err");
     }
-    
+
     /// <summary>
-    /// Sets the filter to use for the given stream types.
+    ///     Sets the filter to use for the given stream types.
     /// </summary>
     /// <param name="streamType">The stream type to set the filter.</param>
     /// <param name="filter">The filter definition.</param>
@@ -387,9 +387,9 @@ public class CommandBuilder
     {
         _arguments.Append($"-filter:{streamType.Identifier()} \"{filter}\" ");
     }
-    
+
     /// <summary>
-    /// Adds a custom complex filter.
+    ///     Adds a custom complex filter.
     /// </summary>
     /// <param name="filter">The filter definition.</param>
     public void FilterComplex(string filter)
@@ -398,16 +398,16 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Sets the analysis duration for the following input.
+    ///     Sets the analysis duration for the following input.
     /// </summary>
     /// <param name="value">The analysis duration.</param>
     public void AnalyzeDuration(long value)
     {
         _arguments.Append($"-analyzeduration {value} ");
     }
-    
+
     /// <summary>
-    /// Sets the probe size for the following input.
+    ///     Sets the probe size for the following input.
     /// </summary>
     /// <param name="value">The probe size.</param>
     public void ProbeSize(long value)
@@ -416,16 +416,16 @@ public class CommandBuilder
     }
 
     /// <summary>
-    /// Sets the FFmpeg log-level.
+    ///     Sets the FFmpeg log-level.
     /// </summary>
     /// <param name="logLevel">The log-level.</param>
     public void LogLevel(string logLevel)
     {
         _arguments.Append($"-loglevel {logLevel} ");
     }
-    
+
     /// <summary>
-    /// Defines the output path. Must be the last argument.
+    ///     Defines the output path. Must be the last argument.
     /// </summary>
     /// <param name="path">The file path.</param>
     public void Output(string path)

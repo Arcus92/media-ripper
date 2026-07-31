@@ -12,15 +12,15 @@ namespace MediaRipper.ViewModels;
 
 public class ExportSettingsViewModel : ViewModelBase
 {
-    private readonly IOutputService _outputService;
-    private readonly IMediaProviderService _mediaProviderService;
-    private readonly ISettingService _settingService;
-    private readonly OutputSelectorViewModel _outputSelector;
-    private readonly SourceTreeViewModel _sourceTree;
     private readonly MediaLookupViewModel _mediaLookup;
-    
-    public ExportSettingsViewModel(IOutputService outputService, IMediaProviderService mediaProviderService, 
-        ISettingService settingService, OutputSelectorViewModel outputSelector, SourceTreeViewModel sourceTree, 
+    private readonly IMediaProviderService _mediaProviderService;
+    private readonly OutputSelectorViewModel _outputSelector;
+    private readonly IOutputService _outputService;
+    private readonly ISettingService _settingService;
+    private readonly SourceTreeViewModel _sourceTree;
+
+    public ExportSettingsViewModel(IOutputService outputService, IMediaProviderService mediaProviderService,
+        ISettingService settingService, OutputSelectorViewModel outputSelector, SourceTreeViewModel sourceTree,
         MediaLookupViewModel mediaLookup)
     {
         _outputService = outputService;
@@ -29,14 +29,20 @@ public class ExportSettingsViewModel : ViewModelBase
         _outputSelector = outputSelector;
         _sourceTree = sourceTree;
         _mediaLookup = mediaLookup;
-        
+
         _sourceTree.PropertyChanged += OnSourceTreePropertyChanged;
+    }
+
+    /// <inheritdoc />
+    public override Control CreateView()
+    {
+        return new ExportSettingsView();
     }
 
     #region Selection
 
     /// <summary>
-    /// Gets if the selected item can be queued.
+    ///     Gets if the selected item can be queued.
     /// </summary>
     public bool CanQueueSelection
     {
@@ -45,7 +51,7 @@ public class ExportSettingsViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets if the selected item can be played.
+    ///     Gets if the selected item can be played.
     /// </summary>
     public bool CanPlaySelection
     {
@@ -54,7 +60,7 @@ public class ExportSettingsViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets if the selected item can be saved.
+    ///     Gets if the selected item can be saved.
     /// </summary>
     public bool CanSaveSelection
     {
@@ -75,7 +81,7 @@ public class ExportSettingsViewModel : ViewModelBase
     private void UpdateSelection()
     {
         var canPlayPreview = !string.IsNullOrEmpty(_settingService.Data.FFplayPath);
-        
+
         if (_sourceTree.TryGetSelectedTitleNode(out var titleNode))
         {
             var output = _outputService.GetByIdentifier(titleNode.Source.Identifier);
@@ -90,13 +96,13 @@ public class ExportSettingsViewModel : ViewModelBase
             CanSaveSelection = false;
         }
     }
-    
+
     #endregion Selection
 
     #region Format settings
 
     /// <summary>
-    /// Convert video to web-friendly format.
+    ///     Convert video to web-friendly format.
     /// </summary>
     private static readonly CodecOptions DefaultCodecOptions = new()
     {
@@ -105,14 +111,14 @@ public class ExportSettingsViewModel : ViewModelBase
         MaxRate = 20000,
         BufferSize = 25000
     };
-    
+
     /// <summary>
-    /// Gets the list of all output formats.
+    ///     Gets the list of all output formats.
     /// </summary>
     public MediaFormat[] AllOutputFormats => ContainerFormats.All;
 
     /// <summary>
-    /// Gets and sets the output format.
+    ///     Gets and sets the output format.
     /// </summary>
     public MediaFormat OutputFormat
     {
@@ -121,17 +127,17 @@ public class ExportSettingsViewModel : ViewModelBase
     } = ContainerFormats.Mp4;
 
     #endregion Format settings
-    
+
     #region Commands
-    
+
     /// <summary>
-    /// Adds the selected title to the output list.
+    ///     Adds the selected title to the output list.
     /// </summary>
     public async Task QueueSelectionAsync()
     {
         if (!_sourceTree.TryGetSelectedTitleNode(out var titleNode))
             return;
-        
+
         var outputDefinition = titleNode.Source.CreateDefaultOutputDefinition(DefaultCodecOptions, OutputFormat);
 
         if (_mediaLookup.TryGetMediaInfo(out var mediaInfo))
@@ -139,24 +145,19 @@ public class ExportSettingsViewModel : ViewModelBase
             var basename = mediaInfo.GetBasename();
 
             foreach (var file in outputDefinition.Files)
-            {
                 file.Filename = file.Filename[outputDefinition.MediaInfo.Name.Length..].Insert(0, basename);
-            }
-            
+
             outputDefinition.MediaInfo = mediaInfo;
             _mediaLookup.IncreaseEpisodeNumber();
         }
-        
+
         await _outputService.AddAsync(outputDefinition);
         UpdateSelection();
     }
 
     public async Task PlayPreviewAsync()
     {
-        if (!_sourceTree.TryGetSelectedTitleNode(out var titleNode))
-        {
-            return;
-        }
+        if (!_sourceTree.TryGetSelectedTitleNode(out var titleNode)) return;
 
         // Pipe-ing the decrypted segment stream into your player. You won't be able to seek properly.
         // You can skip a few seconds ahead, but not backwards. Changing audio or subtitle tracks will force you to 
@@ -169,7 +170,7 @@ public class ExportSettingsViewModel : ViewModelBase
         process.StartInfo.RedirectStandardInput = true;
 
         process.Start();
-        
+
         await Task.Run(async () =>
         {
             try
@@ -185,31 +186,22 @@ public class ExportSettingsViewModel : ViewModelBase
                 // Broken pipe exception is expected when consuming player is closed...
             }
         });
-        
+
         await process.WaitForExitAsync();
     }
 
     public async Task SaveSegmentAsync()
     {
-        if (!_sourceTree.TryGetSelectedTitleNode(out var titleNode))
-        {
-            return;
-        }
+        if (!_sourceTree.TryGetSelectedTitleNode(out var titleNode)) return;
 
         var identifier = titleNode.Source.Identifier;
         var path = Path.Combine(_outputSelector.OutputPath,
             $"{identifier.DiskName}_{identifier.Id}.m2ts");
-        
+
         await using var output = File.Create(path);
         await using var stream = _mediaProviderService.GetRawStream(titleNode.Source);
         await stream.CopyToAsync(output);
     }
-    
+
     #endregion Commands
-    
-    /// <inheritdoc />
-    public override Control CreateView()
-    {
-        return new ExportSettingsView();
-    }
 }

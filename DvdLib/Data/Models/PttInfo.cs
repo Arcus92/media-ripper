@@ -3,12 +3,12 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// PartOfTitle Unit Information
+///     PartOfTitle Unit Information
 /// </summary>
 public class PttInfo : IBigEndianBinaryReadable
 {
-    public ushort Pgcn { get; private set; } = 0;
-    public ushort Pgn { get; private set; } = 0;
+    public ushort Pgcn { get; private set; }
+    public ushort Pgn { get; private set; }
 
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader)

@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MediaLib.Utils\MediaLib.Utils.csproj" />
+        <ProjectReference Include="..\MediaLib.Utils\MediaLib.Utils.csproj"/>
     </ItemGroup>
 
 </Project>

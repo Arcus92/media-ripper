@@ -2,6 +2,6 @@ using Avalonia.Controls;
 
 namespace MediaRipper.Resources.Languages;
 
-public partial class GermanStrings : ResourceDictionary
+public class GermanStrings : ResourceDictionary
 {
 }

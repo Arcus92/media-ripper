@@ -7,17 +7,17 @@ public enum FrameRate : byte
     Fps25 = 0x03,
     Fps30000_1001 = 0x04,
     Fps50 = 0x06,
-    Fps60000_1001 = 0x07,
+    Fps60000_1001 = 0x07
 }
 
 public static class FrameRateHelper
 {
     public static double GetSeconds(this FrameRate frameRate, long frames)
     {
-        GetTimeScale(frameRate, out var dividend, out var divisor);
+        frameRate.GetTimeScale(out var dividend, out var divisor);
         return (double)frames * divisor / dividend;
     }
-    
+
     public static void GetTimeScale(this FrameRate frameRate, out int dividend, out int divisor)
     {
         switch (frameRate)

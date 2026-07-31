@@ -10,7 +10,7 @@ public struct CellPlayback : IBigEndianBinaryReadable
 
     public byte BlockMode { get; private set; } = 0;
     public byte BlockType { get; private set; } = 0;
-    
+
     public byte StillTime { get; private set; } = 0;
     public byte CellCmdNr { get; private set; } = 0;
     public DvdTime PlaybackTime { get; private set; } = default;
@@ -25,7 +25,7 @@ public struct CellPlayback : IBigEndianBinaryReadable
         var b = reader.ReadBits16();
         BlockMode = (byte)b.ReadBits(2);
         BlockType = (byte)b.ReadBits(2);
-        
+
         StillTime = reader.ReadByte();
         CellCmdNr = reader.ReadByte();
         PlaybackTime = reader.Read<DvdTime>();

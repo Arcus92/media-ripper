@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace MediaLib.Models;
 
 /// <summary>
-/// Defines additional flags of <see cref="StreamInfo"/>.
+///     Defines additional flags of <see cref="StreamInfo" />.
 /// </summary>
 [Flags]
 [JsonConverter(typeof(JsonStringEnumConverter<StreamFlags>))]

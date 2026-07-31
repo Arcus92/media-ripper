@@ -17,14 +17,14 @@ public class ApplicationService : IApplicationService
     {
         _serviceProvider = serviceProvider;
     }
-    
+
     /// <inheritdoc />
     public Window ShowWindow<T>() where T : ViewModelBase
     {
         var viewModel = _serviceProvider.GetRequiredService<T>();
         return ShowWindow(viewModel);
     }
-    
+
     /// <inheritdoc />
     public void ShowDialog<T>(T viewModel, ViewModelBase? owner = null) where T : ViewModelBase
     {
@@ -39,28 +39,28 @@ public class ApplicationService : IApplicationService
             if (!TryGetWindow(owner, out ownerWindow))
                 return;
         }
-        
+
         // Check if window is already open
         if (TryGetWindow(viewModel, out var window))
         {
             window.Focus();
             return;
         }
-        
+
         window = (Window)viewModel.CreateView();
         window.DataContext = viewModel;
         window.ShowDialog(ownerWindow);
         _viewModelsToWindow.Add(viewModel, window);
         window.Closed += (_, _) => _viewModelsToWindow.Remove(viewModel);
     }
-    
+
     /// <inheritdoc />
     public void ShowDialog<T>(ViewModelBase? owner = null) where T : ViewModelBase
     {
         var viewModel = _serviceProvider.GetRequiredService<T>();
         ShowDialog(viewModel, owner);
     }
-    
+
     /// <inheritdoc />
     public Window ShowWindow<T>(T viewModel) where T : ViewModelBase
     {
@@ -70,7 +70,7 @@ public class ApplicationService : IApplicationService
             window.Focus();
             return window;
         }
-        
+
         window = (Window)viewModel.CreateView();
         window.DataContext = viewModel;
         window.Show();
@@ -86,8 +86,11 @@ public class ApplicationService : IApplicationService
     }
 
     /// <inheritdoc />
-    public bool TryGetWindow<T>([MaybeNullWhen(false)] out Window window) where T : ViewModelBase => TryGetWindow<T>(out window, out _);
-    
+    public bool TryGetWindow<T>([MaybeNullWhen(false)] out Window window) where T : ViewModelBase
+    {
+        return TryGetWindow<T>(out window, out _);
+    }
+
     /// <inheritdoc />
     public bool TryGetWindow<T>([MaybeNullWhen(false)] out Window window, [MaybeNullWhen(false)] out T viewModel)
         where T : ViewModelBase
@@ -95,7 +98,7 @@ public class ApplicationService : IApplicationService
         foreach (var (curViewModel, curWindow) in _viewModelsToWindow)
         {
             if (curViewModel is not T curViewModelCasted) continue;
-            
+
             window = curWindow;
             viewModel = curViewModelCasted;
             return true;
@@ -105,15 +108,12 @@ public class ApplicationService : IApplicationService
         viewModel = null;
         return false;
     }
-    
+
     /// <inheritdoc />
     public void CloseWindow(ViewModelBase viewModel)
     {
-        if (!_viewModelsToWindow.TryGetValue(viewModel, out var window))
-        {
-            return;
-        }
-        
+        if (!_viewModelsToWindow.TryGetValue(viewModel, out var window)) return;
+
         window.Close();
     }
 }

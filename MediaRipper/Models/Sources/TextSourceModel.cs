@@ -12,12 +12,12 @@ public class TextSourceModel : BaseSourceModel
     }
 
     /// <summary>
-    /// Gets the resource key of the title.
+    ///     Gets the resource key of the title.
     /// </summary>
     public string TitleResourceKey { get; }
-    
+
     /// <summary>
-    /// Gets the sub-nodes.
+    ///     Gets the sub-nodes.
     /// </summary>
     public ObservableCollection<BaseSourceModel> SubNodes { get; init; } = [];
 }
@@ -29,7 +29,7 @@ public class TextSourceModel<TChild> : TextSourceModel where TChild : BaseSource
     }
 
     /// <summary>
-    /// Gets the items in this node.
+    ///     Gets the items in this node.
     /// </summary>
     public IEnumerable<TChild> Items => SubNodes.Cast<TChild>();
 }

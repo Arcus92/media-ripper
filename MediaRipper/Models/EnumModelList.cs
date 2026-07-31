@@ -5,13 +5,13 @@ using System.Linq;
 namespace MediaRipper.Models;
 
 /// <summary>
-/// A list of <see cref="EnumModel{T}"/>s.
+///     A list of <see cref="EnumModel{T}" />s.
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public class EnumModelList<T> : List<EnumModel<T>> where T : struct, IConvertible
 {
     /// <summary>
-    /// Gets the model for the given value.
+    ///     Gets the model for the given value.
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>

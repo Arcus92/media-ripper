@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using MediaLib.FFmpeg;
 using MediaRipper.Models.Settings;
 using MediaRipper.Serializer;
 using MediaRipper.Services.Interfaces;
@@ -9,17 +10,14 @@ using Microsoft.Extensions.Logging;
 namespace MediaRipper.Services;
 
 /// <summary>
-/// The service to load and save application settings.
+///     The service to load and save application settings.
 /// </summary>
 public class SettingService : ISettingService
 {
-    private readonly ILogger _logger;
-    private readonly ILanguageService _languageService;
-    private readonly IThemeService _themeService;
     private readonly string _filename = "settings.json";
-
-    /// <inheritdoc />
-    public SettingsData Data { get; private set; } = new();
+    private readonly ILanguageService _languageService;
+    private readonly ILogger _logger;
+    private readonly IThemeService _themeService;
 
     public SettingService(ILogger<SettingService> logger, ILanguageService languageService, IThemeService themeService)
     {
@@ -31,6 +29,9 @@ public class SettingService : ISettingService
     }
 
     /// <inheritdoc />
+    public SettingsData Data { get; private set; } = new();
+
+    /// <inheritdoc />
     public void NotifyChange()
     {
         OnChange();
@@ -38,45 +39,39 @@ public class SettingService : ISettingService
     }
 
     /// <summary>
-    /// Some settings were changed.
+    ///     Some settings were changed.
     /// </summary>
     private void OnChange()
     {
         // Update the FFmpeg binary path
-        if (!string.IsNullOrEmpty(Data.FFmpegPath))
-        {
-            MediaLib.FFmpeg.Engine.DefaultBinary = Data.FFmpegPath;
-        }
-        
+        if (!string.IsNullOrEmpty(Data.FFmpegPath)) Engine.DefaultBinary = Data.FFmpegPath;
+
         // Update the application language
         _languageService.SetLanguage(Data.Language);
-        
+
         // Update the application theme
         _themeService.SetTheme(Data.Theme);
     }
 
     /// <summary>
-    /// Loads the settings file.
+    ///     Loads the settings file.
     /// </summary>
     private void Load()
     {
         try
         {
             _logger.LogInformation("Loading settings file...");
-            
+
             if (!File.Exists(_filename))
             {
                 _logger.LogInformation("No settings file found. Creating a new file...");
                 Save();
                 return;
             }
-            
+
             using var file = File.OpenRead(_filename);
             var data = JsonSerializer.Deserialize(file, SettingsContext.Default.SettingsData);
-            if (data is null)
-            {
-                return;
-            }
+            if (data is null) return;
 
             Data = data;
             OnChange();
@@ -88,14 +83,14 @@ public class SettingService : ISettingService
     }
 
     /// <summary>
-    /// Saves the settings file.
+    ///     Saves the settings file.
     /// </summary>
     private void Save()
     {
         try
         {
             _logger.LogInformation("Writing settings file...");
-            
+
             using var file = File.Create(_filename);
             JsonSerializer.Serialize(file, Data, SettingsContext.Default.SettingsData);
         }

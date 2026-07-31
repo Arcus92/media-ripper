@@ -10,17 +10,17 @@
              x:Class="MediaRipper.Views.MediaLookupView"
              x:DataType="vm:MediaLookupViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:MediaLookupViewModel}}">
-    
+
     <Border Classes="DarkBox">
         <StackPanel Orientation="Vertical" Spacing="10">
             <!-- Title -->
-            <TextBlock Classes="Title" Text="{DynamicResource MediaLookup}"/>
-            
+            <TextBlock Classes="Title" Text="{DynamicResource MediaLookup}" />
+
             <!-- Source -->
             <TextBlock Opacity="0.6">
-                <Run Text="{DynamicResource Source}"/>: <Run Text="{DynamicResource TheMovieDatabase}"/>
+                <Run Text="{DynamicResource Source}" />: <Run Text="{DynamicResource TheMovieDatabase}" />
             </TextBlock>
-            
+
             <!-- Search box -->
             <DockPanel>
                 <StackPanel Orientation="Horizontal" Margin="5,0,0,0" DockPanel.Dock="Right">
@@ -35,17 +35,17 @@
                         </Button>
                     </StackPanel>
                 </StackPanel>
-                <TextBox Text="{Binding SearchText, Mode=TwoWay}" 
+                <TextBox Text="{Binding SearchText, Mode=TwoWay}"
                          IsEnabled="{Binding !IsLoading}"
                          PlaceholderText="{StaticResource Search}">
                     <TextBox.KeyBindings>
-                        <KeyBinding  Command="{Binding SearchAsync}" Gesture="Enter" />
+                        <KeyBinding Command="{Binding SearchAsync}" Gesture="Enter" />
                     </TextBox.KeyBindings>
                 </TextBox>
             </DockPanel>
-            
+
             <!-- Search result selection -->
-            <ComboBox HorizontalAlignment="Stretch" 
+            <ComboBox HorizontalAlignment="Stretch"
                       SelectedItem="{Binding SelectedMediaItem, Mode=TwoWay}"
                       ItemsSource="{Binding SearchResults}"
                       IsEnabled="{Binding !IsLoading}">
@@ -58,9 +58,9 @@
                     </DataTemplate>
                 </ComboBox.DataTemplates>
             </ComboBox>
-            
+
             <!-- Season selection -->
-            <ComboBox HorizontalAlignment="Stretch" 
+            <ComboBox HorizontalAlignment="Stretch"
                       SelectedItem="{Binding SelectedSeason, Mode=TwoWay}"
                       ItemsSource="{Binding Seasons}"
                       IsEnabled="{Binding !IsLoading}"
@@ -73,14 +73,14 @@
                     </DataTemplate>
                 </ComboBox.DataTemplates>
             </ComboBox>
-            
+
             <!-- Season description -->
-            <TextBlock Text="{Binding SelectedSeason.Description, FallbackValue={}}" 
+            <TextBlock Text="{Binding SelectedSeason.Description, FallbackValue={}}"
                        TextWrapping="Wrap"
                        IsVisible="{Binding IsTvSeries}" />
-            
+
             <!-- Episode selection -->
-            <ComboBox HorizontalAlignment="Stretch" 
+            <ComboBox HorizontalAlignment="Stretch"
                       SelectedItem="{Binding SelectedEpisode, Mode=TwoWay}"
                       ItemsSource="{Binding Episodes}"
                       IsEnabled="{Binding !IsLoading}"
@@ -95,9 +95,9 @@
                     </DataTemplate>
                 </ComboBox.DataTemplates>
             </ComboBox>
-            
+
             <!-- Episode description -->
-            <TextBlock Text="{Binding SelectedEpisode.Description, FallbackValue={}}" 
+            <TextBlock Text="{Binding SelectedEpisode.Description, FallbackValue={}}"
                        TextWrapping="Wrap"
                        IsVisible="{Binding IsTvSeries}" />
         </StackPanel>

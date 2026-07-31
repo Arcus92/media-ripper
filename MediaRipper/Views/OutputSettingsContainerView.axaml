@@ -8,5 +8,5 @@
              x:Class="MediaRipper.Views.OutputSettingsContainerView"
              x:DataType="vm:OutputSettingsContainerViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:OutputSettingsContainerViewModel}}">
-    <ContentControl Content="{Binding SelectedItem}"/>
+    <ContentControl Content="{Binding SelectedItem}" />
 </UserControl>

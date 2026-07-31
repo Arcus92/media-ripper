@@ -1,14 +1,18 @@
 namespace BluRayLib.Decrypt;
 
 /// <summary>
-/// A decryption stream to read an encrypted BluRay file. For example an M2TS file.
+///     A decryption stream to read an encrypted BluRay file. For example an M2TS file.
 /// </summary>
 public class MakeMkvDecryptStream : Stream
 {
+    private readonly byte[] _buffer = new byte[MakeMkv.UnitSize];
+    private readonly Stream _inputStream;
     private readonly MakeMkv _makeMkv;
     private readonly FileNameFlags _nameFlags;
-    private readonly Stream _inputStream;
-    
+    private int _bufferOffset;
+
+    private long _fileOffset;
+
     public MakeMkvDecryptStream(MakeMkv makeMkv, FileNameFlags nameFlags, Stream inputStream)
     {
         _makeMkv = makeMkv;
@@ -16,15 +20,31 @@ public class MakeMkvDecryptStream : Stream
         _inputStream = inputStream;
     }
 
-    private long _fileOffset;
-    private int _bufferOffset;
-    private readonly byte[] _buffer = new byte[MakeMkv.UnitSize];
+    /// <inheritdoc />
+    public override bool CanRead => true;
+
+    /// <inheritdoc />
+    public override bool CanSeek => _inputStream.CanSeek;
+
+    /// <inheritdoc />
+    public override bool CanWrite => false;
+
+    /// <inheritdoc />
+    public override long Length => _inputStream.Length;
+
+    /// <inheritdoc />
+    public override long Position
+    {
+        get => _fileOffset + _bufferOffset;
+        set => Seek(value, SeekOrigin.Begin);
+    }
+
     private void ReadBufferAndDecrypt()
     {
         _inputStream.ReadExactly(_buffer, 0, _buffer.Length);
         _makeMkv.DecryptUnit(_nameFlags, (ulong)_fileOffset, _buffer);
     }
-    
+
     /// <inheritdoc />
     public override void Flush()
     {
@@ -54,7 +74,7 @@ public class MakeMkvDecryptStream : Stream
             readTotal += read;
             offset += read;
             count -= read;
-            
+
             // Jump to next unit
             if (_bufferOffset == MakeMkv.UnitSize)
             {
@@ -80,14 +100,14 @@ public class MakeMkvDecryptStream : Stream
 
         var newBufferOffset = (int)(offset % MakeMkv.UnitSize);
         var newFileOffset = offset - newBufferOffset;
-            
+
         // Unit is already loaded
         if (newFileOffset == _fileOffset && _bufferOffset > 0)
         {
             _bufferOffset = newBufferOffset;
             return offset;
         }
-        
+
         _fileOffset = newFileOffset;
         _bufferOffset = newBufferOffset;
 
@@ -109,29 +129,10 @@ public class MakeMkvDecryptStream : Stream
         throw new NotSupportedException();
     }
 
-    /// <inheritdoc />
-    public override bool CanRead => true;
-
-    /// <inheritdoc />
-    public override bool CanSeek => _inputStream.CanSeek;
-
-    /// <inheritdoc />
-    public override bool CanWrite => false;
-
-    /// <inheritdoc />
-    public override long Length => _inputStream.Length;
-
-    /// <inheritdoc />
-    public override long Position
-    {
-        get => _fileOffset + _bufferOffset;
-        set => Seek(value, SeekOrigin.Begin);
-    }
-    
     #region Static
 
     /// <summary>
-    /// Opens a filename from a BluRay.
+    ///     Opens a filename from a BluRay.
     /// </summary>
     /// <param name="diskPath">The path to the BluRay root directory.</param>
     /// <param name="nameFlags">The filename flags to the file. Use <c>FileName.M2TS(01000)</c> for example.</param>
@@ -139,10 +140,7 @@ public class MakeMkvDecryptStream : Stream
     public static MakeMkvDecryptStream Open(string diskPath, FileNameFlags nameFlags)
     {
         var makeMkv = MakeMkv.Shared;
-        if (makeMkv.Open(diskPath) != 0)
-        {
-            throw new IOException($"MakeMkv couldn't open disk path: {diskPath}");
-        }
+        if (makeMkv.Open(diskPath) != 0) throw new IOException($"MakeMkv couldn't open disk path: {diskPath}");
 
         var inputPath = Path.Combine(diskPath, nameFlags.GetLocalPath());
         var inputStream = File.OpenRead(inputPath);
@@ -153,18 +151,18 @@ public class MakeMkvDecryptStream : Stream
         };
         return stream;
     }
-    
+
     #endregion Static
-    
+
     #region IDisposable
-    
+
     /// <summary>
-    /// Gets and sets if the internal MakeMkv context should be destroyed on dispose.
+    ///     Gets and sets if the internal MakeMkv context should be destroyed on dispose.
     /// </summary>
     public bool DisposeMakeMkv { get; set; }
-    
+
     /// <summary>
-    /// Gets and sets if the input stream should be destroyed on dispose.
+    ///     Gets and sets if the input stream should be destroyed on dispose.
     /// </summary>
     public bool DisposeInputStream { get; set; }
 
@@ -172,12 +170,12 @@ public class MakeMkvDecryptStream : Stream
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        
+
         if (DisposeMakeMkv)
             _makeMkv.Dispose();
         if (DisposeInputStream)
             _inputStream.Dispose();
     }
-    
+
     #endregion IDisposable
 }

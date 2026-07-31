@@ -15,23 +15,26 @@ namespace MediaRipper.ViewModels;
 public class OutputViewModel : ViewModelBase
 {
     private readonly IOutputService _outputService;
-    
-    /// <summary>
-    /// Gets the title output instance.
-    /// </summary>
-    public OutputModel Model { get; }
-    
+
     public OutputViewModel(IOutputService outputService, OutputModel model)
     {
         _outputService = outputService;
-        
+
         Model = model;
         Model.PropertyChanged += ModelOnPropertyChanged;
-        
+
         // Build externals
-        Files = new ObservableCollection<OutputFileViewModel>(model.Files.Select(fileModel => new OutputFileViewModel(fileModel)));
+        Files = new ObservableCollection<OutputFileViewModel>(model.Files.Select(fileModel =>
+            new OutputFileViewModel(fileModel)));
     }
-    
+
+    /// <summary>
+    ///     Gets the title output instance.
+    /// </summary>
+    public OutputModel Model { get; }
+
+    public ObservableCollection<OutputFileViewModel> Files { get; }
+
     private void ModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
@@ -46,14 +49,28 @@ public class OutputViewModel : ViewModelBase
                 break;
         }
     }
-    public ObservableCollection<OutputFileViewModel> Files { get; }
-    
+
+    #region Commands
+
+    public async Task ApplyAsync()
+    {
+        await _outputService.UpdateAsync(Model);
+    }
+
+    #endregion Commands
+
+    /// <inheritdoc />
+    public override Control CreateView()
+    {
+        return new OutputSettingsView();
+    }
+
     #region Progress
-    
+
     public bool IsProcessing => Model.Status == OutputStatus.Processing;
     public bool IsMissing => Model.Status == OutputStatus.Missing;
     public double Progress => Model.Progress;
-    
+
     public Icon StatusIcon => Model.Status switch
     {
         OutputStatus.Completed => Icon.CheckmarkCircle,
@@ -62,22 +79,22 @@ public class OutputViewModel : ViewModelBase
         OutputStatus.Processing => Icon.ArrowSyncCircle,
         _ => Icon.Circle
     };
-    
+
     #endregion Progress
-    
+
     #region Metadata
-    
+
     public static EnumModelList<MediaType> AllMediaTypes { get; } =
     [
-        new(MediaLib.Models.MediaType.Unset, "MediaTypeUnset"),
-        new(MediaLib.Models.MediaType.Movie, "MediaTypeMovie"),
-        new(MediaLib.Models.MediaType.Episode, "MediaTypeEpisode"),
-        new(MediaLib.Models.MediaType.Extra, "MediaTypeExtra"),
-        new(MediaLib.Models.MediaType.MakingOf, "MediaTypeMakingOf"),
-        new(MediaLib.Models.MediaType.BehindTheScenes, "MediaTypeBehindTheScenes"),
-        new(MediaLib.Models.MediaType.DeletedScenes, "MediaTypeDeletedScenes"),
-        new(MediaLib.Models.MediaType.Interview, "MediaTypeInterview"),
-        new(MediaLib.Models.MediaType.Trailer, "MediaTypeTrailer"),
+        new EnumModel<MediaType>(MediaLib.Models.MediaType.Unset, "MediaTypeUnset"),
+        new EnumModel<MediaType>(MediaLib.Models.MediaType.Movie, "MediaTypeMovie"),
+        new EnumModel<MediaType>(MediaLib.Models.MediaType.Episode, "MediaTypeEpisode"),
+        new EnumModel<MediaType>(MediaLib.Models.MediaType.Extra, "MediaTypeExtra"),
+        new EnumModel<MediaType>(MediaLib.Models.MediaType.MakingOf, "MediaTypeMakingOf"),
+        new EnumModel<MediaType>(MediaLib.Models.MediaType.BehindTheScenes, "MediaTypeBehindTheScenes"),
+        new EnumModel<MediaType>(MediaLib.Models.MediaType.DeletedScenes, "MediaTypeDeletedScenes"),
+        new EnumModel<MediaType>(MediaLib.Models.MediaType.Interview, "MediaTypeInterview"),
+        new EnumModel<MediaType>(MediaLib.Models.MediaType.Trailer, "MediaTypeTrailer")
     ];
 
     public EnumModel<MediaType> MediaType
@@ -91,30 +108,30 @@ public class OutputViewModel : ViewModelBase
         get => Model.Definition.MediaInfo.Name;
         set => SetProperty(Model.Definition.MediaInfo.Name, value.Trim(), v => Model.Definition.MediaInfo.Name = v);
     }
-    
+
     public int? Episode
     {
         get => Model.Definition.MediaInfo.Episode;
         set => SetProperty(Model.Definition.MediaInfo.Episode, value, v => Model.Definition.MediaInfo.Episode = v);
     }
-    
+
     public int? Season
     {
         get => Model.Definition.MediaInfo.Season;
         set => SetProperty(Model.Definition.MediaInfo.Season, value, v => Model.Definition.MediaInfo.Season = v);
     }
-    
+
     #endregion Metadata
-    
+
     #region Properties
 
     /// <summary>
-    /// Static field for <see cref="IsFilesExpanded"/> to remember last choice for all new UIs.
+    ///     Static field for <see cref="IsFilesExpanded" /> to remember last choice for all new UIs.
     /// </summary>
     private static bool _isFilesExpanded;
 
     /// <summary>
-    /// Gets and sets if the files list is expanded.
+    ///     Gets and sets if the files list is expanded.
     /// </summary>
     public bool IsFilesExpanded
     {
@@ -127,19 +144,4 @@ public class OutputViewModel : ViewModelBase
     } = _isFilesExpanded;
 
     #endregion Properties
-    
-    #region Commands
-    
-    public async Task ApplyAsync()
-    {
-        await _outputService.UpdateAsync(Model);
-    }
-    
-    #endregion Commands
-    
-    /// <inheritdoc />
-    public override Control CreateView()
-    {
-        return new OutputSettingsView();
-    }
 }

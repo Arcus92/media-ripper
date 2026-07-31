@@ -5,42 +5,42 @@ namespace BluRayLib.Mpls;
 public class StreamNumberTable
 {
     /// <summary>
-    /// Gets and sets the primary video streams.
+    ///     Gets and sets the primary video streams.
     /// </summary>
     public PlaylistStream[] PrimaryVideoStreams { get; set; } = [];
-    
+
     /// <summary>
-    /// Gets and sets the primary audio streams.
+    ///     Gets and sets the primary audio streams.
     /// </summary>
     public PlaylistStream[] PrimaryAudioStreams { get; set; } = [];
-    
+
     /// <summary>
-    /// Gets and sets the primary presentation graphics streams.
+    ///     Gets and sets the primary presentation graphics streams.
     /// </summary>
     public PlaylistStream[] PrimaryPgStreams { get; set; } = [];
-    
+
     /// <summary>
-    /// Gets and sets the primary interactive graphics streams.
+    ///     Gets and sets the primary interactive graphics streams.
     /// </summary>
     public PlaylistStream[] PrimaryIgStreams { get; set; } = [];
-    
+
     /// <summary>
-    /// Gets and sets the secondary video streams.
+    ///     Gets and sets the secondary video streams.
     /// </summary>
     public PlaylistStream[] SecondaryVideoStream { get; set; } = [];
-    
+
     /// <summary>
-    /// Gets and sets the secondary audio streams.
+    ///     Gets and sets the secondary audio streams.
     /// </summary>
     public PlaylistStream[] SecondaryAudioStream { get; set; } = [];
-    
+
     /// <summary>
-    /// Gets and sets the secondary presentation graphics streams.
+    ///     Gets and sets the secondary presentation graphics streams.
     /// </summary>
     public PlaylistStream[] SecondaryPgStream { get; set; } = [];
-    
+
     /// <summary>
-    /// Gets and sets the dv streams.
+    ///     Gets and sets the dv streams.
     /// </summary>
     public PlaylistStream[] DvStream { get; set; } = [];
 
@@ -49,7 +49,7 @@ public class StreamNumberTable
         var length = reader.ReadUInt16();
         var start = reader.Position;
         if (length == 0) return;
-        
+
         reader.Skip(2); // Reserved
         var primaryVideoStreamCount = reader.ReadByte();
         var primaryAudioStreamCount = reader.ReadByte();
@@ -61,7 +61,7 @@ public class StreamNumberTable
         var dvStreamCount = reader.ReadByte();
 
         reader.Skip(4); // Reserved
-        
+
         PrimaryVideoStreams = new PlaylistStream[primaryVideoStreamCount];
         for (var i = 0; i < primaryVideoStreamCount; i++)
         {
@@ -69,7 +69,7 @@ public class StreamNumberTable
             streamInfo.Read(reader);
             PrimaryVideoStreams[i] = streamInfo;
         }
-        
+
         PrimaryAudioStreams = new PlaylistStream[primaryAudioStreamCount];
         for (var i = 0; i < primaryAudioStreamCount; i++)
         {
@@ -77,7 +77,7 @@ public class StreamNumberTable
             streamInfo.Read(reader);
             PrimaryAudioStreams[i] = streamInfo;
         }
-        
+
         PrimaryPgStreams = new PlaylistStream[primaryPgStreamCount];
         for (var i = 0; i < primaryPgStreamCount; i++)
         {
@@ -85,7 +85,7 @@ public class StreamNumberTable
             streamInfo.Read(reader);
             PrimaryPgStreams[i] = streamInfo;
         }
-        
+
         PrimaryIgStreams = new PlaylistStream[primaryIgStreamCount];
         for (var i = 0; i < primaryIgStreamCount; i++)
         {
@@ -93,7 +93,7 @@ public class StreamNumberTable
             streamInfo.Read(reader);
             PrimaryIgStreams[i] = streamInfo;
         }
-        
+
         SecondaryAudioStream = new PlaylistStream[secondaryAudioStreamCount];
         for (var i = 0; i < secondaryAudioStreamCount; i++)
         {
@@ -101,7 +101,7 @@ public class StreamNumberTable
             streamInfo.Read(reader);
             SecondaryAudioStream[i] = streamInfo;
         }
-        
+
         SecondaryVideoStream = new PlaylistStream[secondaryVideoStreamCount];
         for (var i = 0; i < secondaryVideoStreamCount; i++)
         {
@@ -117,7 +117,7 @@ public class StreamNumberTable
             streamInfo.Read(reader);
             SecondaryPgStream[i] = streamInfo;
         }
-        
+
         DvStream = new PlaylistStream[dvStreamCount];
         for (var i = 0; i < dvStreamCount; i++)
         {
@@ -125,7 +125,7 @@ public class StreamNumberTable
             streamInfo.Read(reader);
             DvStream[i] = streamInfo;
         }
-        
+
         reader.SkipTo(start + length);
     }
 }

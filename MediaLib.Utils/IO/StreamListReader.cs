@@ -1,8 +1,8 @@
 namespace MediaLib.Utils.IO;
 
 /// <summary>
-/// A reader that combines multiple streams into one concatenated stream.
-/// The streams are created via a factory function and are opened once needed, when the previous stream was read.
+///     A reader that combines multiple streams into one concatenated stream.
+///     The streams are created via a factory function and are opened once needed, when the previous stream was read.
 /// </summary>
 public class StreamListReader : Stream
 {
@@ -12,14 +12,33 @@ public class StreamListReader : Stream
     private long _position;
 
     /// <summary>
-    /// Creates the stream list with the given stream factories.
+    ///     Creates the stream list with the given stream factories.
     /// </summary>
     /// <param name="factories">The factory functions to create all streams.</param>
     public StreamListReader(IEnumerable<Func<Stream>> factories)
     {
         _streamFactories = factories.ToArray();
     }
-    
+
+    /// <inheritdoc />
+    public override bool CanRead => true;
+
+    /// <inheritdoc />
+    public override bool CanSeek => false;
+
+    /// <inheritdoc />
+    public override bool CanWrite => false;
+
+    /// <inheritdoc />
+    public override long Length => throw new NotSupportedException();
+
+    /// <inheritdoc />
+    public override long Position
+    {
+        get => _position;
+        set => Seek(value, SeekOrigin.Begin);
+    }
+
     /// <inheritdoc />
     public override void Flush()
     {
@@ -32,10 +51,7 @@ public class StreamListReader : Stream
         {
             if (_currentStream is null)
             {
-                if (_currentStreamIndex >= _streamFactories.Length)
-                {
-                    return 0;
-                }
+                if (_currentStreamIndex >= _streamFactories.Length) return 0;
 
                 _currentStream = _streamFactories[_currentStreamIndex].Invoke();
             }
@@ -72,25 +88,6 @@ public class StreamListReader : Stream
     public override void Write(byte[] buffer, int offset, int count)
     {
         throw new NotSupportedException();
-    }
-
-    /// <inheritdoc />
-    public override bool CanRead => true;
-
-    /// <inheritdoc />
-    public override bool CanSeek => false;
-
-    /// <inheritdoc />
-    public override bool CanWrite => false;
-
-    /// <inheritdoc />
-    public override long Length => throw new NotSupportedException();
-
-    /// <inheritdoc />
-    public override long Position
-    {
-        get => _position;
-        set => Seek(value, SeekOrigin.Begin);
     }
 
     /// <inheritdoc />

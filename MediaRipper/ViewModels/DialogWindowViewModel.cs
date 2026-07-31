@@ -14,7 +14,7 @@ public class DialogWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets and sets the message text.
+    ///     Gets and sets the message text.
     /// </summary>
     public string Text
     {
@@ -23,14 +23,14 @@ public class DialogWindowViewModel : ViewModelBase
     } = "";
 
     /// <summary>
-    /// Closes this dialog message.
+    ///     Closes this dialog message.
     /// </summary>
     public void Close()
     {
         _applicationService.CloseWindow(this);
     }
-    
-    /// <inheritdoc/>
+
+    /// <inheritdoc />
     public override Control CreateView()
     {
         return new DialogWindow();

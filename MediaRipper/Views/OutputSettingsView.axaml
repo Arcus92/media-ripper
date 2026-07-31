@@ -8,40 +8,44 @@
              x:Class="MediaRipper.Views.OutputSettingsView"
              x:DataType="vm:OutputViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:OutputViewModel}}">
-    
+
     <Border Classes="DarkBox">
         <StackPanel Orientation="Vertical" Spacing="10">
             <!-- Title -->
-            <TextBlock Classes="Title" Text="{DynamicResource Properties}"/>
-            
+            <TextBlock Classes="Title" Text="{DynamicResource Properties}" />
+
             <StackPanel Orientation="Horizontal" Spacing="10">
                 <!-- Media type -->
-                <ComboBox ItemsSource="{Binding AllMediaTypes}" SelectedValue="{Binding MediaType}"/>
-                
+                <ComboBox ItemsSource="{Binding AllMediaTypes}" SelectedValue="{Binding MediaType}" />
+
                 <!-- Season input -->
                 <TextBlock VerticalAlignment="Center">
-                    <Run Text="{DynamicResource Season}"/>:
+                    <Run Text="{DynamicResource Season}" />:
                 </TextBlock>
-                <NumericUpDown Width="110" Minimum="1" Maximum="1000" Value="{Binding Season}" FormatString="N0" ParsingNumberStyle="Integer"/>
-                
+                <NumericUpDown Width="110" Minimum="1" Maximum="1000" Value="{Binding Season}" FormatString="N0"
+                               ParsingNumberStyle="Integer" />
+
                 <!-- Episode input -->
                 <TextBlock VerticalAlignment="Center">
-                    <Run Text="{DynamicResource Episode}"/>:
+                    <Run Text="{DynamicResource Episode}" />:
                 </TextBlock>
-                <NumericUpDown Width="110" Minimum="1" Maximum="1000" Value="{Binding Episode}" FormatString="N0" ParsingNumberStyle="Integer"/>
-                
+                <NumericUpDown Width="110" Minimum="1" Maximum="1000" Value="{Binding Episode}" FormatString="N0"
+                               ParsingNumberStyle="Integer" />
+
                 <!-- Apply -->
-                <Button Command="{Binding ApplyAsync}" CommandParameter="{Binding Model}" Content="{DynamicResource RenameFiles}" />
+                <Button Command="{Binding ApplyAsync}" CommandParameter="{Binding Model}"
+                        Content="{DynamicResource RenameFiles}" />
             </StackPanel>
-            
+
             <!-- Base name -->
             <TextBlock>
-                <Run Text="{DynamicResource Basename}"/>:
+                <Run Text="{DynamicResource Basename}" />:
             </TextBlock>
             <TextBox Text="{Binding Name}" />
-            
+
             <!-- Files -->
-            <Expander IsExpanded="{Binding IsFilesExpanded, Mode=TwoWay}" HorizontalAlignment="Stretch" Header="{DynamicResource OutputFiles}" >
+            <Expander IsExpanded="{Binding IsFilesExpanded, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                      Header="{DynamicResource OutputFiles}">
                 <ScrollViewer MaxHeight="450">
                     <ItemsControl ItemsSource="{Binding Files}" />
                 </ScrollViewer>

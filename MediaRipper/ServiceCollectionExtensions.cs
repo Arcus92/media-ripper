@@ -9,7 +9,7 @@ namespace MediaRipper;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers the common services for this application.
+    ///     Registers the common services for this application.
     /// </summary>
     /// <param name="collection">The service collection.</param>
     public static void AddCommonServices(this IServiceCollection collection)
@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
         collection.AddScoped<OutputTreeViewModel>();
         collection.AddScoped<OutputSettingsContainerViewModel>();
         collection.AddScoped<MediaLookupViewModel>();
-        
+
         // Controller
         collection.AddSingleton<IApplicationService, ApplicationService>();
         collection.AddSingleton<ILanguageService, LanguageService>();
@@ -37,7 +37,7 @@ public static class ServiceCollectionExtensions
         collection.AddSingleton<IOutputService, OutputService>();
         collection.AddSingleton<IOutputQueueService, OutputQueueService>();
         collection.AddSingleton<IStorageProviderAccessor, StorageProviderAccessor>();
-        
+
         // Services
         collection.AddHttpClient();
         collection.AddLogging(builder => builder.AddConsole());

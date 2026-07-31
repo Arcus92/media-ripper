@@ -12,18 +12,20 @@ using Microsoft.Extensions.Logging;
 namespace MediaLib.FileSystem.Providers;
 
 /// <summary>
-/// A media provider for local files in a given directory.
+///     A media provider for local files in a given directory.
 /// </summary>
 public class FileSystemMediaProvider : IMediaProvider
 {
+    private readonly string _contentHash;
+    private readonly string _diskName;
     private readonly ILogger _logger;
 
     private readonly string _path;
-    private readonly string _contentHash;
-    private readonly string _diskName;
+
     public FileSystemMediaProvider(IServiceProvider serviceProvider, string path)
     {
-        _logger = serviceProvider.GetRequiredService<ILogger<FileSystemMediaProvider>>();;
+        _logger = serviceProvider.GetRequiredService<ILogger<FileSystemMediaProvider>>();
+        ;
         _path = path;
         _contentHash = ContentHash.CalculateHash(path);
         _diskName = Path.GetFileName(_path);
@@ -32,7 +34,7 @@ public class FileSystemMediaProvider : IMediaProvider
     /// <inheritdoc />
     public DiskInfo GetDiskInfo()
     {
-        return new DiskInfo()
+        return new DiskInfo
         {
             DiskName = _diskName,
             ContentHash = _contentHash
@@ -65,11 +67,12 @@ public class FileSystemMediaProvider : IMediaProvider
     /// <inheritdoc />
     public Stream GetRawStream(IMediaSource source)
     {
-        if (!Contains(source.Identifier)) throw new ArgumentException($"The given source isn't contained by this provider.", nameof(source));
-        
+        if (!Contains(source.Identifier))
+            throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
+
         return File.OpenRead(GetMediaPath(source.Identifier));
     }
-    
+
     /// <inheritdoc />
     public Stream GetRawStream(IMediaSource source, ushort segementId)
     {
@@ -83,23 +86,34 @@ public class FileSystemMediaProvider : IMediaProvider
                File.Exists(GetMediaPath(identifier));
     }
 
+    #region Dispose
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        // Nothing to do
+    }
+
+    #endregion Dispose
+
     /// <summary>
-    /// Returns the media source for the given playlist id.
+    ///     Returns the media source for the given playlist id.
     /// </summary>
     /// <param name="path">The path to the source file.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Returns the source object.</returns>
-    public async Task<FileSystemMediaSource?> TryGetSourceAsync(string path, CancellationToken cancellationToken = default)
+    public async Task<FileSystemMediaSource?> TryGetSourceAsync(string path,
+        CancellationToken cancellationToken = default)
     {
-        var identifier = new MediaIdentifier()
+        var identifier = new MediaIdentifier
         {
             Type = MediaIdentifierType.File,
             ContentHash = _contentHash,
             DiskName = _diskName,
             Id = Path.GetFileName(path),
-            SegmentIds = [0],
+            SegmentIds = [0]
         };
-        
+
         try
         {
             var ffmpeg = new Engine();
@@ -115,7 +129,7 @@ public class FileSystemMediaProvider : IMediaProvider
     }
 
     /// <summary>
-    /// Returns the fill disk path of the media identifier.
+    ///     Returns the fill disk path of the media identifier.
     /// </summary>
     /// <param name="identifier">The media identifier.</param>
     /// <returns>Returns the full path.</returns>
@@ -123,9 +137,9 @@ public class FileSystemMediaProvider : IMediaProvider
     {
         return Path.Combine(_path, identifier.Id);
     }
-    
+
     /// <summary>
-    /// Returns if the given file is a supported media format by the file extension.
+    ///     Returns if the given file is a supported media format by the file extension.
     /// </summary>
     /// <param name="path">The file path.</param>
     /// <returns>Returns true, if the given file is supported.</returns>
@@ -136,33 +150,24 @@ public class FileSystemMediaProvider : IMediaProvider
         return string.Equals(extension, ".mp4", StringComparison.OrdinalIgnoreCase) ||
                string.Equals(extension, ".mkv", StringComparison.OrdinalIgnoreCase);
     }
-    
+
     /// <summary>
-    /// Tries to create a media converter for the given directory.
+    ///     Tries to create a media converter for the given directory.
     /// </summary>
     /// <param name="serviceProvider">The service provider.</param>
     /// <param name="path">The disk path.</param>
     /// <param name="provider">Returns the created provider.</param>
     /// <returns>Returns if the path is valid and a provider was created.</returns>
-    public static bool TryCreate(IServiceProvider serviceProvider, string path, [MaybeNullWhen(false)] out FileSystemMediaProvider provider)
+    public static bool TryCreate(IServiceProvider serviceProvider, string path,
+        [MaybeNullWhen(false)] out FileSystemMediaProvider provider)
     {
         if (!Directory.Exists(path))
         {
             provider = null;
             return false;
         }
-        
+
         provider = new FileSystemMediaProvider(serviceProvider, path);
         return true;
     }
-    
-    #region Dispose
-    
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        // Nothing to do
-    }
-    
-    #endregion Dispose
 }

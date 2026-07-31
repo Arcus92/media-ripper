@@ -9,7 +9,7 @@ public class ThemeService : IThemeService
 {
     /// <inheritdoc />
     public AppTheme CurrentTheme { get; private set; }
-    
+
     /// <inheritdoc />
     public void SetTheme(AppTheme theme)
     {
@@ -22,7 +22,7 @@ public class ThemeService : IThemeService
             AppTheme.Dark => ThemeVariant.Dark,
             _ => ThemeVariant.Default
         };
-        
+
         CurrentTheme = theme;
     }
 }

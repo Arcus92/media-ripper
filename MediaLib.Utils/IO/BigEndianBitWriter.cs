@@ -3,18 +3,18 @@ using System.Numerics;
 namespace MediaLib.Utils.IO;
 
 /// <summary>
-/// A big-endian bit writer. Starts at the left bit.
+///     A big-endian bit writer. Starts at the left bit.
 /// </summary>
 /// <typeparam name="T">The base integer value.</typeparam>
 public unsafe ref struct BigEndianBitWriter<T> where T : unmanaged, IBinaryInteger<T>
 {
     /// <summary>
-    /// The binary value.
+    ///     The binary value.
     /// </summary>
     private T _value;
-    
+
     /// <summary>
-    /// The current bit position. Runs backwards for big endian.
+    ///     The current bit position. Runs backwards for big endian.
     /// </summary>
     private int _position = Size - 1;
 
@@ -24,30 +24,27 @@ public unsafe ref struct BigEndianBitWriter<T> where T : unmanaged, IBinaryInteg
     }
 
     /// <summary>
-    /// Gets the number of total bits of <see cref="T"/>.
+    ///     Gets the number of total bits of <see cref="T" />.
     /// </summary>
     private static readonly int Size = sizeof(T) * 8;
-    
+
     /// <summary>
-    /// Gets the number of available bits.
+    ///     Gets the number of available bits.
     /// </summary>
     public int Available => _position;
 
     /// <summary>
-    /// Writes the next bit.
+    ///     Writes the next bit.
     /// </summary>
     public void WriteBit(bool value)
     {
-        if (value)
-        {
-            _value |= T.One << _position;
-        }
-        
+        if (value) _value |= T.One << _position;
+
         _position--;
     }
 
     /// <summary>
-    /// Writes the next bits.
+    ///     Writes the next bits.
     /// </summary>
     /// <param name="count">The number of bits to write.</param>
     /// <param name="value">The value to set.</param>
@@ -59,7 +56,7 @@ public unsafe ref struct BigEndianBitWriter<T> where T : unmanaged, IBinaryInteg
     }
 
     /// <summary>
-    /// Skips the number of bits.
+    ///     Skips the number of bits.
     /// </summary>
     /// <param name="count">The number of bits to skip.</param>
     public void Skip(int count)

@@ -13,7 +13,7 @@ public enum StreamType
 public static class StreamTypeHelper
 {
     /// <summary>
-    /// Returns the stream identifier from the given type.
+    ///     Returns the stream identifier from the given type.
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>

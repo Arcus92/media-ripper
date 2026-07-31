@@ -10,33 +10,33 @@
              x:Class="MediaRipper.Views.ExportSettingsView"
              x:DataType="vm:ExportSettingsViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:ExportSettingsViewModel}}">
-    
+
     <Border Classes="DarkBox">
         <DockPanel>
             <StackPanel Orientation="Horizontal" Spacing="5" DockPanel.Dock="Right">
-                <ComboBox ItemsSource="{Binding AllOutputFormats}" 
+                <ComboBox ItemsSource="{Binding AllOutputFormats}"
                           SelectedValue="{Binding OutputFormat}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate DataType="formats:MediaFormat">
-                            <TextBlock Text="{Binding Extension}"/>
+                            <TextBlock Text="{Binding Extension}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <Button Command="{Binding QueueSelectionAsync}" 
-                        IsEnabled="{Binding CanQueueSelection}" 
+                <Button Command="{Binding QueueSelectionAsync}"
+                        IsEnabled="{Binding CanQueueSelection}"
                         ToolTip.Tip="{DynamicResource QueueSelection}">
                     <avalonia:FluentIcon Icon="Add" />
                 </Button>
             </StackPanel>
-            
+
             <StackPanel Orientation="Horizontal" Spacing="5">
-                <Button Command="{Binding PlayPreviewAsync}" 
-                        IsEnabled="{Binding CanPlaySelection}" 
+                <Button Command="{Binding PlayPreviewAsync}"
+                        IsEnabled="{Binding CanPlaySelection}"
                         ToolTip.Tip="{DynamicResource Play}">
                     <avalonia:FluentIcon Icon="VideoClip" />
                 </Button>
-                <Button Command="{Binding SaveSegmentAsync}" 
-                        IsEnabled="{Binding CanSaveSelection}" 
+                <Button Command="{Binding SaveSegmentAsync}"
+                        IsEnabled="{Binding CanSaveSelection}"
                         ToolTip.Tip="{DynamicResource SaveRawSegment}">
                     <avalonia:FluentIcon Icon="Save" />
                 </Button>

@@ -11,13 +11,13 @@ namespace MediaRipper.ViewModels;
 public class QueueSettingsViewModel : ViewModelBase
 {
     private readonly IApplicationService _applicationService;
+    private readonly IMediaProviderService _mediaProviderService;
     private readonly IOutputQueueService _outputQueueService;
     private readonly IOutputService _outputService;
-    private readonly IMediaProviderService _mediaProviderService;
     private readonly OutputTreeViewModel _outputTreeViewModel;
 
     public QueueSettingsViewModel(IApplicationService applicationService, IOutputQueueService outputQueueService,
-        IOutputService outputService, IMediaProviderService mediaProviderService, 
+        IOutputService outputService, IMediaProviderService mediaProviderService,
         OutputTreeViewModel outputTreeViewModel)
     {
         _applicationService = applicationService;
@@ -25,16 +25,22 @@ public class QueueSettingsViewModel : ViewModelBase
         _outputService = outputService;
         _mediaProviderService = mediaProviderService;
         _outputTreeViewModel = outputTreeViewModel;
-        
+
         _outputQueueService.StatusChanged += OnOutputQueueServiceStatusChanged;
         _mediaProviderService.Changed += OnMediaProviderServiceChanged;
         _outputTreeViewModel.PropertyChanged += OnOutputTreeViewModelOnPropertyChanged;
     }
 
+    /// <inheritdoc />
+    public override Control CreateView()
+    {
+        return new QueueSettingsView();
+    }
+
     #region Queue
 
     /// <summary>
-    /// Gets if the queue is started.
+    ///     Gets if the queue is started.
     /// </summary>
     public bool IsRunning
     {
@@ -43,7 +49,7 @@ public class QueueSettingsViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets if the queue can be started.
+    ///     Gets if the queue can be started.
     /// </summary>
     public bool CanStartQueue
     {
@@ -52,14 +58,14 @@ public class QueueSettingsViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets if the selected item can be dequeued.
+    ///     Gets if the selected item can be dequeued.
     /// </summary>
     public bool CanDequeueSelection
     {
         get;
         set => SetProperty(ref field, value);
     }
-    
+
     private void OnOutputTreeViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
@@ -69,7 +75,7 @@ public class QueueSettingsViewModel : ViewModelBase
                 break;
         }
     }
-    
+
     private void OnOutputQueueServiceStatusChanged(object? sender, EventArgs e)
     {
         UpdateQueue();
@@ -90,47 +96,43 @@ public class QueueSettingsViewModel : ViewModelBase
     private void UpdateSelection()
     {
         var output = _outputTreeViewModel.SelectedItem?.Model;
-        CanDequeueSelection = output is not null && output.Status != OutputStatus.Completed && output.Status != OutputStatus.Processing;
+        CanDequeueSelection = output is not null && output.Status != OutputStatus.Completed &&
+                              output.Status != OutputStatus.Processing;
     }
-    
+
     #endregion Queue
-    
+
     #region Commands
-    
-    /// <inheritdoc cref="IOutputQueueService.Start"/>
+
+    /// <inheritdoc cref="IOutputQueueService.Start" />
     public void StartQueue()
     {
         _outputQueueService.Start();
     }
-    
-    /// <inheritdoc cref="IOutputQueueService.Stop"/>
+
+    /// <inheritdoc cref="IOutputQueueService.Stop" />
     public void StopQueue()
     {
         _outputQueueService.Stop();
     }
 
     /// <summary>
-    /// Opens the application settings.
+    ///     Opens the application settings.
     /// </summary>
     public void OpenSettings()
     {
         _applicationService.ShowWindow<SettingsWindowViewModel>();
     }
-    
+
     public async Task DequeueSelectionAsync()
     {
         var output = _outputTreeViewModel.SelectedItem?.Model;
         if (output is null) return;
-        if (output.Status is OutputStatus.Completed or OutputStatus.Processing) return; // Do not remove completed outputs!
+        if (output.Status is OutputStatus.Completed or OutputStatus.Processing)
+            return; // Do not remove completed outputs!
         await _outputService.RemoveAsync(output);
         UpdateSelection();
     }
-    
+
     #endregion Commands
-    
-    /// <inheritdoc />
-    public override Control CreateView()
-    {
-        return new QueueSettingsView();
-    }
 }

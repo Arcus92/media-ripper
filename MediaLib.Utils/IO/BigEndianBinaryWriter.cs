@@ -3,26 +3,26 @@ using System.Buffers.Binary;
 namespace MediaLib.Utils.IO;
 
 /// <summary>
-/// A variant of the <see cref="BinaryWriter"/> but in big-endian.
+///     A variant of the <see cref="BinaryWriter" /> but in big-endian.
 /// </summary>
 public class BigEndianBinaryWriter : IDisposable
 {
+    /// <summary>
+    ///     The little-endian writer.
+    /// </summary>
+    private readonly BinaryWriter _writer;
+
     public BigEndianBinaryWriter(Stream stream)
     {
         BaseStream = stream;
         _writer = new BinaryWriter(BaseStream);
     }
-    
+
     /// <summary>
-    /// Gets the base stream.
+    ///     Gets the base stream.
     /// </summary>
     public Stream BaseStream { get; }
 
-    /// <summary>
-    /// The little-endian writer.
-    /// </summary>
-    private readonly BinaryWriter _writer;
-    
     /// <inheritdoc />
     public void Dispose()
     {
@@ -30,7 +30,7 @@ public class BigEndianBinaryWriter : IDisposable
     }
 
     /// <summary>
-    /// Flushes the internal writer.
+    ///     Flushes the internal writer.
     /// </summary>
     public void Flush()
     {
@@ -38,7 +38,7 @@ public class BigEndianBinaryWriter : IDisposable
     }
 
     /// <summary>
-    /// Writes a 8-bit byte.
+    ///     Writes a 8-bit byte.
     /// </summary>
     /// <param name="value">The value.</param>
     public void Write(byte value)
@@ -47,25 +47,25 @@ public class BigEndianBinaryWriter : IDisposable
     }
 
     /// <summary>
-    /// Writes an unsigned 16-bit integer.
+    ///     Writes an unsigned 16-bit integer.
     /// </summary>
     /// <param name="value">The value.</param>
     public void Write(ushort value)
     {
         _writer.Write(BinaryPrimitives.ReverseEndianness(value));
     }
-    
+
     /// <summary>
-    /// Writes an 16-bit integer.
+    ///     Writes an 16-bit integer.
     /// </summary>
     /// <param name="value">The value.</param>
     public void Write(short value)
     {
         _writer.Write(BinaryPrimitives.ReverseEndianness(value));
     }
-    
+
     /// <summary>
-    /// Writes an unsigned 24-bit integer.
+    ///     Writes an unsigned 24-bit integer.
     /// </summary>
     /// <param name="value">The value.</param>
     public void WriteUInt24(int value)
@@ -74,45 +74,45 @@ public class BigEndianBinaryWriter : IDisposable
         Write((byte)((value >> 8) & 0xFF));
         Write((byte)(value & 0xFF));
     }
-    
+
     /// <summary>
-    /// Writes an unsigned 32-bit integer.
+    ///     Writes an unsigned 32-bit integer.
     /// </summary>
     /// <param name="value">The value.</param>
     public void Write(uint value)
     {
         _writer.Write(BinaryPrimitives.ReverseEndianness(value));
     }
-    
+
     /// <summary>
-    /// Writes an 32-bit integer.
+    ///     Writes an 32-bit integer.
     /// </summary>
     /// <param name="value">The value.</param>
     public void Write(int value)
     {
         _writer.Write(BinaryPrimitives.ReverseEndianness(value));
     }
-    
+
     /// <summary>
-    /// Writes an unsigned 64-bit integer.
+    ///     Writes an unsigned 64-bit integer.
     /// </summary>
     /// <param name="value">The value.</param>
     public void Write(ulong value)
     {
         _writer.Write(BinaryPrimitives.ReverseEndianness(value));
     }
-    
+
     /// <summary>
-    /// Writes an 64-bit integer.
+    ///     Writes an 64-bit integer.
     /// </summary>
     /// <param name="value">The value.</param>
     public void Write(long value)
     {
         _writer.Write(BinaryPrimitives.ReverseEndianness(value));
     }
-    
+
     /// <summary>
-    /// Writes the given bytes.
+    ///     Writes the given bytes.
     /// </summary>
     /// <param name="data">The byte array.</param>
     public void Write(byte[] data)

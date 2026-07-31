@@ -1,9 +1,9 @@
 namespace DvdLib.Decrypt;
 
 [Flags]
-public enum DvdCssSeekFlags : int
+public enum DvdCssSeekFlags
 {
     None = 0,
     Mpeg = 1 << 0,
-    Key = 1 << 1,
+    Key = 1 << 1
 }

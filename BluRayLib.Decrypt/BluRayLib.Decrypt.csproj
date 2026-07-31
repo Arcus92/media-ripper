@@ -12,11 +12,11 @@
     </PropertyGroup>
 
     <PropertyGroup>
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BluRayLib\BluRayLib.csproj" />
+        <ProjectReference Include="..\BluRayLib\BluRayLib.csproj"/>
     </ItemGroup>
 
 </Project>

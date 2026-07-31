@@ -7,7 +7,7 @@ namespace MediaLib.Output;
 public static class OutputHelper
 {
     /// <summary>
-    /// Creates a default output definition for this media info.
+    ///     Creates a default output definition for this media info.
     /// </summary>
     /// <param name="baseName">The output file basename.</param>
     /// <param name="mediaInfo">The media info to extract the output from.</param>
@@ -18,13 +18,13 @@ public static class OutputHelper
         CodecOptions codec, MediaFormat containerFormat)
     {
         var files = GetFilesByStreams(baseName, mediaInfo.Streams, codec, containerFormat);
-        
+
         return new OutputDefinition
         {
             Identifier = mediaInfo.Identifier,
             MediaInfo = new MediaMetadata
             {
-                Name = baseName,
+                Name = baseName
             },
             Duration = mediaInfo.Duration,
             Codec = codec,
@@ -32,17 +32,18 @@ public static class OutputHelper
             Chapters = mediaInfo.Chapters
         };
     }
-    
+
     /// <summary>
-    /// Returns all output files from the given set of streams when converting to the given output videoFormat.
-    /// This will 
+    ///     Returns all output files from the given set of streams when converting to the given output videoFormat.
+    ///     This will
     /// </summary>
     /// <param name="baseName">The base name of the title.</param>
     /// <param name="streams">The different streams of the title.</param>
     /// <param name="codec">The codec options.</param>
     /// <param name="containerFormat">The output container format.</param>
     /// <returns>Returns a list of output files.</returns>
-    public static List<OutputFile> GetFilesByStreams(string baseName, IEnumerable<StreamInfo> streams, CodecOptions codec, MediaFormat containerFormat)
+    public static List<OutputFile> GetFilesByStreams(string baseName, IEnumerable<StreamInfo> streams,
+        CodecOptions codec, MediaFormat containerFormat)
     {
         var files = new List<OutputFile>();
 
@@ -51,9 +52,8 @@ public static class OutputHelper
         // Guessing the subtitle type by order.
         var filenameCounter = new Dictionary<string, int>();
         var filenameBuilder = new StringBuilder();
-        
+
         foreach (var stream in streams)
-        {
             if (IsStreamSupported(containerFormat, stream))
             {
                 mainFileStreams.Add(stream);
@@ -63,7 +63,7 @@ public static class OutputHelper
                 // The format must be exported into its own file.
                 if (!TryGetFormatByStream(stream, out var format))
                     continue;
-                
+
                 // Building the filename
                 filenameBuilder.Clear();
                 filenameBuilder.Append(baseName);
@@ -74,36 +74,28 @@ public static class OutputHelper
                     filenameBuilder.Append(stream.LanguageCode);
                 }
 
-                if ((stream.Flags & StreamFlags.Forced) != 0)
-                {
-                    filenameBuilder.Append(".forced");
-                }
-            
+                if ((stream.Flags & StreamFlags.Forced) != 0) filenameBuilder.Append(".forced");
+
                 // Count how often the language code was encountered.
                 var filenameBase = filenameBuilder.ToString();
                 filenameCounter.TryGetValue(filenameBase, out var counter);
-                
-                if (counter >= 1) 
-                {
-                    filenameBuilder.Append($".extra{counter}");
-                }
+
+                if (counter >= 1) filenameBuilder.Append($".extra{counter}");
                 filenameBuilder.Append(format.Extension);
-            
+
                 // Increment counter
                 filenameCounter[filenameBase] = ++counter;
-            
-                files.Add(new OutputFile()
+
+                files.Add(new OutputFile
                 {
                     Filename = filenameBuilder.ToString(),
                     Format = format.FFmpegFormat,
                     Streams = [stream]
                 });
             }
-            
-        }
-        
+
         // Create the main video file.
-        var mainFile = new OutputFile()
+        var mainFile = new OutputFile
         {
             Filename = $"{baseName}{containerFormat.Extension}",
             Format = containerFormat.FFmpegFormat,
@@ -115,7 +107,7 @@ public static class OutputHelper
     }
 
     /// <summary>
-    /// Returns if the stream is supported by the container format.
+    ///     Returns if the stream is supported by the container format.
     /// </summary>
     /// <param name="containerFormat">The container format.</param>
     /// <param name="stream">The stream to check.</param>
@@ -130,9 +122,9 @@ public static class OutputHelper
         };
     }
 
-    
+
     /// <summary>
-    /// Returns the media format of the given stream.
+    ///     Returns the media format of the given stream.
     /// </summary>
     /// <param name="stream">The output stream to check.</param>
     /// <param name="result">Returns the media format.</param>
@@ -146,7 +138,7 @@ public static class OutputHelper
             case StreamType.Subtitle:
                 return SubtitleFormats.All.TryGetFromFormat(stream.Format ?? "", out result);
             case StreamType.Audio:
-                // Not supported yet
+            // Not supported yet
             default:
                 result = default;
                 return false;

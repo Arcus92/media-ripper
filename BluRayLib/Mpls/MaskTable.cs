@@ -34,6 +34,7 @@ public class MaskTable
     public bool SecondaryAudioEnableDisable { get; set; }
     public bool SecondaryAudioStreamNumberChange { get; set; }
     public bool SecondaryPgStreamNumberChange { get; set; }
+
     public void Read(BigEndianBinaryReader reader)
     {
         var bits = reader.ReadBits8();
@@ -45,7 +46,7 @@ public class MaskTable
         SkipToPrevPoint = bits.ReadBit();
         bits.Skip(1); // Reserved
         Stop = bits.ReadBit();
-        
+
         bits = reader.ReadBits8();
         PauseOn = bits.ReadBit();
         bits.Skip(1); // Reserved
@@ -55,7 +56,7 @@ public class MaskTable
         Resume = bits.ReadBit();
         MoveUpSelectedButton = bits.ReadBit();
         MoveDownSelectedButton = bits.ReadBit();
-        
+
         bits = reader.ReadBits8();
         MoveLeftSelectedButton = bits.ReadBit();
         MoveRightSelectedButton = bits.ReadBit();
@@ -65,7 +66,7 @@ public class MaskTable
         PrimaryAudioStreamNumberChange = bits.ReadBit();
         bits.Skip(1); // Reserved
         AngleNumberChange = bits.ReadBit();
-        
+
         bits = reader.ReadBits8();
         PopupOn = bits.ReadBit();
         PopupOff = bits.ReadBit();
@@ -75,11 +76,11 @@ public class MaskTable
         SecondaryVideoStreamNumberChange = bits.ReadBit();
         SecondaryAudioEnableDisable = bits.ReadBit();
         SecondaryAudioStreamNumberChange = bits.ReadBit();
-        
+
         bits = reader.ReadBits8();
         bits.Skip(1); // Reserved
         SecondaryPgStreamNumberChange = bits.ReadBit();
-        
+
         reader.Skip(3);
     }
 }

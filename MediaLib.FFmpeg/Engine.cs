@@ -12,54 +12,54 @@ public class Engine
     {
         Binary = ffmpegPath ?? DefaultBinary;
     }
-    
+
     /// <summary>
-    /// Gets the path to the ffmpeg binary.
+    ///     Gets the path to the ffmpeg binary.
     /// </summary>
     public string Binary { get; }
 
     #region Run
-    
+
     private readonly struct StartInfo
     {
         /// <summary>
-        /// Gets the FFMpeg arguments.
+        ///     Gets the FFMpeg arguments.
         /// </summary>
         public string Arguments { get; init; }
-        
+
         /// <summary>
-        /// Gets the list of all bond input streams.
+        ///     Gets the list of all bond input streams.
         /// </summary>
         public IList<InputStream>? InputStreams { get; init; }
-        
+
         /// <summary>
-        /// Gets the update / progress callback.
+        ///     Gets the update / progress callback.
         /// </summary>
         public Action<ConverterUpdate>? OnUpdate { get; init; }
     }
-    
+
     private readonly struct Result
     {
         /// <summary>
-        /// Gets the FFmpeg exit code.
+        ///     Gets the FFmpeg exit code.
         /// </summary>
         public int ExitCode { get; init; }
-        
+
         /// <summary>
-        /// Gets the metadata of the input files.
+        ///     Gets the metadata of the input files.
         /// </summary>
         public InputMetadata[] Inputs { get; init; }
-        
+
         /// <summary>
-        /// Gets the output text.
+        ///     Gets the output text.
         /// </summary>
         public string Output { get; init; }
     }
-    
+
     private async Task<Result> ExecuteAsync(StartInfo startInfo, CancellationToken cancellationToken = default)
     {
         var process = new Process();
-        process.StartInfo = new ProcessStartInfo()
+        process.StartInfo = new ProcessStartInfo
         {
             FileName = Binary,
             Arguments = startInfo.Arguments,
@@ -68,30 +68,23 @@ public class Engine
             RedirectStandardOutput = true,
             CreateNoWindow = true
         };
-        
+
         // Start the input streams
         if (startInfo.InputStreams is not null)
-        {
             foreach (var inputStream in startInfo.InputStreams)
-            {
                 await inputStream.StartAsync();
-            }
-        }
-        
+
         process.Start();
 
-        try 
+        try
         {
             var output = new StringBuilder();
             var inputs = new List<InputMetadata>();
             var intentReader = new IntentTextReader(process.StandardError, 2);
             await foreach (var lineRoot in intentReader.ReadBlockAsync().WithCancellation(cancellationToken))
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    process.Kill();
-                }
-            
+                if (cancellationToken.IsCancellationRequested) process.Kill();
+
                 if (lineRoot.StartsWith("Input #"))
                 {
                     var input = await ReadInputMedaDataAsync(intentReader);
@@ -105,35 +98,29 @@ public class Engine
                     if (startInfo.OnUpdate is null) continue;
 
                     var frameStart = 6;
-                
+
                     var frameEnd = lineRoot.IndexOf("fps=", frameStart, StringComparison.Ordinal);
                     if (frameEnd < 0) continue;
                     var frameText = lineRoot.Substring(frameStart, frameEnd - frameStart).Trim();
                     long? frame = null;
-                    if (long.TryParse(frameText, out var value))
-                    {
-                        frame = value;
-                    }
-                
+                    if (long.TryParse(frameText, out var value)) frame = value;
+
                     var timeStart = lineRoot.IndexOf("time=", frameEnd, StringComparison.Ordinal);
                     if (timeStart < 0) continue;
                     timeStart += 5;
-                
+
                     var timeEnd = lineRoot.IndexOf("bitrate=", timeStart, StringComparison.Ordinal);
                     if (timeEnd < 0) continue;
                     var timeText = lineRoot.Substring(timeStart, timeEnd - timeStart).Trim();
                     TimeSpan? currentTime = null;
-                    if (TimeSpan.TryParse(timeText, out var time))
-                    {
-                        currentTime = time;
-                    }
+                    if (TimeSpan.TryParse(timeText, out var time)) currentTime = time;
 
                     // We need one input to determine the total duration. 
                     // Currently, this won't handle offsets or lengths.
                     if (inputs.Count <= 0) continue;
                     var duration = inputs.Max(i => i.Duration);
                     var percentage = currentTime?.TotalSeconds / duration.TotalSeconds;
-                    var update = new ConverterUpdate()
+                    var update = new ConverterUpdate
                     {
                         Inputs = inputs,
                         Duration = duration,
@@ -144,26 +131,22 @@ public class Engine
 
                     startInfo.OnUpdate(update);
                 }
-            
+
                 // Log other output
                 else
                 {
                     output.AppendLine(lineRoot);
                 }
             }
-        
+
             await process.WaitForExitAsync(cancellationToken);
-            
+
             // Verify that the input stream didn't throw any exceptions.
             if (startInfo.InputStreams is not null)
-            {
                 foreach (var inputStream in startInfo.InputStreams)
-                {
                     await inputStream.WaitAsync(cancellationToken);
-                }
-            }
-            
-            return new Result()
+
+            return new Result
             {
                 ExitCode = process.ExitCode,
                 Inputs = inputs.ToArray(),
@@ -174,21 +157,17 @@ public class Engine
         {
             // Close the input streams.
             if (startInfo.InputStreams is not null)
-            {
                 foreach (var inputStream in startInfo.InputStreams)
-                {
                     inputStream.Dispose();
-                }
-            }
         }
     }
-    
+
     #endregion Run
-    
+
     #region Convert
 
     /// <summary>
-    /// Runs ffmpeg with the given arguments.
+    ///     Runs ffmpeg with the given arguments.
     /// </summary>
     /// <param name="builderCallback">The argument builder callback.</param>
     /// <param name="onUpdate">The status update event.</param>
@@ -202,55 +181,48 @@ public class Engine
     }
 
     /// <summary>
-    /// Runs ffmpeg with the given arguments.
+    ///     Runs ffmpeg with the given arguments.
     /// </summary>
     /// <param name="arguments">The ffmpeg arguments.</param>
     /// <param name="inputStreams">The list of input streams.</param>
     /// <param name="onUpdate">The status update event.</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    public async Task ConvertAsync(string arguments, IList<InputStream>? inputStreams = null, Action<ConverterUpdate>? onUpdate = null,
+    public async Task ConvertAsync(string arguments, IList<InputStream>? inputStreams = null,
+        Action<ConverterUpdate>? onUpdate = null,
         CancellationToken cancellationToken = default)
     {
-        var startInfo = new StartInfo()
+        var startInfo = new StartInfo
         {
             Arguments = arguments,
             InputStreams = inputStreams,
-            OnUpdate = onUpdate,
+            OnUpdate = onUpdate
         };
         var result = await ExecuteAsync(startInfo, cancellationToken);
-        if (result.ExitCode != 0)
-        {
-            throw new FFmpegException(result.ExitCode, result.Output);
-        }
+        if (result.ExitCode != 0) throw new FFmpegException(result.ExitCode, result.Output);
     }
-    
+
     #endregion Convert
-    
+
     #region Probe
 
     /// <summary>
-    /// Returns the metadata of the given file using ffmpeg.
+    ///     Returns the metadata of the given file using ffmpeg.
     /// </summary>
     /// <param name="path">The input file.</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     public async Task<InputMetadata> GetMetadataAsync(string path, CancellationToken cancellationToken = default)
     {
-        var inputs = await GetMetadataAsync(builder =>
-        {
-            builder.Input(path);
-        }, cancellationToken);
+        var inputs = await GetMetadataAsync(builder => { builder.Input(path); }, cancellationToken);
 
         if (inputs.Length != 1)
-        {
             throw new IOException($"FFmpeg returned wrong number of inputs! Should be one, but is {inputs.Length}.");
-        }
-        
+
         return inputs[0];
     }
 
     /// <summary>
-    /// Returns the metadata of the given file using ffmpeg.
+    ///     Returns the metadata of the given file using ffmpeg.
     /// </summary>
     /// <param name="builderCallback">The argument builder callback.</param>
     /// <param name="cancellationToken">The cancellation token</param>
@@ -264,7 +236,7 @@ public class Engine
     }
 
     /// <summary>
-    /// Returns the metadata of the given file using ffmpeg.
+    ///     Returns the metadata of the given file using ffmpeg.
     /// </summary>
     /// <param name="arguments">The ffmpeg arguments.</param>
     /// <param name="inputStreams">The list of input streams.</param>
@@ -273,17 +245,17 @@ public class Engine
     public async Task<InputMetadata[]> GetMetadataAsync(string arguments, IList<InputStream>? inputStreams = null,
         CancellationToken cancellationToken = default)
     {
-        var startInfo = new StartInfo()
+        var startInfo = new StartInfo
         {
             Arguments = arguments,
-            InputStreams = inputStreams,
+            InputStreams = inputStreams
         };
         var result = await ExecuteAsync(startInfo, cancellationToken);
         return result.Inputs;
     }
 
     /// <summary>
-    /// Reads the FFmpeg output starting by an "Input#" line and returns the input information.
+    ///     Reads the FFmpeg output starting by an "Input#" line and returns the input information.
     /// </summary>
     /// <param name="intentReader">The current reader.</param>
     /// <returns>Returns the input metadata.</returns>
@@ -292,11 +264,9 @@ public class Engine
         var input = new InputMetadata();
         var streams = new List<StreamMetadata>();
         await foreach (var lineInput in intentReader.BeginAndReadBlockAsync())
-        {
             if (lineInput.StartsWith("Metadata:"))
             {
                 await foreach (var (name, value) in intentReader.BeginAndReadBlockPropertiesAsync())
-                {
                     switch (name)
                     {
                         case "title":
@@ -306,7 +276,6 @@ public class Engine
                             input.Encoder = value;
                             break;
                     }
-                }
             }
             else if (lineInput.StartsWith("Duration:"))
             {
@@ -324,20 +293,15 @@ public class Engine
                 {
                     var chapter = ReadChapterMetadataByLine(lineChapters);
                     await foreach (var lineChapter in intentReader.BeginAndReadBlockAsync())
-                    {
                         if (lineChapter.StartsWith("Metadata:"))
-                        {
                             await foreach (var (name, value) in intentReader.BeginAndReadBlockPropertiesAsync())
-                            {
                                 switch (name)
                                 {
                                     case "title":
                                         chapter.Title = value;
                                         break;
                                 }
-                            }
-                        }
-                    }
+
                     chapters.Add(chapter);
                 }
 
@@ -347,31 +311,24 @@ public class Engine
             {
                 var stream = CreateStreamMetadataByLine(lineInput);
                 await foreach (var lineStream in intentReader.BeginAndReadBlockAsync())
-                {
                     if (lineStream.StartsWith("Metadata:"))
-                    {
                         await foreach (var (name, value) in intentReader.BeginAndReadBlockPropertiesAsync())
-                        {
                             switch (name)
                             {
                                 case "title":
                                     stream.Title = value;
                                     break;
                             }
-                        }
-                    }
-                }
-                
+
                 streams.Add(stream);
             }
-        }
 
         input.Streams = streams.ToArray();
         return input;
     }
 
     /// <summary>
-    /// Reads the chapter metadata from the given line.
+    ///     Reads the chapter metadata from the given line.
     /// </summary>
     /// <param name="line">The line that start with 'Chapter #'</param>
     /// <returns>Returns the stream metadata.</returns>
@@ -381,7 +338,7 @@ public class Engine
 
         var indexInputId = line.IndexOf('#');
         if (indexInputId < 0) return chapter;
-        
+
         var indexStreamId = line.IndexOf(':', indexInputId + 1);
         if (indexStreamId < 0) return chapter;
 
@@ -389,31 +346,32 @@ public class Engine
 
         var indexEnd = line.IndexOf(':', indexStreamId + 1);
         if (indexEnd < 0) return chapter;
-        
+
         chapter.Id = ulong.Parse(line.Substring(indexStreamId + 1, indexEnd - indexStreamId - 1));
-        
+
         var indexChapterStart = line.IndexOf("start", indexEnd + 1, StringComparison.Ordinal);
         if (indexChapterStart < 0) return chapter;
-        
+
         var indexChapterStartEnd = line.IndexOf(',', indexChapterStart + 1);
         if (indexChapterStartEnd < 0) return chapter;
-        
-        var chapterStartText = line.Substring(indexChapterStart + 6, indexChapterStartEnd - indexChapterStart - 6).Trim();
+
+        var chapterStartText =
+            line.Substring(indexChapterStart + 6, indexChapterStartEnd - indexChapterStart - 6).Trim();
         if (double.TryParse(chapterStartText, CultureInfo.InvariantCulture, out var chapterStart))
             chapter.Start = TimeSpan.FromSeconds(chapterStart);
-        
+
         var indexChapterEnd = line.IndexOf("end", indexChapterStartEnd + 1, StringComparison.Ordinal);
         if (indexChapterEnd < 0) return chapter;
 
         var chapterEndText = line.Substring(indexChapterEnd + 4).Trim();
         if (double.TryParse(chapterEndText, CultureInfo.InvariantCulture, out var chapterEnd))
             chapter.End = TimeSpan.FromSeconds(chapterEnd);
-        
+
         return chapter;
     }
-    
+
     /// <summary>
-    /// Reads the stream metadata from the given line.
+    ///     Reads the stream metadata from the given line.
     /// </summary>
     /// <param name="line">The line that start with 'Stream #'</param>
     /// <returns>Returns the stream metadata.</returns>
@@ -423,42 +381,42 @@ public class Engine
 
         var indexInputId = line.IndexOf('#');
         if (indexInputId < 0) return stream;
-        
+
         var indexStreamId = line.IndexOf(':', indexInputId + 1);
         if (indexStreamId < 0) return stream;
-        
+
         stream.InputId = ulong.Parse(line.Substring(indexInputId + 1, indexStreamId - indexInputId - 1));
-        
+
         var indexType = line.IndexOf(':', indexStreamId + 1);
         if (indexType < 0) return stream;
 
         var indexStreamIdEnd = indexType;
-        
+
         // The transport stream pid: [0x0000]
         var indexPidStart = line.IndexOf('[', indexStreamId + 1);
         if (indexPidStart >= 0 && indexPidStart < indexType)
         {
             indexStreamIdEnd = indexPidStart;
-            
+
             var indexPidEnd = line.IndexOf(']', indexPidStart + 1);
             if (indexPidEnd < 0) return stream;
-            
+
             var pidStr = line.Substring(indexPidStart + 3, indexPidEnd - indexPidStart - 3);
             stream.Pid = (ushort)Convert.ToInt32(pidStr, 16);
         }
-        
+
         // Language is not always available
         var indexLanguageStart = line.IndexOf('(', indexStreamId + 1);
         if (indexLanguageStart >= 0 && indexLanguageStart < indexType)
         {
             indexStreamIdEnd = indexLanguageStart;
-            
+
             var indexLanguageEnd = line.IndexOf(')', indexLanguageStart + 1);
             if (indexLanguageEnd < 0) return stream;
 
             stream.Language = line.Substring(indexLanguageStart + 1, indexLanguageEnd - indexLanguageStart - 1);
         }
-        
+
         var streamIdStr = line.Substring(indexStreamId + 1, indexStreamIdEnd - indexStreamId - 1);
         if (ulong.TryParse(streamIdStr, out var streamId))
             stream.Id = streamId;
@@ -476,39 +434,39 @@ public class Engine
             "Attachment" => StreamType.Attachment,
             _ => StreamType.Unknown
         };
-        
+
         var indexEnd = line.IndexOf(',', indexFormat + 1);
         if (indexEnd < 0) indexEnd = line.Length;
-        
+
         // The format type is the first word followed by tags like (default) or (forced)
         var indexFormatType = line.IndexOf(' ', indexFormat + 2);
         if (indexFormatType < 0 || indexFormatType > indexEnd) indexFormatType = indexEnd;
-        
+
         stream.Format = line.Substring(indexFormat + 1, indexFormatType - indexFormat - 1).Trim();
 
         stream.IsDefault = line.Contains("(default)");
         stream.IsForced = line.Contains("(forced)");
-        
+
         return stream;
     }
-    
+
     #endregion Prope
-    
+
     #region Static
 
     /// <summary>
-    /// Gets the default binary path that is used when the engine is created without an explicit path.
+    ///     Gets the default binary path that is used when the engine is created without an explicit path.
     /// </summary>
     public static string DefaultBinary { get; set; } = GetDefaultBinaryForPlatform();
 
     /// <summary>
-    /// Gets the default binary path to FFmpeg for the current platform.
+    ///     Gets the default binary path to FFmpeg for the current platform.
     /// </summary>
     /// <returns>Returns the FFmpeg binary name.</returns>
     private static string GetDefaultBinaryForPlatform()
     {
         return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg";
     }
-    
+
     #endregion Static
 }

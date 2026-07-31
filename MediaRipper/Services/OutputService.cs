@@ -14,32 +14,22 @@ using Microsoft.Extensions.Logging;
 namespace MediaRipper.Services;
 
 /// <summary>
-/// Handling the output directory. Can scan the output directory for existing exports.
+///     Handling the output directory. Can scan the output directory for existing exports.
 /// </summary>
 public class OutputService : IOutputService
 {
-    private readonly IMediaProviderService _mediaProviderService;
     private readonly ILogger<OutputService> _logger;
+    private readonly IMediaProviderService _mediaProviderService;
 
     /// <summary>
-    /// Handling the output directory. Can scan the output directory for existing exports.
+    ///     Handling the output directory. Can scan the output directory for existing exports.
     /// </summary>
     public OutputService(IMediaProviderService mediaProviderService, ILogger<OutputService> logger)
     {
         _mediaProviderService = mediaProviderService;
         _logger = logger;
-        
-        _mediaProviderService.Changed += OnMediaProviderServiceChanged;
-    }
 
-    /// <summary>
-    /// The media provider changed the source.
-    /// </summary>
-    /// <param name="sender">The event sender.</param>
-    /// <param name="e">The event arguments.</param>
-    private void OnMediaProviderServiceChanged(object? sender, EventArgs e)
-    {
-        UpdateStatus();
+        _mediaProviderService.Changed += OnMediaProviderServiceChanged;
     }
 
     /// <inheritdoc />
@@ -52,11 +42,42 @@ public class OutputService : IOutputService
         await RefreshAsync();
     }
 
+    /// <summary>
+    ///     The media provider changed the source.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The event arguments.</param>
+    private void OnMediaProviderServiceChanged(object? sender, EventArgs e)
+    {
+        UpdateStatus();
+    }
+
+    /// <summary>
+    ///     Writes the given output info file to the output directory.
+    /// </summary>
+    /// <param name="model">The output info file.</param>
+    private async Task WriteOutputInfoAsync(OutputModel model)
+    {
+        var path = Path.Combine(OutputPath, $"{model.Basename}.json");
+        await OutputDefinitionSerializer.SerializeAsync(path, model.Definition);
+    }
+
+    /// <summary>
+    ///     Removes the given output info file from the output directory.
+    /// </summary>
+    /// <param name="outputInfo">The output info file.</param>
+    private Task RemoveOutputInfoAsync(OutputModel outputInfo)
+    {
+        var path = Path.Combine(OutputPath, $"{outputInfo.Basename}.json");
+        File.Delete(path);
+        return Task.CompletedTask;
+    }
+
     #region List
 
     /// <inheritdoc />
     public ObservableCollection<OutputModel> Outputs { get; } = [];
-    
+
     /// <inheritdoc />
     public async Task<OutputModel> AddAsync(OutputDefinition definition)
     {
@@ -84,25 +105,23 @@ public class OutputService : IOutputService
         // Renaming is more complex the through. For example, when swapping filenames of two files, we need an
         // intermediate rename step to not block any filename. 
         var renameMap = new Dictionary<string, string>();
-        
+
         var basename = model.Definition.MediaInfo.GetBasename();
         if (basename != model.Basename)
         {
             await RemoveOutputInfoAsync(model);
             model.Basename = basename;
         }
+
         foreach (var file in model.Files)
         {
             file.Basename = basename;
             var filename = file.BuildFilename();
             if (filename == file.Filename) continue; // No rename
-            
+
             var oldPath = Path.Combine(OutputPath, file.Filename);
             var newPath = Path.Combine(OutputPath, filename);
-            if (File.Exists(oldPath))
-            {
-                renameMap.Add(oldPath, newPath);
-            }
+            if (File.Exists(oldPath)) renameMap.Add(oldPath, newPath);
 
             file.Filename = filename;
         }
@@ -116,7 +135,7 @@ public class OutputService : IOutputService
             _logger.LogError(ex, "Failed to rename output files!");
             return;
         }
-        
+
         await WriteOutputInfoAsync(model);
     }
 
@@ -131,11 +150,8 @@ public class OutputService : IOutputService
     {
         Outputs.Clear();
 
-        if (string.IsNullOrEmpty(OutputPath))
-        {
-            return;
-        }
-        
+        if (string.IsNullOrEmpty(OutputPath)) return;
+
         await foreach (var (filename, info) in OutputDefinitionSerializer.DeserializeFromDirectoryAsync(OutputPath))
         {
             var model = new OutputModel(info, filename);
@@ -145,14 +161,11 @@ public class OutputService : IOutputService
     }
 
     /// <summary>
-    /// Uploads the status for all current items.
+    ///     Uploads the status for all current items.
     /// </summary>
     private void UpdateStatus()
     {
-        foreach (var model in Outputs)
-        {
-            UpdateStatus(model);
-        }
+        foreach (var model in Outputs) UpdateStatus(model);
     }
 
     /// <inheritdoc />
@@ -174,7 +187,7 @@ public class OutputService : IOutputService
                 hasAllFiles = false;
             }
         }
-        
+
         if (hasAllFiles)
         {
             model.Status = OutputStatus.Completed;
@@ -182,35 +195,11 @@ public class OutputService : IOutputService
         else
         {
             model.Status = OutputStatus.Queued;
-            
+
             // Queued output file, but from a different disk.
-            if (!_mediaProviderService.Contains(model.Definition.Identifier))
-            {
-                model.Status = OutputStatus.Missing;
-            }
+            if (!_mediaProviderService.Contains(model.Definition.Identifier)) model.Status = OutputStatus.Missing;
         }
     }
-    
+
     #endregion List
-    
-    /// <summary>
-    /// Writes the given output info file to the output directory.
-    /// </summary>
-    /// <param name="model">The output info file.</param>
-    private async Task WriteOutputInfoAsync(OutputModel model)
-    {
-        var path = Path.Combine(OutputPath, $"{model.Basename}.json");
-        await OutputDefinitionSerializer.SerializeAsync(path, model.Definition);
-    }
-    
-    /// <summary>
-    /// Removes the given output info file from the output directory.
-    /// </summary>
-    /// <param name="outputInfo">The output info file.</param>
-    private Task RemoveOutputInfoAsync(OutputModel outputInfo)
-    {
-        var path = Path.Combine(OutputPath, $"{outputInfo.Basename}.json");
-        File.Delete(path);
-        return Task.CompletedTask;
-    }
 }

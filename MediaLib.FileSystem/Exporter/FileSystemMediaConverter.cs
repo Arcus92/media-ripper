@@ -5,11 +5,12 @@ using Microsoft.Extensions.Logging;
 namespace MediaLib.FileSystem.Exporter;
 
 /// <summary>
-/// A media converter implementation for local files.
+///     A media converter implementation for local files.
 /// </summary>
 public class FileSystemMediaConverter : FFmpegMediaConverter<FileSystemMediaProvider>
 {
-    public FileSystemMediaConverter(ILogger logger, FileSystemMediaProvider provider, MediaConverterParameter parameter) : base(logger, provider, parameter)
+    public FileSystemMediaConverter(ILogger logger, FileSystemMediaProvider provider, MediaConverterParameter parameter)
+        : base(logger, provider, parameter)
     {
     }
 
@@ -20,12 +21,12 @@ public class FileSystemMediaConverter : FFmpegMediaConverter<FileSystemMediaProv
         var fileInfo = new FileInfo(path);
         return fileInfo.Length;
     }
-    
+
     /// <inheritdoc />
     protected override Stream OpenSegmentStream(ushort segmentId)
     {
         var path = Provider.GetMediaPath(Parameter.Definition.Identifier);
-        
+
         Logger.LogInformation("Opening segment {SegmentId}", segmentId);
         return File.OpenRead(path);
     }

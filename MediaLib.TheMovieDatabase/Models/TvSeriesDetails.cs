@@ -1,7 +1,7 @@
 namespace MediaLib.TheMovieDatabase.Models;
 
 /// <summary>
-/// The full TV series details.
+///     The full TV series details.
 /// </summary>
 [Serializable]
 public class TvSeriesDetails

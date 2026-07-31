@@ -13,22 +13,11 @@ using Microsoft.Extensions.Logging;
 namespace MediaLib.BluRays.Providers;
 
 /// <summary>
-/// A media provider from a BluRay disk.
+///     A media provider from a BluRay disk.
 /// </summary>
 public class BluRayMediaProvider : IMediaProvider
 {
     private readonly ILogger _logger;
-    
-    /// <summary>
-    /// Gets the BluRay disk information.
-    /// </summary>
-    public BluRay BluRay { get; }
-
-    public BluRayMediaProvider(IServiceProvider serviceProvider, string path)
-    {
-        _logger = serviceProvider.GetRequiredService<ILogger<BluRayMediaProvider>>();;
-        BluRay = new BluRay(path);
-    }
 
     static BluRayMediaProvider()
     {
@@ -37,13 +26,25 @@ public class BluRayMediaProvider : IMediaProvider
         MakeMkv.RegisterLibraryImportResolver();
     }
 
+    public BluRayMediaProvider(IServiceProvider serviceProvider, string path)
+    {
+        _logger = serviceProvider.GetRequiredService<ILogger<BluRayMediaProvider>>();
+        ;
+        BluRay = new BluRay(path);
+    }
+
+    /// <summary>
+    ///     Gets the BluRay disk information.
+    /// </summary>
+    public BluRay BluRay { get; }
+
     /// <inheritdoc />
     public DiskInfo GetDiskInfo()
     {
-        return new DiskInfo()
+        return new DiskInfo
         {
             DiskName = BluRay.DiskName,
-            ContentHash = BluRay.ContentHash,
+            ContentHash = BluRay.ContentHash
         };
     }
 
@@ -52,7 +53,7 @@ public class BluRayMediaProvider : IMediaProvider
     {
         await BluRay.LoadAsync();
     }
-    
+
     /// <inheritdoc />
     public async IAsyncEnumerable<IMediaSource> GetSourcesAsync()
     {
@@ -62,69 +63,12 @@ public class BluRayMediaProvider : IMediaProvider
             var source = GetSource(playlistId);
 
             foreach (var otherSource in sources)
-            {
                 if (otherSource.Info.Matches(source.Info))
-                {
                     source.IgnoreFlags |= MediaIgnoreFlags.Duplicate;
-                }
-            }
-            
+
             sources.Add(source);
             yield return source;
         }
-    }
-
-    /// <summary>
-    /// Returns the media source for the given playlist id.
-    /// </summary>
-    /// <param name="playlistId">The BluRay playlist id.</param>
-    /// <returns></returns>
-    private BluRayMediaSource GetSource(ushort playlistId)
-    {
-        var playlist = BluRay.Playlists[playlistId];
-        
-        // Builds the media identifier
-        var identifier = new MediaIdentifier()
-        {
-            Type = MediaIdentifierType.BluRay,
-            ContentHash = BluRay.ContentHash,
-            DiskName = BluRay.DiskName,
-            Id = playlistId.ToString(),
-            SegmentIds = playlist.Items.Select(i => ushort.Parse(i.Name)).ToArray(),
-        };
-        
-        var source = new BluRayMediaSource(playlist, identifier);
-
-        // Check ignore flags
-        var flags = MediaIgnoreFlags.None;
-
-        // Smaller than 10 seconds
-        if (source.Info.Duration.TotalSeconds < 10) 
-        {
-            flags |= MediaIgnoreFlags.TooShort;
-        }
-        
-        // Longer than 5 hours
-        if (source.Info.Duration.TotalSeconds > 60 * 60 * 5) 
-        {
-            flags |= MediaIgnoreFlags.TooLong;
-        }
-
-        // Scan segments
-        var audioStreams = source.Info.Streams.Count(s => s.Type == StreamType.Audio);
-        var subtitleStreams = source.Info.Streams.Count(s => s.Type == StreamType.Subtitle);
-        if (audioStreams == 0)
-        {
-            flags |= MediaIgnoreFlags.NoAudio;
-        }
-        if (subtitleStreams == 0)
-        {
-            flags |= MediaIgnoreFlags.NoSubtitle;
-        }
-        
-        source.IgnoreFlags = flags;
-        
-        return source;
     }
 
     /// <inheritdoc />
@@ -136,21 +80,20 @@ public class BluRayMediaProvider : IMediaProvider
     /// <inheritdoc />
     public Stream GetRawStream(IMediaSource source)
     {
-        if (!Contains(source.Identifier)) throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
-        
+        if (!Contains(source.Identifier))
+            throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
+
         var streamFactories = new List<Func<Stream>>();
-        foreach (var segment in source.Info.Segments)
-        {
-            streamFactories.Add(() => BluRay.GetM2TsStream(segment.Id));
-        }
-        
+        foreach (var segment in source.Info.Segments) streamFactories.Add(() => BluRay.GetM2TsStream(segment.Id));
+
         return new StreamListReader(streamFactories);
     }
-    
+
     /// <inheritdoc />
     public Stream GetRawStream(IMediaSource source, ushort segmentId)
     {
-        if (!Contains(source.Identifier)) throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
+        if (!Contains(source.Identifier))
+            throw new ArgumentException("The given source isn't contained by this provider.", nameof(source));
         return BluRay.GetM2TsStream(segmentId);
     }
 
@@ -160,32 +103,74 @@ public class BluRayMediaProvider : IMediaProvider
         return identifier.Type == MediaIdentifierType.BluRay && identifier.ContentHash == BluRay.ContentHash;
     }
 
+    #region Dispose
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        // Nothing to do
+    }
+
+    #endregion Dispose
+
     /// <summary>
-    /// Tries to create a media converter for the given directory.
+    ///     Returns the media source for the given playlist id.
+    /// </summary>
+    /// <param name="playlistId">The BluRay playlist id.</param>
+    /// <returns></returns>
+    private BluRayMediaSource GetSource(ushort playlistId)
+    {
+        var playlist = BluRay.Playlists[playlistId];
+
+        // Builds the media identifier
+        var identifier = new MediaIdentifier
+        {
+            Type = MediaIdentifierType.BluRay,
+            ContentHash = BluRay.ContentHash,
+            DiskName = BluRay.DiskName,
+            Id = playlistId.ToString(),
+            SegmentIds = playlist.Items.Select(i => ushort.Parse(i.Name)).ToArray()
+        };
+
+        var source = new BluRayMediaSource(playlist, identifier);
+
+        // Check ignore flags
+        var flags = MediaIgnoreFlags.None;
+
+        // Smaller than 10 seconds
+        if (source.Info.Duration.TotalSeconds < 10) flags |= MediaIgnoreFlags.TooShort;
+
+        // Longer than 5 hours
+        if (source.Info.Duration.TotalSeconds > 60 * 60 * 5) flags |= MediaIgnoreFlags.TooLong;
+
+        // Scan segments
+        var audioStreams = source.Info.Streams.Count(s => s.Type == StreamType.Audio);
+        var subtitleStreams = source.Info.Streams.Count(s => s.Type == StreamType.Subtitle);
+        if (audioStreams == 0) flags |= MediaIgnoreFlags.NoAudio;
+        if (subtitleStreams == 0) flags |= MediaIgnoreFlags.NoSubtitle;
+
+        source.IgnoreFlags = flags;
+
+        return source;
+    }
+
+    /// <summary>
+    ///     Tries to create a media converter for the given directory.
     /// </summary>
     /// <param name="serviceProvider">The service provider.</param>
     /// <param name="path">The disk path.</param>
     /// <param name="provider">Returns the created provider.</param>
     /// <returns>Returns if the path is valid and a provider was created.</returns>
-    public static bool TryCreate(IServiceProvider serviceProvider, string path, [MaybeNullWhen(false)] out BluRayMediaProvider provider)
+    public static bool TryCreate(IServiceProvider serviceProvider, string path,
+        [MaybeNullWhen(false)] out BluRayMediaProvider provider)
     {
         if (!Directory.Exists(Path.Combine(path, "BDMV")))
         {
             provider = null;
             return false;
         }
-        
+
         provider = new BluRayMediaProvider(serviceProvider, path);
         return true;
     }
-
-    #region Dispose
-    
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        // Nothing to do
-    }
-    
-    #endregion Dispose
 }

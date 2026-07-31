@@ -7,7 +7,7 @@ public class BootRecord : IBigEndianBinaryReadable, IVolumeDescriptor
     public string SystemIdentifier { get; set; } = "";
     public string BootIdentifier { get; set; } = "";
     public byte[] SystemUse { get; set; } = [];
-    
+
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader)
     {

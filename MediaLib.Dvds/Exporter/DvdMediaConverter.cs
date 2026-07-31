@@ -9,16 +9,23 @@ namespace MediaLib.Dvds.Exporter;
 
 public class DvdMediaConverter : FFmpegMediaConverter<DvdMediaProvider>
 {
-    public DvdMediaConverter(ILogger logger, DvdMediaProvider provider, MediaConverterParameter parameter) : 
+    public DvdMediaConverter(ILogger logger, DvdMediaProvider provider, MediaConverterParameter parameter) :
         base(logger, provider, parameter)
     {
     }
-    
+
     /// <inheritdoc />
-    protected override bool RequireFullProbeSize() => true; // Required for DVDs
-    
+    protected override bool RequireFullProbeSize()
+    {
+        return true;
+        // Required for DVDs
+    }
+
     /// <inheritdoc />
-    protected override StreamId GetStreamId(StreamInfo stream) => StreamId.Pid(stream.Id);
+    protected override StreamId GetStreamId(StreamInfo stream)
+    {
+        return StreamId.Pid(stream.Id);
+    }
 
     /// <inheritdoc />
     protected override long GetSegmentFilesize(ushort segmentId)
@@ -28,21 +35,18 @@ public class DvdMediaConverter : FFmpegMediaConverter<DvdMediaProvider>
         var cell = title.Pgc.CellPlayback[segmentId - 1];
         return (cell.LastSector - cell.FirstSector + 1) * Dvd.BlockSize;
     }
-    
+
     /// <inheritdoc />
     protected override Stream OpenSegmentStream(ushort segmentId)
     {
         if (!ushort.TryParse(Parameter.Definition.Identifier.Id, out var titleId))
-        {
             throw new ArgumentException("Couldn't parse title id.", nameof(Parameter));
-        }
-        
+
         var cellId = segmentId;
-        
+
         var retries = 0;
         const int maxRetries = 5;
         while (true)
-        {
             try
             {
                 Logger.LogInformation("Opening segment #{cellId}", cellId);
@@ -53,7 +57,8 @@ public class DvdMediaConverter : FFmpegMediaConverter<DvdMediaProvider>
                 if (retries < maxRetries)
                 {
                     retries++;
-                    Logger.LogWarning(ex, "Exception while opening segment #{cellId}. Retry {Retry} / {MaxRetry}", cellId, retries, maxRetries);
+                    Logger.LogWarning(ex, "Exception while opening segment #{cellId}. Retry {Retry} / {MaxRetry}",
+                        cellId, retries, maxRetries);
                 }
                 else
                 {
@@ -61,8 +66,5 @@ public class DvdMediaConverter : FFmpegMediaConverter<DvdMediaProvider>
                     throw;
                 }
             }
-        }
     }
-
-    
 }

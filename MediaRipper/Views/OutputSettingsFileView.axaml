@@ -6,11 +6,11 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MediaRipper.Views.OutputSettingsFileView"
              x:DataType="vm:OutputFileViewModel">
-    
+
     <StackPanel Orientation="Vertical" Spacing="5" Margin="0,5">
         <TextBlock Text="{Binding DisplayName}" />
 
         <TextBox Text="{Binding Model.Name}" PlaceholderText="{DynamicResource MainFile}" />
     </StackPanel>
-    
+
 </UserControl>

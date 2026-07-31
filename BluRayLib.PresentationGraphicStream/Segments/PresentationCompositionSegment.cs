@@ -5,12 +5,13 @@ namespace BluRayLib.PresentationGraphicStream.Segments;
 public struct PresentationCompositionSegment : IPresentationGraphicSegment
 {
     /// <summary>
-    /// The type byte in the PGS.
+    ///     The type byte in the PGS.
     /// </summary>
     public const byte Type = 0x16;
-    
+
     /// <inheritdoc />
     static byte IPresentationGraphicSegment.Type => Type;
+
     public PresentationCompositionSegment()
     {
         Width = 0;
@@ -22,8 +23,7 @@ public struct PresentationCompositionSegment : IPresentationGraphicSegment
         PaletteId = 0;
         CompositionObjects = Array.Empty<CompositionObject>();
     }
-    
-    
+
 
     public ushort Width { get; set; }
     public ushort Height { get; set; }
@@ -32,8 +32,9 @@ public struct PresentationCompositionSegment : IPresentationGraphicSegment
     public byte CompositionState { get; set; }
     public byte PaletteUpdateFlag { get; set; }
     public byte PaletteId { get; set; }
-    
+
     public CompositionObject[] CompositionObjects { get; set; }
+
     public struct CompositionObject
     {
         public ushort Id { get; set; }
@@ -47,7 +48,7 @@ public struct PresentationCompositionSegment : IPresentationGraphicSegment
         public ushort CroppingHeightPosition { get; set; }
         public bool HasCropping => (CroppedFlag & 0x80) != 0;
     }
-    
+
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader, ushort segmentLength)
     {
@@ -58,7 +59,7 @@ public struct PresentationCompositionSegment : IPresentationGraphicSegment
         CompositionState = reader.ReadByte();
         PaletteUpdateFlag = reader.ReadByte();
         PaletteId = reader.ReadByte();
-        
+
         var count = reader.ReadByte();
         CompositionObjects = new CompositionObject[count];
         for (var i = 0; i < count; i++)
@@ -80,7 +81,7 @@ public struct PresentationCompositionSegment : IPresentationGraphicSegment
             CompositionObjects[i] = compositionObject;
         }
     }
-    
+
     /// <inheritdoc />
     public void Write(BigEndianBinaryWriter writer)
     {
@@ -109,15 +110,12 @@ public struct PresentationCompositionSegment : IPresentationGraphicSegment
             }
         }
     }
-    
+
     /// <inheritdoc />
     public ushort GetSegmentLength()
     {
         var length = 11;
-        foreach (var compositionObject in CompositionObjects)
-        {
-            length += compositionObject.HasCropping ? 16 : 8;
-        }
+        foreach (var compositionObject in CompositionObjects) length += compositionObject.HasCropping ? 16 : 8;
 
         return (ushort)length;
     }

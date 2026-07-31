@@ -3,15 +3,15 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// Program Chain Information Search Pointer
+///     Program Chain Information Search Pointer
 /// </summary>
 public class PgciSrp : IBigEndianBinaryReadable
-{ 
-    public byte EntryId { get; private set; } = 0;
-    public byte BlockMode { get; private set; } = 0;
-    public byte BlockType { get; private set; } = 0;
-    public ushort PtlIdMask { get; private set; } = 0;
-    public uint PgcStartByte { get; private set; } = 0;
+{
+    public byte EntryId { get; private set; }
+    public byte BlockMode { get; private set; }
+    public byte BlockType { get; private set; }
+    public ushort PtlIdMask { get; private set; }
+    public uint PgcStartByte { get; private set; }
     public Pgc? Pgc { get; set; } = null;
 
     /// <inheritdoc />

@@ -9,50 +9,50 @@
              x:Class="MediaRipper.Views.SourceSelectorView"
              x:DataType="vm:SourceSelectorViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:SourceSelectorViewModel}}">
-    
+
     <Interaction.Behaviors>
         <EventTriggerBehavior
             EventName="Loaded">
             <InvokeCommandAction Command="{Binding OnLoaded}" />
         </EventTriggerBehavior>
     </Interaction.Behaviors>
-    
+
     <Border Classes="DarkBox">
         <StackPanel Orientation="Vertical" Spacing="10">
             <!-- Title -->
-            <TextBlock Classes="Title" Text="{DynamicResource Source}"/>
-            
+            <TextBlock Classes="Title" Text="{DynamicResource Source}" />
+
             <DockPanel>
                 <!-- Actions -->
                 <StackPanel Orientation="Horizontal" Margin="5,0,0,0" Spacing="5" DockPanel.Dock="Right">
-                    <Button Command="{Binding OpenFolderPickerAsync}" 
+                    <Button Command="{Binding OpenFolderPickerAsync}"
                             IsEnabled="{Binding IsEnabled}"
                             ToolTip.Tip="{DynamicResource OpenSource}">
                         <avalonia:FluentIcon Icon="FolderOpen" />
                     </Button>
-                    
+
                     <Button Command="{Binding CopyContentHashAsync}"
                             IsEnabled="{Binding IsEnabled}"
                             ToolTip.Tip="{Binding ContentHash}">
                         <avalonia:FluentIcon Icon="Copy" />
                     </Button>
-                    
+
                     <Button Command="{Binding RefreshAsync}"
                             IsEnabled="{Binding IsEnabled}"
                             ToolTip.Tip="{DynamicResource Refresh}">
                         <avalonia:FluentIcon Icon="ArrowClockwise" />
                     </Button>
                 </StackPanel>
-                
+
                 <!-- Input path -->
                 <TextBox Text="{Binding SourcePath}"
                          IsReadOnly="{Binding !IsEnabled}">
                     <TextBox.KeyBindings>
-                        <KeyBinding  Command="{Binding OpenAsync}" Gesture="Enter" />
+                        <KeyBinding Command="{Binding OpenAsync}" Gesture="Enter" />
                     </TextBox.KeyBindings>
                 </TextBox>
             </DockPanel>
         </StackPanel>
     </Border>
-    
+
 </UserControl>

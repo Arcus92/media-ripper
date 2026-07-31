@@ -1,12 +1,12 @@
 namespace MediaLib.Formats;
 
 /// <summary>
-/// Provides a list of video container formats.
+///     Provides a list of video container formats.
 /// </summary>
 public static class ContainerFormats
 {
     /// <summary>
-    /// The MP4 format.
+    ///     The MP4 format.
     /// </summary>
     public static readonly MediaFormat Mp4 = new()
     {
@@ -15,21 +15,21 @@ public static class ContainerFormats
     };
 
     /// <summary>
-    /// The MKV (Matroska) format.
+    ///     The MKV (Matroska) format.
     /// </summary>
     public static readonly MediaFormat Mkv = new()
     {
         Extension = ".mkv",
         FFmpegFormat = "matroska"
     };
-    
-    /// <summary>
-    /// The list of all formats.
-    /// </summary>
-    public static readonly MediaFormat[] All = [ Mp4, Mkv ];
 
     /// <summary>
-    /// Returns if the given subtitle format is supported by the video container format.
+    ///     The list of all formats.
+    /// </summary>
+    public static readonly MediaFormat[] All = [Mp4, Mkv];
+
+    /// <summary>
+    ///     Returns if the given subtitle format is supported by the video container format.
     /// </summary>
     /// <param name="containerFormat">The video format to check.</param>
     /// <param name="subtitleFormat">The subtitle format to check.</param>
@@ -38,9 +38,9 @@ public static class ContainerFormats
     {
         return SupportSubtitle(containerFormat.FFmpegFormat, subtitleFormat.FFmpegFormat);
     }
-    
+
     /// <summary>
-    /// Returns if the given subtitle format is supported by the video container format.
+    ///     Returns if the given subtitle format is supported by the video container format.
     /// </summary>
     /// <param name="containerFormat">The video format to check.</param>
     /// <param name="subtitleFormat">The subtitle format to check.</param>

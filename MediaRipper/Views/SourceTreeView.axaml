@@ -10,12 +10,12 @@
              x:Class="MediaRipper.Views.SourceTreeView"
              x:DataType="vm:SourceTreeViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:SourceTreeViewModel}}">
-    
+
     <Border Classes="LightBox">
         <ScrollViewer>
             <TreeView ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
                 <TreeView.DataTemplates>
-                    
+
                     <!-- Title node -->
                     <TreeDataTemplate x:DataType="sources:MediaSourceModel" ItemsSource="{Binding SubNodes}">
                         <DockPanel Classes.transparent="{Binding IsIgnored}">
@@ -27,16 +27,16 @@
                                         <StackPanel Orientation="Horizontal" />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
-                                
+
                                 <!-- Icon template -->
                                 <ItemsControl.DataTemplates>
                                     <DataTemplate x:DataType="sources:MediaSourceIconModel">
-                                        <avalonia:FluentIcon Icon="{Binding Icon}" 
+                                        <avalonia:FluentIcon Icon="{Binding Icon}"
                                                              ToolTip.Tip="{Binding Description}" />
                                     </DataTemplate>
                                 </ItemsControl.DataTemplates>
                             </ItemsControl>
-                            
+
                             <!-- Title text -->
                             <StackPanel Orientation="Horizontal" Classes="nodeRow">
                                 <TextBlock Text="{Binding Info.Name}" />
@@ -45,7 +45,7 @@
                             </StackPanel>
                         </DockPanel>
                     </TreeDataTemplate>
-                    
+
                     <!-- Video stream node -->
                     <TreeDataTemplate x:DataType="sources:VideoSourceModel">
                         <StackPanel Orientation="Horizontal" Classes="nodeRow">
@@ -53,7 +53,7 @@
                             <TextBlock Text="{Binding Stream.Name}" />
                         </StackPanel>
                     </TreeDataTemplate>
-                    
+
                     <!-- Audio stream node -->
                     <TreeDataTemplate x:DataType="sources:AudioSourceModel">
                         <StackPanel Orientation="Horizontal" Classes="nodeRow">
@@ -62,7 +62,7 @@
                             <TextBlock Text="{Binding Stream.LanguageCode}" />
                         </StackPanel>
                     </TreeDataTemplate>
-                    
+
                     <!-- Subtitle stream node -->
                     <TreeDataTemplate x:DataType="sources:SubtitleSourceModel">
                         <StackPanel Orientation="Horizontal" Classes="nodeRow">
@@ -71,45 +71,46 @@
                             <TextBlock Text="{Binding Stream.LanguageCode}" />
                         </StackPanel>
                     </TreeDataTemplate>
-                    
+
                     <!-- Chapter node -->
                     <TreeDataTemplate x:DataType="sources:ChapterSourceModel">
                         <StackPanel Orientation="Horizontal" Classes="nodeRow">
                             <avalonia:FluentIcon Icon="Clock" />
                             <TextBlock Text="{Binding Chapter.Name}" />
-                            <TextBlock Text="{Binding Start, StringFormat=hh\\:mm\\:ss}"/>
+                            <TextBlock Text="{Binding Start, StringFormat=hh\\:mm\\:ss}" />
                             <TextBlock Text="-" />
                             <TextBlock Text="{Binding End, StringFormat=hh\\:mm\\:ss}" />
                         </StackPanel>
                     </TreeDataTemplate>
-                    
+
                     <!-- Generic text node (chapter / segment) -->
                     <TreeDataTemplate x:DataType="sources:TextSourceModel" ItemsSource="{Binding SubNodes}">
                         <StackPanel Orientation="Horizontal" Classes="nodeRow">
-                            <TextBlock Text="{Binding TitleResourceKey, Converter={StaticResource DynamicResourceKeyConverter}}"/>
+                            <TextBlock
+                                Text="{Binding TitleResourceKey, Converter={StaticResource DynamicResourceKeyConverter}}" />
                         </StackPanel>
                     </TreeDataTemplate>
                 </TreeView.DataTemplates>
-                
+
                 <TreeView.Styles>
                     <!-- Auto expand text nodes -->
                     <Style x:DataType="sources:BaseSourceModel" Selector="TreeViewItem">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                     </Style>
-                    
+
                     <!-- Element nodes -->
                     <Style Selector="StackPanel.nodeRow">
                         <Setter Property="Spacing" Value="8" />
                     </Style>
-                    
+
                     <!-- Text element in nodes -->
                     <Style Selector=".nodeRow TextBlock">
                         <Setter Property="VerticalAlignment" Value="Center" />
                     </Style>
-                    
+
                     <!-- Slight hide ignored titles -->
                     <Style Selector=".transparent TextBlock">
-                        <Setter Property="Opacity" Value="0.5"/>
+                        <Setter Property="Opacity" Value="0.5" />
                     </Style>
                 </TreeView.Styles>
             </TreeView>

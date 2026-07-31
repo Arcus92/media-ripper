@@ -19,7 +19,7 @@ public class OutputTreeViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets and sets the selected title info.
+    ///     Gets and sets the selected title info.
     /// </summary>
     public OutputViewModel? SelectedItem
     {
@@ -28,7 +28,7 @@ public class OutputTreeViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets the list of outputs.
+    ///     Gets the list of outputs.
     /// </summary>
     public ObservableCollection<OutputViewModel> Items { get; } = [];
 
@@ -37,7 +37,7 @@ public class OutputTreeViewModel : ViewModelBase
         var viewModel = new OutputViewModel(_outputService, output);
         return viewModel;
     }
-    
+
     /// <inheritdoc />
     public override Control CreateView()
     {

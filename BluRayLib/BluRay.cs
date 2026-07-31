@@ -7,150 +7,27 @@ namespace BluRayLib;
 
 public class BluRay
 {
-    /// <summary>
-    /// Gets the BluRay disk path.
-    /// </summary>
-    public string DiskPath { get; }
-
-    /// <summary>
-    /// Gets the BluRay disk name.
-    /// </summary>
-    public string DiskName { get; }
-    
     public BluRay(string diskPath)
     {
         diskPath = Path.GetFullPath(diskPath).TrimEnd('/', '\\'); // Sanitize
         DiskPath = diskPath;
         DiskName = Path.GetFileName(diskPath);
     }
-    
-    #region Info
-    
-    /// <summary>
-    /// Gets if the BluRay is encrypted.
-    /// </summary>
-    public bool IsEncrypted { get; private set; }
-    
-    /// <summary>
-    /// Gets the content hash of the disc. This content hash is compatible with TheDiscDb.
-    /// </summary>
-    public string ContentHash { get; private set; } = "";
 
     /// <summary>
-    /// Gets the loaded movie object.
+    ///     Gets the BluRay disk path.
     /// </summary>
-    public MovieObjects MovieObjects { get; } = new();
-    
-    /// <summary>
-    /// Gets all loaded playlists.
-    /// </summary>
-    public Dictionary<ushort, Playlist> Playlists { get; } = new();
-    
-    /// <summary>
-    /// Gets all loaded clips.
-    /// </summary>
-    public Dictionary<ushort, ClipInfo> Clips { get; } = new();
-    
-    /// <summary>
-    /// Loads the BluRay disks content and populates the <see cref="Playlists"/> and <see cref="Clips"/> lists.
-    /// </summary>
-    public async Task LoadAsync()
-    {
-        Playlists.Clear();
-        Clips.Clear();
-        await Task.Run(() =>
-        {
-            // Check if the disk is encrypted by checking the AACS directory.
-            IsEncrypted = Directory.Exists(Path.Combine(DiskPath, "AACS"));
-            
-            // Load the movie object file
-            var path = Path.Combine(DiskPath, "BDMV/MovieObject.bdmv");
-            MovieObjects.Read(path);
-            
-            // Load the clips from the directory
-            path = Path.Combine(DiskPath, "BDMV/CLIPINF/");
-            foreach (var file in Directory.EnumerateFiles(path, "*.clpi"))
-            {
-                var name = Path.GetFileNameWithoutExtension(file);
-                if (!ushort.TryParse(name, out var id)) continue;
-                var item = new ClipInfo();
-                item.Read(file);
-                Clips.Add(id, item);
-            }
-            
-            // Load the playlist from the directory
-            path = Path.Combine(DiskPath, "BDMV/PLAYLIST/");
-            foreach (var file in Directory.EnumerateFiles(path, "*.mpls"))
-            {
-                var name = Path.GetFileNameWithoutExtension(file);
-                if (!ushort.TryParse(name, out var id)) continue;
-                
-                // Read the playlist file
-                var item = new Playlist();
-                item.Read(file);
-                Playlists.Add(id, item);
-            }
-            
-            // Load the streams and build the content hash
-            var fileInfos = new List<ContentHash.HashFileInfo>();
-            path = Path.Combine(DiskPath, "BDMV/STREAM/");
-            foreach (var file in Directory.EnumerateFiles(path, "*.m2ts"))
-            {
-                var name = Path.GetFileNameWithoutExtension(file);
-                
-                // Collect infos for the content hash calculation
-                var fileInfo = new FileInfo(file);
-                fileInfos.Add(new ContentHash.HashFileInfo()
-                {
-                    Name = name,
-                    CreationTime = fileInfo.CreationTime,
-                    Size = fileInfo.Length,
-                });
-            }
+    public string DiskPath { get; }
 
-            // Order the playlist files before calculating the hash.
-            ContentHash = fileInfos.OrderBy(i => i.Name).CalculateHash();
-        });
-    }
-    
-    #endregion Info
-    
-    #region Streams
-    
     /// <summary>
-    /// Opens the M2TS file with the given id.
+    ///     Gets the BluRay disk name.
     /// </summary>
-    /// <param name="clipId"></param>
-    /// <returns></returns>
-    public Stream GetM2TsStream(ushort clipId)
-    {
-        // Handle decryption
-        if (IsEncrypted && M2TsDecryptionHandler is not null)
-        {
-            return M2TsDecryptionHandler.Invoke(this, clipId);
-        }
-        
-        var path = Path.Combine(DiskPath, "BDMV/STREAM", $"{clipId:00000}.m2ts");
-        return File.OpenRead(path);
-    }
-    
-    /// <summary>
-    /// Returns the file info for the M2TS file.
-    /// </summary>
-    /// <param name="clipId"></param>
-    /// <returns></returns>
-    public FileInfo GetM2TsFileInfo(ushort clipId)
-    {
-        var path = Path.Combine(DiskPath, "BDMV/STREAM", $"{clipId:00000}.m2ts");
-        return new FileInfo(path);
-    }
-    
-    #endregion Streams
-    
+    public string DiskName { get; }
+
     #region Clip
 
     /// <summary>
-    /// Reads and returns the clip-info file with the given id.
+    ///     Reads and returns the clip-info file with the given id.
     /// </summary>
     /// <param name="clipId"></param>
     /// <returns></returns>
@@ -161,13 +38,13 @@ public class BluRay
         clipInfo.Read(path);
         return clipInfo;
     }
-    
+
     #endregion Clip
-    
+
     #region Playlists
 
     /// <summary>
-    /// Reads and returns the playlist with the given id.
+    ///     Reads and returns the playlist with the given id.
     /// </summary>
     /// <param name="playlistId">The playlist id.</param>
     /// <returns>Returns the playlist.</returns>
@@ -178,27 +55,13 @@ public class BluRay
         playlist.Read(path);
         return playlist;
     }
-    
+
     #endregion Playlists
-    
-    #region Decryption
-    
-    /// <summary>
-    /// The decryption handler method.
-    /// </summary>
-    public delegate Stream DecryptionHandler(BluRay bluRay, ushort clipId);
 
-    /// <summary>
-    /// Gets and sets the M2TS decryption stream.
-    /// </summary>
-    public static DecryptionHandler? M2TsDecryptionHandler { get; set; }
-
-    #endregion Decryption
-    
     #region Utils
-    
+
     /// <summary>
-    /// Converts the BluRay ticks to TimeSpan.
+    ///     Converts the BluRay ticks to TimeSpan.
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
@@ -206,6 +69,140 @@ public class BluRay
     {
         return TimeSpan.FromSeconds(time / (double)45000);
     }
-    
+
     #endregion Utils
+
+    #region Info
+
+    /// <summary>
+    ///     Gets if the BluRay is encrypted.
+    /// </summary>
+    public bool IsEncrypted { get; private set; }
+
+    /// <summary>
+    ///     Gets the content hash of the disc. This content hash is compatible with TheDiscDb.
+    /// </summary>
+    public string ContentHash { get; private set; } = "";
+
+    /// <summary>
+    ///     Gets the loaded movie object.
+    /// </summary>
+    public MovieObjects MovieObjects { get; } = new();
+
+    /// <summary>
+    ///     Gets all loaded playlists.
+    /// </summary>
+    public Dictionary<ushort, Playlist> Playlists { get; } = new();
+
+    /// <summary>
+    ///     Gets all loaded clips.
+    /// </summary>
+    public Dictionary<ushort, ClipInfo> Clips { get; } = new();
+
+    /// <summary>
+    ///     Loads the BluRay disks content and populates the <see cref="Playlists" /> and <see cref="Clips" /> lists.
+    /// </summary>
+    public async Task LoadAsync()
+    {
+        Playlists.Clear();
+        Clips.Clear();
+        await Task.Run(() =>
+        {
+            // Check if the disk is encrypted by checking the AACS directory.
+            IsEncrypted = Directory.Exists(Path.Combine(DiskPath, "AACS"));
+
+            // Load the movie object file
+            var path = Path.Combine(DiskPath, "BDMV/MovieObject.bdmv");
+            MovieObjects.Read(path);
+
+            // Load the clips from the directory
+            path = Path.Combine(DiskPath, "BDMV/CLIPINF/");
+            foreach (var file in Directory.EnumerateFiles(path, "*.clpi"))
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                if (!ushort.TryParse(name, out var id)) continue;
+                var item = new ClipInfo();
+                item.Read(file);
+                Clips.Add(id, item);
+            }
+
+            // Load the playlist from the directory
+            path = Path.Combine(DiskPath, "BDMV/PLAYLIST/");
+            foreach (var file in Directory.EnumerateFiles(path, "*.mpls"))
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                if (!ushort.TryParse(name, out var id)) continue;
+
+                // Read the playlist file
+                var item = new Playlist();
+                item.Read(file);
+                Playlists.Add(id, item);
+            }
+
+            // Load the streams and build the content hash
+            var fileInfos = new List<ContentHash.HashFileInfo>();
+            path = Path.Combine(DiskPath, "BDMV/STREAM/");
+            foreach (var file in Directory.EnumerateFiles(path, "*.m2ts"))
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+
+                // Collect infos for the content hash calculation
+                var fileInfo = new FileInfo(file);
+                fileInfos.Add(new ContentHash.HashFileInfo
+                {
+                    Name = name,
+                    CreationTime = fileInfo.CreationTime,
+                    Size = fileInfo.Length
+                });
+            }
+
+            // Order the playlist files before calculating the hash.
+            ContentHash = fileInfos.OrderBy(i => i.Name).CalculateHash();
+        });
+    }
+
+    #endregion Info
+
+    #region Streams
+
+    /// <summary>
+    ///     Opens the M2TS file with the given id.
+    /// </summary>
+    /// <param name="clipId"></param>
+    /// <returns></returns>
+    public Stream GetM2TsStream(ushort clipId)
+    {
+        // Handle decryption
+        if (IsEncrypted && M2TsDecryptionHandler is not null) return M2TsDecryptionHandler.Invoke(this, clipId);
+
+        var path = Path.Combine(DiskPath, "BDMV/STREAM", $"{clipId:00000}.m2ts");
+        return File.OpenRead(path);
+    }
+
+    /// <summary>
+    ///     Returns the file info for the M2TS file.
+    /// </summary>
+    /// <param name="clipId"></param>
+    /// <returns></returns>
+    public FileInfo GetM2TsFileInfo(ushort clipId)
+    {
+        var path = Path.Combine(DiskPath, "BDMV/STREAM", $"{clipId:00000}.m2ts");
+        return new FileInfo(path);
+    }
+
+    #endregion Streams
+
+    #region Decryption
+
+    /// <summary>
+    ///     The decryption handler method.
+    /// </summary>
+    public delegate Stream DecryptionHandler(BluRay bluRay, ushort clipId);
+
+    /// <summary>
+    ///     Gets and sets the M2TS decryption stream.
+    /// </summary>
+    public static DecryptionHandler? M2TsDecryptionHandler { get; set; }
+
+    #endregion Decryption
 }

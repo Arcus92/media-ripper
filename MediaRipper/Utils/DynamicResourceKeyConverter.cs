@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MediaRipper.Utils;
 
 /// <summary>
-/// 
 /// </summary>
 public class DynamicResourceKeyConverter : IValueConverter
 {
@@ -16,7 +15,7 @@ public class DynamicResourceKeyConverter : IValueConverter
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not string resourceKey) return value;
-        
+
         var app = (App)Application.Current!;
         var languageService = app.ServiceProvider.GetRequiredService<ILanguageService>();
         return languageService.Translate(resourceKey);

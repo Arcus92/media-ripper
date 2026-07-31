@@ -9,7 +9,7 @@
              x:Class="MediaRipper.Views.QueueSettingsView"
              x:DataType="vm:QueueSettingsViewModel"
              Design.DataContext="{utils:DesignResolve {x:Type vm:QueueSettingsViewModel}}">
-    
+
     <Border Classes="DarkBox">
         <DockPanel>
             <StackPanel Orientation="Horizontal" Spacing="5" DockPanel.Dock="Right">
@@ -29,15 +29,15 @@
                     <avalonia:FluentIcon Icon="Stop" />
                 </Button>
             </StackPanel>
-            
+
             <StackPanel Orientation="Horizontal" Spacing="5">
                 <Button Command="{Binding DequeueSelectionAsync}"
-                        IsEnabled="{Binding CanDequeueSelection}" 
+                        IsEnabled="{Binding CanDequeueSelection}"
                         ToolTip.Tip="{DynamicResource DequeueSelection}">
                     <avalonia:FluentIcon Icon="Subtract" />
                 </Button>
             </StackPanel>
         </DockPanel>
     </Border>
-    
+
 </UserControl>

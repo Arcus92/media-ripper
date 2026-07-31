@@ -7,7 +7,7 @@ public struct UserOps : IBigEndianBinaryReadable
     public UserOps()
     {
     }
-    
+
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader)
     {

@@ -4,24 +4,21 @@ using System.Text.Json.Serialization;
 namespace MediaLib.TheMovieDatabase.Serializer;
 
 /// <summary>
-/// A JSON converter to read a specific date-time format. 
+///     A JSON converter to read a specific date-time format.
 /// </summary>
 public class DateTimeFormatConverter : JsonConverter<DateTime>
 {
     /// <summary>
-    /// Gets and sets the date format.
+    ///     Gets and sets the date format.
     /// </summary>
     public string DateFormat { get; init; } = "yyyy-MM-dd";
-    
+
     /// <inheritdoc />
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var text = reader.GetString();
-        if (string.IsNullOrEmpty(text))
-        {
-            return default;
-        }
-        
+        if (string.IsNullOrEmpty(text)) return default;
+
         return DateTime.ParseExact(text, DateFormat, null);
     }
 
@@ -33,7 +30,7 @@ public class DateTimeFormatConverter : JsonConverter<DateTime>
             writer.WriteStringValue("");
             return;
         }
-        
+
         writer.WriteStringValue(value.ToString(DateFormat));
     }
 }

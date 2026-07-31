@@ -3,37 +3,37 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// Video Title Set Information Management Table
+///     Video Title Set Information Management Table
 /// </summary>
 public class VtsiMat : IBigEndianBinaryReadable
 {
-    public uint VtsLastSector { get; private set; } = 0;
-    public uint VtsiLastSector { get; private set; } = 0;
-    public byte SpecificationVersion { get; private set; } = 0;
-    public uint VtsCategory { get; private set; } = 0;
-    public uint VtsiLastByte { get; private set; } = 0;
+    public uint VtsLastSector { get; private set; }
+    public uint VtsiLastSector { get; private set; }
+    public byte SpecificationVersion { get; private set; }
+    public uint VtsCategory { get; private set; }
+    public uint VtsiLastByte { get; private set; }
 
-    public uint VtsmVobs { get; private set; } = 0;
-    public uint VtsTtVobs { get; private set; } = 0;
-    public uint VtsPttSrpt { get; private set; } = 0;
-    public uint VtsPgcit { get; private set; } = 0;
+    public uint VtsmVobs { get; private set; }
+    public uint VtsTtVobs { get; private set; }
+    public uint VtsPttSrpt { get; private set; }
+    public uint VtsPgcit { get; private set; }
 
-    public uint VtsmPgciUt { get; private set; } = 0;
-    public uint VtsTmapt { get; private set; } = 0;
-    public uint VtsmCAdt { get; private set; } = 0;
-    public uint VtsmVobuAdmap { get; private set; } = 0;
-    public uint VtsCAdt { get; private set; } = 0;
-    public uint VtsVobuAdmap { get; private set; } = 0;
-    
+    public uint VtsmPgciUt { get; private set; }
+    public uint VtsTmapt { get; private set; }
+    public uint VtsmCAdt { get; private set; }
+    public uint VtsmVobuAdmap { get; private set; }
+    public uint VtsCAdt { get; private set; }
+    public uint VtsVobuAdmap { get; private set; }
+
     public VideoAttributes VtsmVideo { get; private set; }
     public AudioAttributes[] VtsmAudios { get; private set; } = [];
     public SubPictureAttributes[] VtsmSubPictures { get; private set; } = [];
-    
+
     public VideoAttributes VtsVideo { get; private set; }
     public AudioAttributes[] VtsAudios { get; private set; } = [];
     public SubPictureAttributes[] VtsSubPictures { get; private set; } = [];
     public MultiChannelAttributes[] VtsiMultiChannelAudios { get; private set; } = [];
-    
+
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader)
     {
@@ -45,7 +45,7 @@ public class VtsiMat : IBigEndianBinaryReadable
         VtsCategory = reader.ReadUInt32();
         reader.ReadZero(2);
         reader.ReadZero(2);
-        reader.ReadZero(1);
+        reader.ReadZero();
         reader.ReadZero(19);
         reader.ReadZero(2);
         reader.ReadZero(32);
@@ -65,7 +65,7 @@ public class VtsiMat : IBigEndianBinaryReadable
         VtsCAdt = reader.ReadUInt32();
         VtsVobuAdmap = reader.ReadUInt32();
         reader.ReadZero(24);
-        
+
         VtsmVideo = reader.Read<VideoAttributes>();
         reader.ReadZero();
         var nrOfVtsmAudioStreams = reader.ReadByte();
@@ -76,7 +76,7 @@ public class VtsiMat : IBigEndianBinaryReadable
         var vtsmSubpAttr = reader.Read<SubPictureAttributes>(28);
         VtsmSubPictures = vtsmSubpAttr.AsSpan(0, nrOfVtsmSubpStreams).ToArray();
         reader.ReadZero(2);
-        
+
         VtsVideo = reader.Read<VideoAttributes>();
         reader.ReadZero();
         var nrOfVtsAudioAttr = reader.ReadByte();

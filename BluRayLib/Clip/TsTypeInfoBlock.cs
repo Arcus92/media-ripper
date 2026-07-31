@@ -8,9 +8,8 @@ public class TsTypeInfoBlock
     {
         var length = reader.ReadUInt16();
         var start = reader.Position;
-        
-        
-        
+
+
         reader.SkipTo(start + length);
     }
 }

@@ -7,8 +7,9 @@ namespace MediaLib.TheMovieDatabase.Serializer;
     PropertyNameCaseInsensitive = true,
     PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower,
     AllowOutOfOrderMetadataProperties = true,
-    Converters = [ 
-        typeof(DateTimeFormatConverter) 
+    Converters =
+    [
+        typeof(DateTimeFormatConverter)
     ]
 )]
 [JsonSerializable(typeof(CompanyResult))]

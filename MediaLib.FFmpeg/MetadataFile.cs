@@ -3,17 +3,17 @@ using System.Text;
 namespace MediaLib.FFmpeg;
 
 /// <summary>
-/// This class can write FFmpeg metadata files that can be used as input for FFmpeg.
+///     This class can write FFmpeg metadata files that can be used as input for FFmpeg.
 /// </summary>
 public class MetadataFile
 {
     /// <summary>
-    /// Gets and sets the chapters.
+    ///     Gets and sets the chapters.
     /// </summary>
     public ChapterMetadata[]? Chapters { get; set; }
 
     /// <summary>
-    /// Writes the metadata file to the given path.
+    ///     Writes the metadata file to the given path.
     /// </summary>
     /// <param name="filename">The path to the metadata file.</param>
     public async Task Save(string filename)
@@ -21,9 +21,9 @@ public class MetadataFile
         await using var stream = new FileStream(filename, FileMode.Create);
         await Save(stream);
     }
-    
+
     /// <summary>
-    /// Writes the metadata file to the given stream.
+    ///     Writes the metadata file to the given stream.
     /// </summary>
     /// <param name="stream">The stream to write to.</param>
     public async Task Save(Stream stream)
@@ -33,7 +33,6 @@ public class MetadataFile
         await writer.WriteLineAsync(";FFMETADATA1");
 
         if (Chapters is not null)
-        {
             foreach (var chapter in Chapters)
             {
                 await writer.WriteLineAsync("[CHAPTER]");
@@ -42,6 +41,5 @@ public class MetadataFile
                 await writer.WriteLineAsync($"END={chapter.End.TotalMilliseconds:#}");
                 await writer.WriteLineAsync($"TITLE={chapter.Title}");
             }
-        }
     }
 }

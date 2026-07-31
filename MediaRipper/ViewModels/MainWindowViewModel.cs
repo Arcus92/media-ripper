@@ -3,20 +3,11 @@ using MediaRipper.Views;
 
 namespace MediaRipper.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : ViewModelBase
 {
-    public SourceSelectorViewModel SourceSelector { get; }
-    public SourceTreeViewModel SourceTree { get; }
-    public ExportSettingsViewModel ExportSettings { get; }
-    public OutputSelectorViewModel OutputSelector { get; }
-    public QueueSettingsViewModel QueueSettings { get; }
-    public OutputTreeViewModel OutputTree { get; }
-    public OutputSettingsContainerViewModel OutputSettingsContainer { get; }
-    public MediaLookupViewModel MediaLookup { get; }
-    
-    public MainWindowViewModel(SourceSelectorViewModel sourceSelector, SourceTreeViewModel sourceTree, 
-        ExportSettingsViewModel exportSettings, OutputSelectorViewModel outputSelector, 
-        QueueSettingsViewModel queueSettings, OutputTreeViewModel outputTree, 
+    public MainWindowViewModel(SourceSelectorViewModel sourceSelector, SourceTreeViewModel sourceTree,
+        ExportSettingsViewModel exportSettings, OutputSelectorViewModel outputSelector,
+        QueueSettingsViewModel queueSettings, OutputTreeViewModel outputTree,
         OutputSettingsContainerViewModel outputSettingsContainer, MediaLookupViewModel mediaLookup)
     {
         SourceSelector = sourceSelector;
@@ -29,6 +20,18 @@ public partial class MainWindowViewModel : ViewModelBase
         MediaLookup = mediaLookup;
     }
 
+    public SourceSelectorViewModel SourceSelector { get; }
+    public SourceTreeViewModel SourceTree { get; }
+    public ExportSettingsViewModel ExportSettings { get; }
+    public OutputSelectorViewModel OutputSelector { get; }
+    public QueueSettingsViewModel QueueSettings { get; }
+    public OutputTreeViewModel OutputTree { get; }
+    public OutputSettingsContainerViewModel OutputSettingsContainer { get; }
+    public MediaLookupViewModel MediaLookup { get; }
+
     /// <inheritdoc />
-    public override Control CreateView() => new MainWindow();
+    public override Control CreateView()
+    {
+        return new MainWindow();
+    }
 }

@@ -4,47 +4,47 @@ using MediaLib.Utils.IO;
 namespace BluRayLib.PresentationGraphicStream;
 
 /// <summary>
-/// The display set contains all information to display a graphic subtitle from a PGS (Presentation Graphic Stream).
+///     The display set contains all information to display a graphic subtitle from a PGS (Presentation Graphic Stream).
 /// </summary>
 public class DisplaySet
 {
     /// <summary>
-    /// The file magic number.
+    ///     The file magic number.
     /// </summary>
     private const ushort MagicNumber = 0x5047;
-    
+
     /// <summary>
-    /// Gets the presentation timestamp in 90 kHz.
+    ///     Gets the presentation timestamp in 90 kHz.
     /// </summary>
     public uint PresentationTimestamp { get; set; }
-    
+
     /// <summary>
-    /// Gets the decoding timestamp in 90 kHz.
+    ///     Gets the decoding timestamp in 90 kHz.
     /// </summary>
     public uint DecodingTimestamp { get; set; }
-    
+
     /// <summary>
-    /// Gets the presentation composition.
+    ///     Gets the presentation composition.
     /// </summary>
     public PresentationCompositionSegment PresentationComposition { get; set; } = new();
-    
+
     /// <summary>
-    /// Gets the palette definitions.
+    ///     Gets the palette definitions.
     /// </summary>
     public List<PaletteDefinitionSegment> PaletteDefinitions { get; } = new();
-    
+
     /// <summary>
-    /// Gets the object definitions.
+    ///     Gets the object definitions.
     /// </summary>
     public List<ObjectDefinitionSegment> ObjectDefinitions { get; } = new();
-    
+
     /// <summary>
-    /// Gets the window definitions.
+    ///     Gets the window definitions.
     /// </summary>
     public List<WindowDefinitionSegment> WindowDefinitions { get; } = new();
 
     /// <summary>
-    /// Clears and resets the current display set.
+    ///     Clears and resets the current display set.
     /// </summary>
     public void Clear()
     {
@@ -53,9 +53,9 @@ public class DisplaySet
         ObjectDefinitions.Clear();
         WindowDefinitions.Clear();
     }
-    
+
     /// <summary>
-    /// Reads the PGS format.
+    ///     Reads the PGS format.
     /// </summary>
     /// <param name="reader">The binary reader.</param>
     /// <param name="includeHeader">Should the header be included? The PG header is written before every segment.</param>
@@ -65,14 +65,14 @@ public class DisplaySet
         PaletteDefinitions.Clear();
         ObjectDefinitions.Clear();
         WindowDefinitions.Clear();
-        
+
         while (true)
         {
             // The header is included before every segment. Even for the end segment.
             if (includeHeader)
             {
                 var magicNumber = reader.ReadUInt16();
-                if (magicNumber != MagicNumber) 
+                if (magicNumber != MagicNumber)
                     throw new InvalidDataException("Magic number mismatch. Expected: 0x5047.");
                 PresentationTimestamp = reader.ReadUInt32();
                 DecodingTimestamp = reader.ReadUInt32();
@@ -84,7 +84,7 @@ public class DisplaySet
     }
 
     /// <summary>
-    /// Reads the next segment of this display set.
+    ///     Reads the next segment of this display set.
     /// </summary>
     /// <param name="reader"></param>
     /// <returns></returns>
@@ -123,15 +123,14 @@ public class DisplaySet
         // Check
         var realSize = reader.Position - start;
         if (size != realSize)
-        {
-            throw new InvalidDataException($"Segment size doesn't match: {type} - read: {realSize} - expected: {size}.");
-        }
-        
+            throw new InvalidDataException(
+                $"Segment size doesn't match: {type} - read: {realSize} - expected: {size}.");
+
         return type;
     }
 
     /// <summary>
-    /// Writes the PGS format.
+    ///     Writes the PGS format.
     /// </summary>
     /// <param name="writer">The binary writer.</param>
     /// <param name="includeHeader">Should the header be included? The PG header is written before every segment.</param>
@@ -145,7 +144,7 @@ public class DisplaySet
     }
 
     /// <summary>
-    /// Writes all segments to the stream.
+    ///     Writes all segments to the stream.
     /// </summary>
     /// <param name="segments">The segments to write.</param>
     /// <param name="writer">The writer.</param>
@@ -154,20 +153,18 @@ public class DisplaySet
     private void WriteSegments<T>(IEnumerable<T> segments, BigEndianBinaryWriter writer, bool includeHeader = true)
         where T : IPresentationGraphicSegment
     {
-        foreach (var segment in segments)
-        {
-            WriteSegment(segment, writer, includeHeader);
-        }
+        foreach (var segment in segments) WriteSegment(segment, writer, includeHeader);
     }
 
     /// <summary>
-    /// Writes a segment to the stream.
+    ///     Writes a segment to the stream.
     /// </summary>
     /// <param name="segment">The segment to write.</param>
     /// <param name="writer">The writer.</param>
     /// <param name="includeHeader">Should the header be included?</param>
     /// <typeparam name="T">The segment type.</typeparam>
-    private void WriteSegment<T>(T segment, BigEndianBinaryWriter writer, bool includeHeader = true) where T : IPresentationGraphicSegment
+    private void WriteSegment<T>(T segment, BigEndianBinaryWriter writer, bool includeHeader = true)
+        where T : IPresentationGraphicSegment
     {
         if (includeHeader)
         {
@@ -175,7 +172,7 @@ public class DisplaySet
             writer.Write(PresentationTimestamp);
             writer.Write(DecodingTimestamp);
         }
-            
+
         var length = segment.GetSegmentLength();
         writer.Write(T.Type);
         writer.Write(length);

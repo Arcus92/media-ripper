@@ -3,40 +3,34 @@ using MediaLib.Utils.IO;
 namespace MediaLib.Utils;
 
 /// <summary>
-/// Encoder for the RunLengthEncoding.
+///     Encoder for the RunLengthEncoding.
 /// </summary>
 public static class RunLengthEncoding
 {
     /// <summary>
-    /// Encodes the data using the RunLengthEncoding.
+    ///     Encodes the data using the RunLengthEncoding.
     /// </summary>
     /// <param name="data">The data to encode.</param>
     /// <param name="setter">The callback to set a pixel.</param>
     public static void Encode(ReadOnlySpan<byte> data, Action<ushort, ushort, byte> setter)
     {
         var reader = new ByteReader(data);
-        Encode(reader, setter, (c, _, x, y, b) =>
-        {
-            c(x, y, b);
-        });
+        Encode(reader, setter, (c, _, x, y, b) => { c(x, y, b); });
     }
-    
+
     /// <summary>
-    /// Encodes the data using the RunLengthEncoding.
+    ///     Encodes the data using the RunLengthEncoding.
     /// </summary>
     /// <param name="data">The data to encode.</param>
     /// <param name="setter">The callback to set a pixel.</param>
     public static void Encode(ReadOnlySpan<byte> data, Action<int, byte> setter)
     {
         var reader = new ByteReader(data);
-        Encode(reader, setter, (c, p, _, _, b) =>
-        {
-            c(p, b);
-        });
+        Encode(reader, setter, (c, p, _, _, b) => { c(p, b); });
     }
-    
+
     /// <summary>
-    /// Encodes the data using the RunLengthEncoding.
+    ///     Encodes the data using the RunLengthEncoding.
     /// </summary>
     /// <param name="data">The data to encode.</param>
     /// <param name="width">The width of the image.</param>
@@ -46,54 +40,45 @@ public static class RunLengthEncoding
     {
         var reader = new ByteReader(data);
         var array = new byte[width * height];
-        Encode(reader, array, (a, p, _, _, b) =>
-        {
-            a[p] = b;
-        });
+        Encode(reader, array, (a, p, _, _, b) => { a[p] = b; });
         return array;
     }
 
     /// <summary>
-    /// Encodes the data using the RunLengthEncoding.
+    ///     Encodes the data using the RunLengthEncoding.
     /// </summary>
     /// <param name="data">The data to encode.</param>
-    /// <param name="setterObject">An object that is passed to the <paramref name="setter"/> to avoid closure allocations.</param>
+    /// <param name="setterObject">An object that is passed to the <paramref name="setter" /> to avoid closure allocations.</param>
     /// <param name="setter">The callback to set a pixel.</param>
-    /// <typeparam name="T">The custom <paramref name="setterObject"/> type.</typeparam>
+    /// <typeparam name="T">The custom <paramref name="setterObject" /> type.</typeparam>
     public static void Encode<T>(ReadOnlySpan<byte> data, T setterObject, Action<T, ushort, ushort, byte> setter)
     {
         var reader = new ByteReader(data);
         var param = (setter, setterObject);
-        Encode(reader, param, (o, _, x, y, b) =>
-        {
-            o.setter(o.setterObject, x, y, b);
-        });
+        Encode(reader, param, (o, _, x, y, b) => { o.setter(o.setterObject, x, y, b); });
     }
-    
+
     /// <summary>
-    /// Encodes the data using the RunLengthEncoding.
+    ///     Encodes the data using the RunLengthEncoding.
     /// </summary>
     /// <param name="data">The data to encode.</param>
-    /// <param name="setterObject">An object that is passed to the <paramref name="setter"/> to avoid closure allocations.</param>
+    /// <param name="setterObject">An object that is passed to the <paramref name="setter" /> to avoid closure allocations.</param>
     /// <param name="setter">The callback to set a pixel.</param>
-    /// <typeparam name="T">The custom <paramref name="setterObject"/> type.</typeparam>
+    /// <typeparam name="T">The custom <paramref name="setterObject" /> type.</typeparam>
     public static void Encode<T>(ReadOnlySpan<byte> data, T setterObject, Action<T, int, byte> setter)
     {
         var reader = new ByteReader(data);
         var param = (setter, setterObject);
-        Encode(reader, param, (o, p, _, _, b) =>
-        {
-            o.setter(o.setterObject, p, b);
-        });
+        Encode(reader, param, (o, p, _, _, b) => { o.setter(o.setterObject, p, b); });
     }
 
     /// <summary>
-    /// Encodes the data using the RunLengthEncoding.
+    ///     Encodes the data using the RunLengthEncoding.
     /// </summary>
     /// <param name="reader">The data reader to encode.</param>
-    /// <param name="setterObject">An object that is passed to the <paramref name="setter"/> to avoid closure allocations.</param>
+    /// <param name="setterObject">An object that is passed to the <paramref name="setter" /> to avoid closure allocations.</param>
     /// <param name="setter">The callback to set a pixel.</param>
-    /// <typeparam name="T">The custom <paramref name="setterObject"/> type.</typeparam>
+    /// <typeparam name="T">The custom <paramref name="setterObject" /> type.</typeparam>
     public static void Encode<T>(ByteReader reader, T setterObject, Action<T, int, ushort, ushort, byte> setter)
     {
         ushort x = 0;
@@ -115,19 +100,14 @@ public static class RunLengthEncoding
                 y++;
                 continue;
             }
+
             var bit8 = (byte2 & 0b10000000) != 0;
             var bit7 = (byte2 & 0b01000000) != 0;
             var num = byte2 & 0b00111111;
-            if (bit7)
-            {
-                num = (num << 8) + reader.ReadByte();
-            }
+            if (bit7) num = (num << 8) + reader.ReadByte();
             var index = bit8 ? reader.ReadByte() : (byte)0x00;
-                
-            for (var i = 0; i < num; i++)
-            {
-                setter(setterObject, p++, x++, y, index);
-            }
+
+            for (var i = 0; i < num; i++) setter(setterObject, p++, x++, y, index);
         }
     }
 }

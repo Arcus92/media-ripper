@@ -6,7 +6,7 @@ namespace MediaLib.Output;
 public static class OutputDefinitionSerializer
 {
     /// <summary>
-    /// Serializes the output definition file.
+    ///     Serializes the output definition file.
     /// </summary>
     /// <param name="path">The path to the output definition file.</param>
     /// <param name="definition">The output definition file to write.</param>
@@ -15,9 +15,9 @@ public static class OutputDefinitionSerializer
         await using var stream = File.Create(path);
         await JsonSerializer.SerializeAsync(stream, definition, ModelContext.Default.OutputDefinition);
     }
-    
+
     /// <summary>
-    /// Deserialize the output definition file.
+    ///     Deserialize the output definition file.
     /// </summary>
     /// <param name="path">The path to the output definition file.</param>
     /// <returns>Returns the output definition file if valid.</returns>
@@ -28,7 +28,7 @@ public static class OutputDefinitionSerializer
     }
 
     /// <summary>
-    /// Reads the output directory and returns all output files.
+    ///     Reads the output directory and returns all output files.
     /// </summary>
     /// <param name="path">The path.</param>
     /// <returns>Returns a list of all output definition files.</returns>
@@ -38,9 +38,9 @@ public static class OutputDefinitionSerializer
         {
             var definition = await DeserializeAsync(file);
             if (definition is null) continue;
-            
+
             var filename = Path.GetFileNameWithoutExtension(file);
-            
+
             yield return (filename, definition);
         }
     }

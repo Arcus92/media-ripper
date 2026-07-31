@@ -11,7 +11,7 @@ namespace MediaLib.Dvds.Sources;
 public class DvdMediaSource : IMediaSource
 {
     private readonly DvdTitleInfo _dvdTitleInfo;
-    
+
     public DvdMediaSource(DvdTitleInfo dvdTitleInfo, MediaIdentifier identifier)
     {
         _dvdTitleInfo = dvdTitleInfo;
@@ -19,20 +19,31 @@ public class DvdMediaSource : IMediaSource
         IgnoreFlags = MediaIgnoreFlags.None;
         Info = BuildMediaInfo();
     }
-    
+
+    #region Output
+
+    /// <inheritdoc />
+    public OutputDefinition CreateDefaultOutputDefinition(CodecOptions codec, MediaFormat containerFormat)
+    {
+        var baseName = $"{Identifier.DiskName}_{_dvdTitleInfo.TitleIndex}";
+        return OutputHelper.CreateDefaultOutputDefinition(baseName, Info, codec, containerFormat);
+    }
+
+    #endregion Output
+
     #region Media info
-    
+
     /// <inheritdoc />
     public MediaIdentifier Identifier { get; }
-    
+
     /// <inheritdoc />
     public MediaInfo Info { get; }
-    
+
     /// <inheritdoc />
     public MediaIgnoreFlags IgnoreFlags { get; }
 
     /// <summary>
-    /// Gets the chapter infos.
+    ///     Gets the chapter infos.
     /// </summary>
     /// <returns></returns>
     private IEnumerable<ChapterInfo> GetChapterInfos()
@@ -46,17 +57,17 @@ public class DvdMediaSource : IMediaSource
                 return timespan;
             }));
     }
-    
+
     /// <summary>
-    /// Builds the media info from the DVD source.
+    ///     Builds the media info from the DVD source.
     /// </summary>
     /// <returns></returns>
     private MediaInfo BuildMediaInfo()
     {
         var baseName = _dvdTitleInfo.Name;
         var vts = _dvdTitleInfo.TitleSetInfo;
-        
-        
+
+
         // DVD uses fixed PIDs:
         // Video          0xE0
         // AC-3	          0x80-0x87
@@ -64,7 +75,7 @@ public class DvdMediaSource : IMediaSource
         // LPCM	          0xA0-0xA7
         // MPEG-1/2 audio 0xC0-0xC7
         // Subpicture     0x20-0x3F
-        
+
         var streams = new List<StreamInfo>
         {
             new()
@@ -81,7 +92,7 @@ public class DvdMediaSource : IMediaSource
         ushort audioIdMpeg = 0xC0;
         foreach (var audio in vts.VtsAudios)
         {
-            ushort audioId = audio.AudioFormat switch
+            var audioId = audio.AudioFormat switch
             {
                 AudioFormat.Ac3 => audioIdAc3++,
                 AudioFormat.Dts => audioIdDts++,
@@ -89,7 +100,7 @@ public class DvdMediaSource : IMediaSource
                 AudioFormat.Mpeg1 or AudioFormat.Mpeg2Ext => audioIdMpeg++,
                 _ => throw new ArgumentOutOfRangeException()
             };
-            
+
             streams.Add(new StreamInfo
             {
                 Id = audioId,
@@ -101,7 +112,6 @@ public class DvdMediaSource : IMediaSource
 
         ushort subPictureId = 0x20;
         foreach (var subPicture in vts.VtsSubPictures)
-        {
             streams.Add(new StreamInfo
             {
                 Id = subPictureId++,
@@ -110,8 +120,7 @@ public class DvdMediaSource : IMediaSource
                 Type = StreamType.Subtitle,
                 Format = "dvd_subtitle"
             });
-        }
-        
+
         return new MediaInfo
         {
             Identifier = Identifier,
@@ -124,7 +133,7 @@ public class DvdMediaSource : IMediaSource
                 {
                     Id = ptt.Pgn,
                     Name = baseName,
-                    Duration = _dvdTitleInfo.Pgc.CellPlayback[cellId - 1].PlaybackTime.AsTimeSpan(),
+                    Duration = _dvdTitleInfo.Pgc.CellPlayback[cellId - 1].PlaybackTime.AsTimeSpan()
                 };
             }).ToArray(),
             Streams = streams.ToArray(),
@@ -136,20 +145,20 @@ public class DvdMediaSource : IMediaSource
     {
         return extension switch
         {
-            AudioCodeExtension.DirectorComments or 
+            AudioCodeExtension.DirectorComments or
                 AudioCodeExtension.AlternateDirectorComments => StreamFlags.Secondary,
             _ => StreamFlags.None
         };
     }
-    
+
     private StreamFlags MapFlags(SubPictureCodeExtension extension)
     {
         return extension switch
         {
             SubPictureCodeExtension.ForcedCaption => StreamFlags.Forced,
-            
-            SubPictureCodeExtension.DirectorComments or 
-                SubPictureCodeExtension.DirectorCommentsLarge or 
+
+            SubPictureCodeExtension.DirectorComments or
+                SubPictureCodeExtension.DirectorCommentsLarge or
                 SubPictureCodeExtension.DirectorCommentsForChildren => StreamFlags.Secondary,
             _ => StreamFlags.None
         };
@@ -160,17 +169,6 @@ public class DvdMediaSource : IMediaSource
         // DVDs use two-digit (Set 1) language code, FFmpeg requires three-digit (Set2 T) codes.
         return Iso639.Set1ToSet2T.GetValueOrDefault(languageCode, languageCode);
     }
-    
+
     #endregion Media info
-    
-    #region Output
-    
-    /// <inheritdoc />
-    public OutputDefinition CreateDefaultOutputDefinition(CodecOptions codec, MediaFormat containerFormat)
-    {
-        var baseName = $"{Identifier.DiskName}_{_dvdTitleInfo.TitleIndex}";
-        return OutputHelper.CreateDefaultOutputDefinition(baseName, Info, codec, containerFormat);
-    }
-    
-    #endregion Output
 }

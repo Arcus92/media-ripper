@@ -7,22 +7,22 @@ namespace MediaLib.Sources;
 public interface IMediaSource
 {
     /// <summary>
-    /// Gets the media information.
+    ///     Gets the media information.
     /// </summary>
     MediaInfo Info { get; }
-    
+
     /// <summary>
-    /// Gets the media identifier.
+    ///     Gets the media identifier.
     /// </summary>
     MediaIdentifier Identifier => Info.Identifier;
-    
+
     /// <summary>
-    /// Gets the ignore flags of this media.
+    ///     Gets the ignore flags of this media.
     /// </summary>
     MediaIgnoreFlags IgnoreFlags { get; }
-    
+
     /// <summary>
-    /// Creates a default output definition for this media source.
+    ///     Creates a default output definition for this media source.
     /// </summary>
     /// <param name="codec">The codec options to use.</param>
     /// <param name="containerFormat">The container format to use.</param>

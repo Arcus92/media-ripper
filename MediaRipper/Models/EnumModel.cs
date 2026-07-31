@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MediaRipper.Models;
 
 /// <summary>
-/// A model to store a display text and an enum value for a view.
+///     A model to store a display text and an enum value for a view.
 /// </summary>
 /// <typeparam name="T">The enum value.</typeparam>
 public readonly struct EnumModel<T> : IEquatable<EnumModel<T>> where T : struct, IConvertible
@@ -18,17 +18,17 @@ public readonly struct EnumModel<T> : IEquatable<EnumModel<T>> where T : struct,
     }
 
     /// <summary>
-    /// Gets the value.
+    ///     Gets the value.
     /// </summary>
     public T Value { get; }
-    
+
     /// <summary>
-    /// Gets the resource name.
+    ///     Gets the resource name.
     /// </summary>
     public string ResourceName { get; }
 
     /// <summary>
-    /// Gets the display name.
+    ///     Gets the display name.
     /// </summary>
     public string DisplayName
     {
@@ -39,9 +39,12 @@ public readonly struct EnumModel<T> : IEquatable<EnumModel<T>> where T : struct,
             return languageService.Translate(ResourceName) ?? ResourceName;
         }
     }
-    
+
     /// <inheritdoc />
-    public override string ToString() => DisplayName;
+    public override string ToString()
+    {
+        return DisplayName;
+    }
 
     /// <inheritdoc />
     public bool Equals(EnumModel<T> other)

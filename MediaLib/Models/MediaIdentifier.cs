@@ -5,40 +5,40 @@ using MediaLib.Sources;
 namespace MediaLib.Models;
 
 /// <summary>
-/// Identifier of a <see cref="IMediaSource"/>.
+///     Identifier of a <see cref="IMediaSource" />.
 /// </summary>
 [Serializable]
 public class MediaIdentifier : IEquatable<MediaIdentifier>
 {
     /// <summary>
-    /// Gets and sets the media id from which this output file was generated.
+    ///     Gets and sets the media id from which this output file was generated.
     /// </summary>
     [JsonConverter(typeof(IdentifierIdConverter))]
     public required string Id { get; init; }
-    
+
     /// <summary>
-    /// Gets and sets the source type.
+    ///     Gets and sets the source type.
     /// </summary>
     public required MediaIdentifierType Type { get; init; }
-    
+
     /// <summary>
-    /// Gets and sets the disk name from which this output file was generated.
+    ///     Gets and sets the disk name from which this output file was generated.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string DiskName { get; init; } = "";
-    
+
     /// <summary>
-    /// Gets and sets the content hash of the source.
+    ///     Gets and sets the content hash of the source.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string ContentHash { get; init; } = "";
 
     /// <summary>
-    /// Gets and sets the segment ids.
+    ///     Gets and sets the segment ids.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public ushort[] SegmentIds { get; init; } = [];
-    
+
     #region Equals
 
     public bool Equals(MediaIdentifier? other)

@@ -5,7 +5,7 @@ namespace BluRayLib.Clip;
 public class ClipInfo
 {
     /// <summary>
-    /// Reads the clip-info file.
+    ///     Reads the clip-info file.
     /// </summary>
     /// <param name="path">The path to the clip-info file.</param>
     public void Read(string path)
@@ -13,9 +13,9 @@ public class ClipInfo
         using var fileStream = File.OpenRead(path);
         Read(fileStream);
     }
-    
+
     /// <summary>
-    /// Reads the clip-info file from stream.
+    ///     Reads the clip-info file from stream.
     /// </summary>
     /// <param name="stream">The stream.</param>
     public void Read(Stream stream)
@@ -27,14 +27,14 @@ public class ClipInfo
     private void Read(BigEndianBinaryReader reader)
     {
         // https://github.com/lw/BluRay/wiki/CLPI
-        
+
         var format = reader.ReadString(4);
         if (format != "HDMV")
             throw new InvalidDataException("Invalid clip magic number!");
         var version = reader.ReadString(4);
         if (version != "0200")
             throw new InvalidDataException($"Invalid clip version: {version}!");
-        
+
         var sequenceInfoStart = reader.ReadUInt32();
         var programInfoStart = reader.ReadUInt32();
         var cpiStart = reader.ReadUInt32();
@@ -47,13 +47,13 @@ public class ClipInfo
 
         reader.Position = sequenceInfoStart;
         ReadSequenceInfo(reader);
-        
+
         reader.Position = programInfoStart;
         ReadProgramInfo(reader);
-        
+
         reader.Position = cpiStart;
         ReadCpi(reader);
-        
+
         reader.Position = clipMarkStart;
         ReadClipMark(reader);
 
@@ -63,7 +63,37 @@ public class ClipInfo
             ReadExtensionData(reader);
         }
     }
-    
+
+    #region Sequence info
+
+    private void ReadSequenceInfo(BigEndianBinaryReader reader)
+    {
+        var length = reader.ReadUInt32();
+        var start = reader.Position;
+        reader.Skip(1); // Reserved
+
+
+        reader.SkipTo(start + length);
+    }
+
+    #endregion Sequence info
+
+    #region Clip mark
+
+    private void ReadClipMark(BigEndianBinaryReader reader)
+    {
+    }
+
+    #endregion Clip mark
+
+    #region Extension data
+
+    private void ReadExtensionData(BigEndianBinaryReader reader)
+    {
+    }
+
+    #endregion Extension data
+
     #region Clip info
 
     public byte ClipStreamType { get; set; }
@@ -71,7 +101,7 @@ public class ClipInfo
     public bool IsCc5 { get; set; }
 
     public uint TsRecordingRate { get; set; }
-    
+
     public uint NumberOfSourcePackets { get; set; }
 
     public TsTypeInfoBlock TsTypeInfo { get; } = new();
@@ -81,7 +111,7 @@ public class ClipInfo
         var length = reader.ReadUInt32();
         var start = reader.Position;
         reader.Skip(2); // Reserved
-        
+
         ClipStreamType = reader.ReadByte();
         ApplicationType = reader.ReadByte();
         var flags = reader.ReadUInt32();
@@ -89,33 +119,18 @@ public class ClipInfo
         TsRecordingRate = reader.ReadUInt32();
         NumberOfSourcePackets = reader.ReadUInt32();
         reader.Skip(128);
-        
+
         TsTypeInfo.Read(reader);
-        
+
         reader.SkipTo(start + length);
     }
-    
+
     #endregion Clip info
-    
-    #region Sequence info
-    
-    private void ReadSequenceInfo(BigEndianBinaryReader reader)
-    {
-        var length = reader.ReadUInt32();
-        var start = reader.Position;
-        reader.Skip(1); // Reserved
-        
-        
-        
-        reader.SkipTo(start + length);
-    }
-    
-    #endregion Sequence info
-    
+
     #region Program info
 
     public Program[] Programs { get; set; } = [];
-    
+
     private void ReadProgramInfo(BigEndianBinaryReader reader)
     {
         var length = reader.ReadUInt32();
@@ -130,14 +145,14 @@ public class ClipInfo
             program.Read(reader);
             Programs[i] = program;
         }
-        
+
         reader.SkipTo(start + length);
     }
-    
+
     #endregion Program info
-    
+
     #region CPI
-    
+
     public byte CpiType { get; set; }
 
     public StreamPidEntry[] StreamPidEntries { get; set; } = [];
@@ -150,7 +165,7 @@ public class ClipInfo
         reader.Skip(1); // Reserved
         CpiType = reader.ReadByte();
         reader.Skip(1); // Reserved
-        
+
         var count = reader.ReadByte();
         StreamPidEntries = new StreamPidEntry[count];
         for (var i = 0; i < count; i++)
@@ -165,38 +180,14 @@ public class ClipInfo
             reader.Position = start + 2 + entry.EpMapForOneStreamPidStart;
 
             var epFineTableStart = reader.ReadUInt32();
-            foreach (var epCoarseEntry in entry.EpCoarseEntries)
-            {
-                epCoarseEntry.Read(reader);
-            }
-            
+            foreach (var epCoarseEntry in entry.EpCoarseEntries) epCoarseEntry.Read(reader);
+
             reader.Position = start + 2 + entry.EpMapForOneStreamPidStart + epFineTableStart;
-            foreach (var epFineEntry in entry.EpFineEntries)
-            {
-                epFineEntry.Read(reader);
-            }
+            foreach (var epFineEntry in entry.EpFineEntries) epFineEntry.Read(reader);
         }
-        
+
         reader.SkipTo(start + length);
     }
-    
+
     #endregion CPI
-    
-    #region Clip mark
-    
-    private void ReadClipMark(BigEndianBinaryReader reader)
-    {
-        
-    }
-    
-    #endregion Clip mark
-    
-    #region Extension data
-    
-    private void ReadExtensionData(BigEndianBinaryReader reader)
-    {
-        
-    }
-    
-    #endregion Extension data
 }

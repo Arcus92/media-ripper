@@ -3,7 +3,7 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// Multi Channel Attributes
+///     Multi Channel Attributes
 /// </summary>
 public struct MultiChannelAttributes : IBigEndianBinaryReadable
 {
@@ -20,17 +20,17 @@ public struct MultiChannelAttributes : IBigEndianBinaryReadable
         var b = reader.ReadBits8();
         b.Skip(7);
         Ach0Gme = b.ReadBit();
-        
+
         b = reader.ReadBits8();
         b.Skip(7);
         Ach1Gme = b.ReadBit();
-        
+
         b = reader.ReadBits8();
-        
+
         b = reader.ReadBits8();
-        
+
         b = reader.ReadBits8();
-        
+
         reader.Skip(19);
     }
 }

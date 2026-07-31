@@ -9,13 +9,13 @@ public class StreamEntry
     public byte RefToSubPathId { get; set; }
     public byte RefToSubClipId { get; set; }
     public ushort RefToStreamId { get; set; }
-    
+
     public void Read(BigEndianBinaryReader reader)
     {
         var length = reader.ReadByte();
         var start = reader.Position;
         if (length == 0) return;
-        
+
         Type = (MplsStreamType)reader.ReadByte();
         switch (Type)
         {
@@ -38,5 +38,4 @@ public class StreamEntry
 
         reader.SkipTo(start + length);
     }
-    
 }

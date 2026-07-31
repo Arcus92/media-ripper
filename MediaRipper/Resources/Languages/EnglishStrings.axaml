@@ -2,14 +2,14 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:system="clr-namespace:System;assembly=System.Runtime"
                     x:Class="MediaRipper.Resources.Languages.EnglishStrings">
-    
+
     <!-- General -->
     <system:String x:Key="Cancel">Cancel</system:String>
     <system:String x:Key="Okay">Okay</system:String>
     <system:String x:Key="Apply">Apply</system:String>
     <system:String x:Key="Search">Search</system:String>
     <system:String x:Key="RenameFiles">Rename files</system:String>
-    
+
     <system:String x:Key="Title">Title</system:String>
     <system:String x:Key="Playlist">Playlist</system:String>
     <system:String x:Key="Segments">Segments</system:String>
@@ -18,7 +18,7 @@
     <system:String x:Key="Chapters">Chapters</system:String>
     <system:String x:Key="VideoStreams">Video streams</system:String>
     <system:String x:Key="AudioStreams">Audio streams</system:String>
-    
+
     <!-- Main window -->
     <system:String x:Key="Source">Source</system:String>
     <system:String x:Key="Output">Output</system:String>
@@ -35,7 +35,7 @@
     <system:String x:Key="OpenApplicationSettings">Open application settings</system:String>
     <system:String x:Key="StartExport">Start export</system:String>
     <system:String x:Key="StopExport">Stop export</system:String>
-    
+
     <!-- Media properties -->
     <system:String x:Key="Basename">Basename</system:String>
     <system:String x:Key="Episode">Episode</system:String>
@@ -43,7 +43,7 @@
     <system:String x:Key="Files">Files</system:String>
     <system:String x:Key="OutputFiles">Output files</system:String>
     <system:String x:Key="MainFile">Main file</system:String>
-    
+
     <!-- Media type -->
     <system:String x:Key="MediaTypeUnset">-/-</system:String>
     <system:String x:Key="MediaTypeMovie">Movie</system:String>
@@ -54,7 +54,7 @@
     <system:String x:Key="MediaTypeDeletedScenes">Deleted scenes</system:String>
     <system:String x:Key="MediaTypeInterview">Interview</system:String>
     <system:String x:Key="MediaTypeTrailer">Trailer</system:String>
-    
+
     <!-- Settings -->
     <system:String x:Key="General">General</system:String>
     <system:String x:Key="FFmpeg">FFmpeg</system:String>

@@ -5,7 +5,7 @@ namespace DvdLib.VolumeDescriptor;
 public class PathTable : IBigEndianBinaryReadable
 {
     public string Identifier { get; set; } = "";
-    
+
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader)
     {
@@ -15,9 +15,6 @@ public class PathTable : IBigEndianBinaryReadable
         Identifier = reader.ReadString(identifierLength).TrimEnd();
 
         // Padding
-        if (reader.Position % 2 == 1)
-        {
-            reader.ReadZero();
-        }
+        if (reader.Position % 2 == 1) reader.ReadZero();
     }
 }

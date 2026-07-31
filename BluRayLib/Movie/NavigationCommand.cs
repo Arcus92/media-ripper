@@ -14,28 +14,28 @@ public class NavigationCommand
     public byte SetOption { get; set; }
     public uint Destination { get; set; }
     public uint Source { get; set; }
-    
+
     public void Read(BigEndianBinaryReader reader)
     {
         var bits = reader.ReadBits8();
         OperationCount = bits.ReadBits(3);
         Group = bits.ReadBits(2);
         SupGroup = bits.ReadBits(3);
-        
+
         bits = reader.ReadBits8();
         ImmOperation1 = bits.ReadBit();
         ImmOperation2 = bits.ReadBit();
         bits.Skip(2); // Skip 2 bits
         BranchOption = bits.ReadBits(4);
-        
+
         bits = reader.ReadBits8();
         bits.Skip(4); // Skip 4 bits
         CompareOption = bits.ReadBits(4);
-        
+
         bits = reader.ReadBits8();
         bits.Skip(3); // Skip 3 bits
         SetOption = bits.ReadBits(5);
-        
+
         Destination = reader.ReadUInt32();
         Source = reader.ReadUInt32();
     }

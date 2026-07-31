@@ -6,10 +6,8 @@ namespace MediaRipper.Models.Outputs;
 
 public class OutputModel : ObservableObject
 {
-    /// <summary>
-    /// Gets the output file data.
-    /// </summary>
-    public OutputDefinition Definition { get; }
+    /// <inheritdoc cref="Basename" />
+    private string _basename;
 
     public OutputModel(OutputDefinition definition, string basename)
     {
@@ -19,47 +17,49 @@ public class OutputModel : ObservableObject
     }
 
     /// <summary>
-    /// Gets the file models.
+    ///     Gets the output file data.
     /// </summary>
-    public OutputFileModel[] Files { get; }
-    
-    /// <inheritdoc cref="Basename"/>
-    private string _basename;
+    public OutputDefinition Definition { get; }
 
     /// <summary>
-    /// Gets and sets the base filename of the input file (without any extension).
+    ///     Gets the file models.
+    /// </summary>
+    public OutputFileModel[] Files { get; }
+
+    /// <summary>
+    ///     Gets and sets the base filename of the input file (without any extension).
     /// </summary>
     public string Basename
     {
         get => _basename;
         set => SetProperty(ref _basename, value);
     }
-    
+
     #region Progress
-    
-    /// <inheritdoc cref="Status"/>
+
+    /// <inheritdoc cref="Status" />
     private OutputStatus _status;
 
     /// <summary>
-    /// Gets and sets the status.
+    ///     Gets and sets the status.
     /// </summary>
     public OutputStatus Status
     {
         get => _status;
         set => SetProperty(ref _status, value);
     }
-    
-    /// <inheritdoc cref="Progress"/>
+
+    /// <inheritdoc cref="Progress" />
     private double _progress;
 
     /// <summary>
-    /// Gets and sets the progress of the current export.
+    ///     Gets and sets the progress of the current export.
     /// </summary>
     public double Progress
     {
         get => _progress;
         set => SetProperty(ref _progress, value);
     }
-    
+
     #endregion Progress
 }

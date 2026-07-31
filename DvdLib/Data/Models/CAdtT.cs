@@ -3,12 +3,12 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// Cell address table.
+///     Cell address table.
 /// </summary>
 public class CAdtT : IBigEndianBinaryReadable
 {
     public CellAdr[] CellAdrs { get; private set; } = [];
-    
+
     /// <inheritdoc />
     public void Read(BigEndianBinaryReader reader)
     {

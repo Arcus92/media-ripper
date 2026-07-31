@@ -10,12 +10,15 @@ namespace MediaRipper.ViewModels;
 
 public class OutputSelectorViewModel : ViewModelBase
 {
-    private readonly ISettingService _settingService;
-    private readonly IOutputService _outputService;
-    private readonly IStorageProviderAccessor _storageProviderAccessor;
     private readonly IOutputQueueService _outputQueueService;
-    
-    public OutputSelectorViewModel(ISettingService settingService, IOutputService outputService, 
+    private readonly IOutputService _outputService;
+    private readonly ISettingService _settingService;
+    private readonly IStorageProviderAccessor _storageProviderAccessor;
+
+    /// <inheritdoc cref="OutputPath" />
+    private string _outputPath;
+
+    public OutputSelectorViewModel(ISettingService settingService, IOutputService outputService,
         IStorageProviderAccessor storageProviderAccessor, IOutputQueueService outputQueueService)
     {
         _settingService = settingService;
@@ -28,18 +31,7 @@ public class OutputSelectorViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// The view was loaded.
-    /// </summary>
-    public async Task OnLoaded()
-    {
-        await OpenAsync();
-    }
-    
-    /// <inheritdoc cref="OutputPath"/>
-    private string _outputPath;
-
-    /// <summary>
-    /// Gets and sets the output path.
+    ///     Gets and sets the output path.
     /// </summary>
     public string OutputPath
     {
@@ -48,13 +40,21 @@ public class OutputSelectorViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Gets if this element is enabled.
+    ///     Gets if this element is enabled.
     /// </summary>
     public bool IsEnabled
     {
         get;
         private set => SetProperty(ref field, value);
     } = true;
+
+    /// <summary>
+    ///     The view was loaded.
+    /// </summary>
+    public async Task OnLoaded()
+    {
+        await OpenAsync();
+    }
 
     private void OnOutputQueueServiceStatusChanged(object? sender, EventArgs e)
     {
@@ -65,9 +65,9 @@ public class OutputSelectorViewModel : ViewModelBase
     {
         IsEnabled = _outputQueueService.Status != OutputQueueStatus.Running;
     }
-    
+
     /// <summary>
-    /// Opens and loads the current output path.
+    ///     Opens and loads the current output path.
     /// </summary>
     public async Task OpenAsync()
     {
@@ -76,19 +76,16 @@ public class OutputSelectorViewModel : ViewModelBase
         _settingService.Data.OutputPath = _outputPath;
         _settingService.NotifyChange();
     }
-    
+
     /// <summary>
-    /// Opens a folder picker to select the output file.
+    ///     Opens a folder picker to select the output file.
     /// </summary>
     public async Task OpenFolderPickerAsync()
     {
         if (!IsEnabled) return;
         var storageProvider = _storageProviderAccessor.StorageProvider;
-        if (storageProvider is null)
-        {
-            return;
-        }
-        
+        if (storageProvider is null) return;
+
         var paths = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             AllowMultiple = false,
@@ -101,16 +98,16 @@ public class OutputSelectorViewModel : ViewModelBase
             await OpenAsync();
         }
     }
-    
+
     /// <summary>
-    /// Refresh the current output path.
+    ///     Refresh the current output path.
     /// </summary>
     public async Task RefreshAsync()
     {
         if (!IsEnabled) return;
         await _outputService.OpenAsync(_outputPath);
     }
-    
+
     /// <inheritdoc />
     public override Control CreateView()
     {

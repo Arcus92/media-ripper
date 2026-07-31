@@ -9,5 +9,5 @@ public enum VideoFormat : byte
     P720 = 0x05,
     P1080 = 0x06,
     P576 = 0x07,
-    P2160 = 0x08,
+    P2160 = 0x08
 }

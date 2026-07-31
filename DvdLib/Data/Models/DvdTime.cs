@@ -3,27 +3,27 @@ using MediaLib.Utils.IO;
 namespace DvdLib.Data.Models;
 
 /// <summary>
-/// DVD Time
+///     DVD Time
 /// </summary>
 public struct DvdTime : IBigEndianBinaryReadable
 {
     /// <summary>
-    /// Gets the hours BCD encoded.
+    ///     Gets the hours BCD encoded.
     /// </summary>
     public byte Hour { get; set; }
-    
+
     /// <summary>
-    /// Gets the minutes BCD encoded.
+    ///     Gets the minutes BCD encoded.
     /// </summary>
     public byte Minute { get; set; }
-    
+
     /// <summary>
-    /// Gets the seconds BCD encoded.
+    ///     Gets the seconds BCD encoded.
     /// </summary>
     public byte Second { get; set; }
-    
+
     /// <summary>
-    /// Gets the frame number. The last two bytes define the frame rate.
+    ///     Gets the frame number. The last two bytes define the frame rate.
     /// </summary>
     public byte Frame { get; set; }
 
@@ -31,8 +31,8 @@ public struct DvdTime : IBigEndianBinaryReadable
     {
         // Time is BCD encoded
         return new TimeSpan(
-            DecodeBcd(Hour), 
-            DecodeBcd(Minute), 
+            DecodeBcd(Hour),
+            DecodeBcd(Minute),
             DecodeBcd(Second));
     }
 
@@ -44,7 +44,7 @@ public struct DvdTime : IBigEndianBinaryReadable
         Second = reader.ReadByte();
         Frame = reader.ReadByte();
     }
-    
+
     private static int DecodeBcd(byte b)
     {
         return ((b >> 4) & 0x0F) * 10 + (b & 0x0F);

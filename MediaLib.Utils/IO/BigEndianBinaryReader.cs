@@ -4,38 +4,38 @@ using System.Text;
 namespace MediaLib.Utils.IO;
 
 /// <summary>
-/// A variant of the <see cref="BinaryReader"/> but in big-endian.
+///     A variant of the <see cref="BinaryReader" /> but in big-endian.
 /// </summary>
 public class BigEndianBinaryReader : IDisposable
 {
+    /// <summary>
+    ///     The little-endian reader.
+    /// </summary>
+    private readonly BinaryReader _reader;
+
+    /// <summary>
+    ///     The current position.
+    /// </summary>
+    private long _position;
+
     public BigEndianBinaryReader(Stream stream)
     {
         BaseStream = stream;
         _reader = new BinaryReader(BaseStream);
         _position = _reader.BaseStream.Position;
     }
-    
+
     public BigEndianBinaryReader(byte[] data) : this(new MemoryStream(data))
     {
     }
 
     /// <summary>
-    /// Gets the base stream.
+    ///     Gets the base stream.
     /// </summary>
     public Stream BaseStream { get; }
 
     /// <summary>
-    /// The little-endian reader.
-    /// </summary>
-    private readonly BinaryReader _reader;
-
-    /// <summary>
-    /// The current position.
-    /// </summary>
-    private long _position;
-
-    /// <summary>
-    /// Gets and sets the byte position in the given stream.
+    ///     Gets and sets the byte position in the given stream.
     /// </summary>
     public long Position
     {
@@ -49,23 +49,23 @@ public class BigEndianBinaryReader : IDisposable
     }
 
     /// <summary>
-    /// Gets the length of the buffer to read.
+    ///     Gets the length of the buffer to read.
     /// </summary>
     public long Length => BaseStream.Length;
-    
+
     /// <summary>
-    /// Gets the number of available bytes.
+    ///     Gets the number of available bytes.
     /// </summary>
     public long Available => Length - Position;
-    
+
     /// <inheritdoc />
     public void Dispose()
     {
         BaseStream.Dispose();
     }
-    
+
     /// <summary>
-    /// Reads an 8-bit byte.
+    ///     Reads an 8-bit byte.
     /// </summary>
     /// <returns></returns>
     public byte ReadByte()
@@ -73,9 +73,9 @@ public class BigEndianBinaryReader : IDisposable
         _position++;
         return _reader.ReadByte();
     }
-    
+
     /// <summary>
-    /// Reads a signed 8-bit byte.
+    ///     Reads a signed 8-bit byte.
     /// </summary>
     /// <returns></returns>
     public sbyte ReadSByte()
@@ -83,9 +83,9 @@ public class BigEndianBinaryReader : IDisposable
         _position++;
         return _reader.ReadSByte();
     }
-    
+
     /// <summary>
-    /// Reads an 16-bit integer.
+    ///     Reads an 16-bit integer.
     /// </summary>
     /// <returns></returns>
     public short ReadInt16()
@@ -93,24 +93,21 @@ public class BigEndianBinaryReader : IDisposable
         _position += sizeof(short);
         return BinaryPrimitives.ReverseEndianness(_reader.ReadInt16());
     }
-    
+
     /// <summary>
-    /// Reads an 16-bit integer array.
+    ///     Reads an 16-bit integer array.
     /// </summary>
     /// <param name="count">The number of elements to read.</param>
     /// <returns></returns>
     public short[] ReadInt16Array(int count)
     {
         var array = new short[count];
-        for (var i = 0; i < count; i++)
-        {
-            array[i] = ReadInt16();
-        }
+        for (var i = 0; i < count; i++) array[i] = ReadInt16();
         return array;
     }
-    
+
     /// <summary>
-    /// Reads an 16-bit unsigned integer.
+    ///     Reads an 16-bit unsigned integer.
     /// </summary>
     /// <returns></returns>
     public ushort ReadUInt16()
@@ -118,24 +115,21 @@ public class BigEndianBinaryReader : IDisposable
         _position += sizeof(ushort);
         return BinaryPrimitives.ReverseEndianness(_reader.ReadUInt16());
     }
-    
+
     /// <summary>
-    /// Reads an 16-bit unsigned integer array.
+    ///     Reads an 16-bit unsigned integer array.
     /// </summary>
     /// <param name="count">The number of elements to read.</param>
     /// <returns></returns>
     public ushort[] ReadUInt16Array(int count)
     {
         var array = new ushort[count];
-        for (var i = 0; i < count; i++)
-        {
-            array[i] = ReadUInt16();
-        }
+        for (var i = 0; i < count; i++) array[i] = ReadUInt16();
         return array;
     }
-    
+
     /// <summary>
-    /// Reads an 24-bit unsigned integer.
+    ///     Reads an 24-bit unsigned integer.
     /// </summary>
     /// <returns></returns>
     public int ReadUInt24()
@@ -145,9 +139,9 @@ public class BigEndianBinaryReader : IDisposable
         var b3 = ReadByte();
         return (b1 << 16) + (b2 << 8) + b3;
     }
-    
+
     /// <summary>
-    /// Reads an 32-bit integer.
+    ///     Reads an 32-bit integer.
     /// </summary>
     /// <returns></returns>
     public int ReadInt32()
@@ -155,24 +149,21 @@ public class BigEndianBinaryReader : IDisposable
         _position += sizeof(int);
         return BinaryPrimitives.ReverseEndianness(_reader.ReadInt32());
     }
-    
+
     /// <summary>
-    /// Reads an 32-bit integer array.
+    ///     Reads an 32-bit integer array.
     /// </summary>
     /// <param name="count">The number of elements to read.</param>
     /// <returns></returns>
     public int[] ReadInt32Array(int count)
     {
         var array = new int[count];
-        for (var i = 0; i < count; i++)
-        {
-            array[i] = ReadInt32();
-        }
+        for (var i = 0; i < count; i++) array[i] = ReadInt32();
         return array;
     }
-    
+
     /// <summary>
-    /// Reads an 32-bit unsigned integer.
+    ///     Reads an 32-bit unsigned integer.
     /// </summary>
     /// <returns></returns>
     public uint ReadUInt32()
@@ -180,24 +171,21 @@ public class BigEndianBinaryReader : IDisposable
         _position += sizeof(uint);
         return BinaryPrimitives.ReverseEndianness(_reader.ReadUInt32());
     }
-    
+
     /// <summary>
-    /// Reads an 32-bit unsigned integer array.
+    ///     Reads an 32-bit unsigned integer array.
     /// </summary>
     /// <param name="count">The number of elements to read.</param>
     /// <returns></returns>
     public uint[] ReadUInt32Array(int count)
     {
         var array = new uint[count];
-        for (var i = 0; i < count; i++)
-        {
-            array[i] = ReadUInt32();
-        }
+        for (var i = 0; i < count; i++) array[i] = ReadUInt32();
         return array;
     }
-    
+
     /// <summary>
-    /// Reads an 40-bit unsigned integer.
+    ///     Reads an 40-bit unsigned integer.
     /// </summary>
     /// <returns></returns>
     public long ReadUInt40()
@@ -209,9 +197,9 @@ public class BigEndianBinaryReader : IDisposable
         var b5 = ReadByte();
         return ((long)b1 << 32) + ((long)b2 << 24) + ((long)b3 << 16) + ((long)b4 << 8) + b5;
     }
-    
+
     /// <summary>
-    /// Reads an 64-bit integer.
+    ///     Reads an 64-bit integer.
     /// </summary>
     /// <returns></returns>
     public long ReadInt64()
@@ -219,9 +207,9 @@ public class BigEndianBinaryReader : IDisposable
         _position += sizeof(long);
         return BinaryPrimitives.ReverseEndianness(_reader.ReadInt64());
     }
-    
+
     /// <summary>
-    /// Reads an 64-bit unsigned integer.
+    ///     Reads an 64-bit unsigned integer.
     /// </summary>
     /// <returns></returns>
     public ulong ReadUInt64()
@@ -231,7 +219,7 @@ public class BigEndianBinaryReader : IDisposable
     }
 
     /// <summary>
-    /// Reads the number of bytes.
+    ///     Reads the number of bytes.
     /// </summary>
     /// <param name="count">The number of bytes to read.</param>
     /// <returns></returns>
@@ -242,7 +230,7 @@ public class BigEndianBinaryReader : IDisposable
     }
 
     /// <summary>
-    /// Reads a fixed sized UTF8 string.
+    ///     Reads a fixed sized UTF8 string.
     /// </summary>
     /// <param name="length">The length of the string in bytes.</param>
     /// <returns>Returns the string.</returns>
@@ -253,34 +241,34 @@ public class BigEndianBinaryReader : IDisposable
     }
 
     /// <summary>
-    /// Reads the next 8 bits and returns a bit-reader.
+    ///     Reads the next 8 bits and returns a bit-reader.
     /// </summary>
     /// <returns>Returns the bit reader.</returns>
     public BigEndianBitReader<byte> ReadBits8()
     {
         return new BigEndianBitReader<byte>(ReadByte());
     }
-    
+
     /// <summary>
-    /// Reads the next 16 bits and returns a bit-reader.
+    ///     Reads the next 16 bits and returns a bit-reader.
     /// </summary>
     /// <returns>Returns the bit reader.</returns>
     public BigEndianBitReader<ushort> ReadBits16()
     {
         return new BigEndianBitReader<ushort>(ReadUInt16());
     }
-    
+
     /// <summary>
-    /// Reads the next 32 bits and returns a bit-reader.
+    ///     Reads the next 32 bits and returns a bit-reader.
     /// </summary>
     /// <returns>Returns the bit reader.</returns>
     public BigEndianBitReader<uint> ReadBits32()
     {
         return new BigEndianBitReader<uint>(ReadUInt32());
     }
-    
+
     /// <summary>
-    /// Reads the next 64 bits and returns a bit-reader.
+    ///     Reads the next 64 bits and returns a bit-reader.
     /// </summary>
     /// <returns>Returns the bit reader.</returns>
     public BigEndianBitReader<ulong> ReadBits64()
@@ -289,7 +277,7 @@ public class BigEndianBinaryReader : IDisposable
     }
 
     /// <summary>
-    /// Creates and reads a <see cref="IBigEndianBinaryReadable"/> instance.
+    ///     Creates and reads a <see cref="IBigEndianBinaryReadable" /> instance.
     /// </summary>
     /// <typeparam name="T">The instance type.</typeparam>
     /// <returns>Returns the instance.</returns>
@@ -299,9 +287,9 @@ public class BigEndianBinaryReader : IDisposable
         instance.Read(this);
         return instance;
     }
-    
+
     /// <summary>
-    /// Reads an array of <see cref="IBigEndianBinaryReadable"/> instances.
+    ///     Reads an array of <see cref="IBigEndianBinaryReadable" /> instances.
     /// </summary>
     /// <param name="count">The number of elements to read.</param>
     /// <typeparam name="T">The instance type.</typeparam>
@@ -309,15 +297,12 @@ public class BigEndianBinaryReader : IDisposable
     public T[] Read<T>(int count) where T : IBigEndianBinaryReadable, new()
     {
         var array = new T[count];
-        for (var i = 0; i < count; i++)
-        {
-            array[i] = Read<T>();
-        }
+        for (var i = 0; i < count; i++) array[i] = Read<T>();
         return array;
     }
-    
+
     /// <summary>
-    /// Skips the next number of bytes.
+    ///     Skips the next number of bytes.
     /// </summary>
     /// <param name="count">The bytes to skip.</param>
     public void Skip(long count)
@@ -326,7 +311,7 @@ public class BigEndianBinaryReader : IDisposable
     }
 
     /// <summary>
-    /// Returns the given number of bytes and checks if they are zero.
+    ///     Returns the given number of bytes and checks if they are zero.
     /// </summary>
     /// <param name="count">The number of zeros to read.</param>
     /// <exception cref="IOException">Throws an exception if one byte is not zero.</exception>
@@ -341,10 +326,10 @@ public class BigEndianBinaryReader : IDisposable
             }
         }
     }
-    
+
     /// <summary>
-    /// Skips to the given position.
-    /// Fails if the position was already past.
+    ///     Skips to the given position.
+    ///     Fails if the position was already past.
     /// </summary>
     /// <param name="position">The target position.</param>
     public void SkipTo(long position)
@@ -356,7 +341,7 @@ public class BigEndianBinaryReader : IDisposable
     }
 
     /// <summary>
-    /// Seeks to the given position.
+    ///     Seeks to the given position.
     /// </summary>
     /// <param name="position">The target position.</param>
     public void SeekTo(long position)
@@ -365,9 +350,9 @@ public class BigEndianBinaryReader : IDisposable
         BaseStream.Seek(position, SeekOrigin.Begin);
         Position = position;
     }
-    
+
     /// <summary>
-    /// Returns a sub stream with the given length.
+    ///     Returns a sub stream with the given length.
     /// </summary>
     /// <param name="length"></param>
     /// <returns></returns>
