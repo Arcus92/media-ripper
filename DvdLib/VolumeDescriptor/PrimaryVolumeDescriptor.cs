@@ -47,6 +47,5 @@ public class PrimaryVolumeDescriptor : IVolumeDescriptor, IBigEndianBinaryReadab
         RootDirectoryEntry = reader.Read<DirectoryEntry>();
         VolumeSetIdentifier = reader.ReadString(128).TrimEnd();
         PublisherIdentifier = reader.ReadString(128).TrimEnd();
-        var x = 0;
     }
 }
