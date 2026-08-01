@@ -11,10 +11,7 @@
              Design.DataContext="{utils:DesignResolve {x:Type vm:OutputSelectorViewModel}}">
 
     <Interaction.Behaviors>
-        <EventTriggerBehavior
-            EventName="Loaded">
-            <InvokeCommandAction Command="{Binding OnLoaded}" />
-        </EventTriggerBehavior>
+        <utils:LoadedTriggerBehavior Command="{Binding OnLoaded}" />
     </Interaction.Behaviors>
 
     <Border Classes="DarkBox">
